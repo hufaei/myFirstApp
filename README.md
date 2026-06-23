@@ -1,0 +1,71 @@
+# LifeLab
+
+LifeLab 是一个面向学习的原生 Android 综合案例项目。它的目标不是做一个单一业务很深的产品，而是用一个结构清晰、标准接近正式团队项目的示例，系统覆盖 Kotlin 与 Android 开发中的高频概念、常见模块边界和工程实践。
+
+当前仓库状态仍然是 Kotlin JVM 初始化模板，尚未迁移为 Android 工程。本仓库当前阶段先完成项目文档和架构基线，再按切片进入 Android 工程搭建与功能实现。
+
+## 项目目标
+
+- 用一个项目覆盖列表、详情、表单、搜索、分页、登录态、通知、本地存储、网络请求等典型场景
+- 用正式项目可接受的标准组织代码：Clean Architecture 为骨架，务实引入 DDD 建模
+- 用 Kotlin 主流写法组织业务：Compose、ViewModel、StateFlow、Coroutines、Repository、Room、DataStore、Hilt
+- 让项目既能作为学习样板，也能逐步演进为可维护的真实工程
+
+## 产品方向
+
+LifeLab 的主题是“个人效率与成长实验室”，统一承载以下业务场景：
+
+- 首页：信息流、推荐卡片、刷新与分页
+- 任务：待办、任务详情、编辑与筛选
+- 习惯：每日打卡、连续记录、提醒
+- 发现：文章、课程、商品/会员混合内容
+- 搜索：历史记录、热词、结果页
+- 消息：站内消息、系统通知
+- 我的：账号信息、偏好设置、主题与配置
+
+## 交付策略
+
+项目不再按“一份总设计覆盖整个 app”的方式推进，而是采用：
+
+- `项目章程`：定义长期稳定的产品目标、架构边界和工程约束
+- `垂直切片`：每次只为当前实施切片写详细设计和 implementation plan
+
+当前固定的交付顺序是：
+
+1. `Platform Baseline`：Android 工程迁移、Compose 宿主、导航、依赖注入、错误模型、测试基线
+2. `Productivity Slice`：`Tasks + Habits`，优先打通 Room、DataStore、UseCase、提醒与核心业务流
+3. `Content Discovery Slice`：`Home + Discover + Search`
+4. `Account And Notifications Slice`：`Profile + Notifications`
+
+## 技术方向
+
+- Kotlin
+- Android Studio
+- Jetpack Compose
+- Navigation Compose
+- ViewModel + StateFlow
+- Coroutines + Flow
+- Hilt
+- Retrofit + OkHttp + Kotlinx Serialization
+- Room
+- DataStore
+- Coil
+- JUnit + MockK + Compose UI Test
+
+## 文档入口
+
+- [项目文档总览](docs/README.md)
+- [项目章程与交付策略](docs/superpowers/specs/2026-06-23-lifelab-project-design.md)
+- [产品愿景](docs/00-roadmap/product-vision.md)
+- [范围与阶段](docs/00-roadmap/scope-and-phases.md)
+- [交付策略](docs/00-roadmap/delivery-strategy.md)
+- [架构总览](docs/01-architecture/architecture-overview.md)
+- [模块边界](docs/01-architecture/module-boundaries.md)
+- [领域模型](docs/02-domain/domain-model.md)
+- [测试策略](docs/05-quality/testing-strategy.md)
+- [开发命令](docs/06-engineering/dev-commands.md)
+- [编码规范](docs/06-engineering/coding-standards.md)
+
+## 当前阶段
+
+当前处于“文档基线”阶段，尚未开始 Android 代码实现。下一份详细设计不会覆盖全 app，而是只针对 `Platform Baseline` 这一条首个垂直切片展开。
