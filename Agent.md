@@ -6,7 +6,7 @@
 
 - 项目名：`LifeLab`
 - 当前仓库：`myFirstApp`
-- 当前阶段：`Platform Baseline` 主体骨架已建立，包含 Android `app` module、Compose 宿主、根导航、基础包边界和平台测试基线
+- 当前阶段：`Integrated Demo Slice`，Android `app` module、Compose 宿主、根导航、基础包边界、平台测试基线和 7 个最小正式功能模块已经集成
 - 项目定位：面向学习的原生 Android 综合案例，但按接近正式团队项目的工程标准推进
 - 产品主题：个人效率与成长实验室
 - 当前交付策略：`Modular Monolith + Vertical Slice Delivery + feature-first package structure`
@@ -40,7 +40,7 @@
 3. `Content Discovery Slice`
 4. `Account And Notifications Slice`
 
-当前主会话已负责 `Platform Baseline` 主体架构。具体业务功能必须通过模块负责人新会话推进，不要在主会话里直接散点开发任务、习惯、首页或账号功能。
+当前主会话已负责 `Platform Baseline` 主体架构，并已统筹 7 个模块负责人会话完成首批功能切片集成。后续新增或深化具体业务功能仍必须通过模块负责人新会话推进，不要在主会话里直接散点开发任务、习惯、首页或账号功能。
 
 每个切片进入实现前，应先有对应设计文档和 implementation plan。不要用一份总设计直接覆盖全 app 的实现细节。
 
@@ -209,10 +209,10 @@ Android 工程迁移后再逐步启用：
 
 下一步建议：
 
-1. 推送 `codex/platform-baseline-architecture` 分支
-2. 基于平台基线创建模块负责人新会话
-3. 维护 7 个具体模块负责人会话：`Tasks`、`Habits`、`Home`、`Discover`、`Search`、`Notifications`、`Profile`
-4. 按 `docs/07-coordination/integration-log.md` 跟踪每个模块分支、worktree、基线和交付状态
-5. 主会话持续负责跨模块边界、导航契约、共享依赖和共享能力上提
+1. 在具备 Android SDK 的环境或 GitHub Actions 中跑 `:app:testDebugUnitTest`、`:app:lintDebug`、`:app:assembleDebug`
+2. 根据 CI/完整环境结果修复真实编译、lint 或测试问题
+3. 继续由主会话维护跨模块边界、导航契约、共享依赖和共享能力上提
+4. 后续功能深化继续通过模块负责人新会话推进，例如持久化、网络、登录态、系统通知和设备级 UI 验证
+5. 按 `docs/07-coordination/integration-log.md` 更新模块状态、验证证据和集成决策
 
 具体功能模块不要在主会话中直接实现；由模块负责人会话规划、验收并派发自己的子 agent 开发。

@@ -9,6 +9,7 @@
 - Shared dependency owner: main controller thread
 - Android SDK status on controller machine: not configured; Android Gradle tasks are expected to stop at SDK discovery here
 - Android Gradle Plugin: upgraded to `8.6.1` with Gradle wrapper `8.7` to satisfy AndroidX/Compose dependency metadata requiring AGP 8.6+ while keeping `compileSdk = 35`
+- Remote verification: `.github/workflows/android-ci.yml` runs unit tests, lint, and debug assemble on GitHub-hosted `ubuntu-24.04` with Android SDK
 
 ## Module Threads
 
