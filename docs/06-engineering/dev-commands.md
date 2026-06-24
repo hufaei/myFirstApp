@@ -1,6 +1,6 @@
 # Development Commands
 
-本文档收录后续开发中最常用的 Gradle、adb 和调试命令。由于当前仓库尚未迁移为 Android 工程，部分命令会在 Android 工程搭建后正式可用。
+本文档收录后续开发中最常用的 Gradle、adb 和调试命令。当前仓库已建立 Android `app` module；需要 Android SDK 的命令只有在本机配置完整 SDK 后才可执行。
 
 当前机器默认只作为开发与自动化验证环境，不要求始终具备完整 IDE、模拟器或真机调试能力。后续 Agent 默认跑构建、测试和静态验证；需要设备或模拟器的运行调试由用户在完整环境中执行。
 
@@ -11,6 +11,12 @@
 ```powershell
 ./gradlew test
 ./gradlew lint
+```
+
+Android 工程中常用的定向单元测试命令：
+
+```powershell
+./gradlew :app:testDebugUnitTest
 ```
 
 辅助检查命令：
@@ -63,7 +69,7 @@ adb shell dumpsys activity activities
 以下命令用于人工运行调试，不作为当前机器默认验收条件：
 
 ```powershell
-adb shell am start -n com.example.lifelab/.MainActivity
+adb shell am start -n com.example.lifelab/.app.MainActivity
 adb shell input text hello
 adb shell input tap 500 1200
 ```

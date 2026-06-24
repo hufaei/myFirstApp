@@ -28,9 +28,18 @@
 - [dev-commands.md](06-engineering/dev-commands.md): Gradle、adb、调试、构建、测试常用命令
 - [coding-standards.md](06-engineering/coding-standards.md): Kotlin、Compose、架构、命名、测试规范
 
+### 07-coordination
+
+- [module-thread-prompts.md](07-coordination/module-thread-prompts.md): 后续功能模块负责人会话的初始提示词模板与协作规则
+
 ## 已确认的设计文档
 
 - [2026-06-23-lifelab-project-design.md](superpowers/specs/2026-06-23-lifelab-project-design.md): 当前项目章程与交付策略总纲
+- [2026-06-24-platform-baseline-design.md](superpowers/specs/2026-06-24-platform-baseline-design.md): Platform Baseline 切片设计
+
+## 已确认的实施计划
+
+- [2026-06-24-platform-baseline.md](superpowers/plans/2026-06-24-platform-baseline.md): Platform Baseline 实施计划
 
 ## 后续会按切片新增的设计文档
 
@@ -52,4 +61,6 @@
 4. `docs/02-domain/domain-model.md`
 5. `docs/05-quality/testing-strategy.md`
 6. `docs/06-engineering/*`
-7. `docs/superpowers/specs/*`
+7. `docs/07-coordination/*`
+8. `docs/superpowers/specs/*`
+9. `docs/superpowers/plans/*`

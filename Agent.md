@@ -6,7 +6,7 @@
 
 - 项目名：`LifeLab`
 - 当前仓库：`myFirstApp`
-- 当前阶段：文档基线已建立，代码仍是 Kotlin JVM 初始化模板，尚未迁移为 Android 工程
+- 当前阶段：`Platform Baseline` 主体骨架已建立，包含 Android `app` module、Compose 宿主、根导航、基础包边界和平台测试基线
 - 项目定位：面向学习的原生 Android 综合案例，但按接近正式团队项目的工程标准推进
 - 产品主题：个人效率与成长实验室
 - 当前交付策略：`Modular Monolith + Vertical Slice Delivery + feature-first package structure`
@@ -39,7 +39,7 @@
 3. `Content Discovery Slice`
 4. `Account And Notifications Slice`
 
-当前下一步应进入 `Platform Baseline` 的切片设计与实施，不要越过平台基线直接开发任务、习惯、首页或账号功能。
+当前主会话已负责 `Platform Baseline` 主体架构。具体业务功能必须通过模块负责人新会话推进，不要在主会话里直接散点开发任务、习惯、首页或账号功能。
 
 每个切片进入实现前，应先有对应设计文档和 implementation plan。不要用一份总设计直接覆盖全 app 的实现细节。
 
@@ -207,10 +207,10 @@ Android 工程迁移后再逐步启用：
 
 下一步建议：
 
-1. 为 `Platform Baseline` 编写切片设计文档
-2. 将 Kotlin JVM 模板迁移为 Android app 工程
-3. 建立 Compose 宿主、主题、根导航和基础包结构
-4. 引入基础依赖注入、统一错误模型和测试基线
-5. 建立最小 App 启动入口和自动化验证链路
+1. 推送 `codex/platform-baseline-architecture` 分支
+2. 基于平台基线创建模块负责人新会话
+3. 先派发 `Productivity Slice Owner`，负责 `Tasks + Habits`
+4. 后续再派发 `Content Discovery Owner` 和 `Account Notifications Owner`
+5. 主会话持续负责跨模块边界、导航契约和共享能力上提
 
-在完成 `Platform Baseline` 之前，不要进入 `Tasks + Habits` 的正式功能实现。
+具体功能模块不要在主会话中直接实现；由模块负责人会话规划、验收并派发自己的子 agent 开发。
