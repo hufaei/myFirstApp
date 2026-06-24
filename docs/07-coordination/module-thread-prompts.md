@@ -17,6 +17,8 @@
 - 为自己的模块设置 goal
 - 先做模块级规划和验收标准
 - 再派发自己会话内的子 agent 写代码
+- 不自行修改 `app/build.gradle.kts`；共享依赖由主会话统一维护
+- ViewModel 单元测试默认使用 `com.example.lifelab.core.testing.MainDispatcherRule`
 - 子 agent 交付前必须自检，模块负责人交付前必须静态 review
 - 只修改自己模块范围内文件，除非主会话明确要求调整共享契约
 
@@ -44,6 +46,8 @@
 - 先产出模块级设计、验收标准和任务拆分，不要直接写代码。
 - 代码撰写优先派发你会话内的子 agent 完成。
 - 每个子 agent 的任务必须有明确文件范围，避免跨模块冲突。
+- 不要自行修改 `app/build.gradle.kts`；共享依赖由主会话统一处理。
+- ViewModel 单元测试使用 `com.example.lifelab.core.testing.MainDispatcherRule`。
 - 每个子 agent 交付前必须自检；你作为模块负责人在交付前必须再做静态 review。
 - 测试采用质量优先原则：不堆叠低价值测试，不默认写否定式 UI 测试。
 - 不做历史版本、旧数据结构、旧 API 或旧 UI 行为兼容。
