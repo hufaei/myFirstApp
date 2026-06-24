@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lifelab.core.ui.component.StatePanel
 import com.example.lifelab.feature.tasks.domain.Task
 import com.example.lifelab.feature.tasks.domain.TaskPriority
 import com.example.lifelab.feature.tasks.domain.TaskStatus
@@ -45,9 +46,10 @@ fun TasksRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    TasksScreen(
+    TasksPane(
         state = state,
         contentPadding = contentPadding,
+        showHeader = true,
         onSelectFilter = viewModel::selectFilter,
         onOpenDetail = viewModel::openDetail,
         onStartCreate = viewModel::startCreate,
@@ -66,9 +68,8 @@ fun TasksRoute(
 }
 
 @Composable
-private fun TasksScreen(
+fun TasksPane(
     state: TasksUiState,
-    contentPadding: PaddingValues,
     onSelectFilter: (TaskFilter) -> Unit,
     onOpenDetail: (String) -> Unit,
     onStartCreate: () -> Unit,
@@ -83,18 +84,24 @@ private fun TasksScreen(
     onRestore: () -> Unit,
     onBackToList: () -> Unit,
     onClearMessage: () -> Unit,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    showHeader: Boolean = true,
 ) {
+    val panePadding = if (showHeader) 20.dp else 0.dp
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(contentPadding)
-            .padding(20.dp),
+            .padding(panePadding),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        TasksHeader(
-            mode = state.mode,
-            onBackToList = onBackToList,
-        )
+        if (showHeader) {
+            TasksHeader(
+                mode = state.mode,
+                onBackToList = onBackToList,
+            )
+        }
 
         state.message?.let { message ->
             MessageBanner(
@@ -200,12 +207,16 @@ private fun TaskListContent(
             onSelectFilter = onSelectFilter,
         )
         Button(onClick = onStartCreate) {
-            Text("New")
+            Text("New task")
         }
     }
 
     if (state.isLoading) {
-        Text("Loading tasks...")
+        StatePanel(
+            title = "Loading tasks",
+            body = "Preparing your current work list.",
+            isLoading = true,
+        )
         return
     }
 
@@ -301,18 +312,10 @@ private fun TaskMetaRow(task: Task) {
 
 @Composable
 private fun TaskEmptyState(filter: TaskFilter) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = "No ${filter.label.lowercase()} tasks yet",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = "Create a task or switch filters to review other work.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    StatePanel(
+        title = "No ${filter.label.lowercase()} tasks yet",
+        body = "Create a task or switch filters to review other work.",
+    )
 }
 
 @Composable

@@ -113,12 +113,12 @@
 
 主视觉采用双色撞色体系，以 `晴空蓝 + 雪雾白` 为核心，强调清爽、克制、实验感。
 
-- `Sky 500` `#66B8F4`
-- `Sky 700` `#2C7FB8`
-- `Snow Mist` `#F7FBFF`
-- `Cloud Panel` `#EAF4FB`
-- `Ink Blue` `#173247`
-- `Fog Line` `#C9DCEB`
+- `Sky 500` `#89C2FF`
+- `Sky 700` `#4C9DDA`
+- `Snow Mist` `#E6F7FF`
+- `Cloud Panel` `#F6FBFF`
+- `Ink Blue` `#18324A`
+- `Fog Line` `#C7DDEA`
 
 使用原则：
 
@@ -397,9 +397,9 @@
 
 色彩要求：
 
-- 主色：`#66B8F4`
-- 背景：`#F7FBFF`
-- 深层辅助：`#2C7FB8`
+- 主色：`#89C2FF`
+- 背景：`#E6F7FF`
+- 深层辅助：`#4C9DDA`
 
 交付要求：
 

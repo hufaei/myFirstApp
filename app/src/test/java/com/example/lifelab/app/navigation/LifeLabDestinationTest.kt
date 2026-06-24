@@ -7,19 +7,24 @@ class LifeLabDestinationTest {
 
     @Test
     fun topLevelDestinationsUseExpectedOrder() {
-        val routes = topLevelDestinations.map { it.route }
+        assertEquals(
+            listOf(
+                "today",
+                "workbench",
+                "discover",
+                "me",
+            ),
+            topLevelDestinations.map { it.route },
+        )
 
         assertEquals(
             listOf(
-                "home",
-                "tasks",
-                "habits",
-                "discover",
-                "search",
-                "notifications",
-                "profile",
+                "Today",
+                "Workbench",
+                "Discover",
+                "Me",
             ),
-            routes,
+            topLevelDestinations.map { it.title },
         )
     }
 }

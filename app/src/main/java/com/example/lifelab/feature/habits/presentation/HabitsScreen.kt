@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -24,6 +23,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.lifelab.core.ui.component.StatePanel
+import com.example.lifelab.core.ui.component.SummaryMetric
 import com.example.lifelab.feature.habits.domain.model.Habit
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -38,18 +39,45 @@ fun HabitsScreen(
     onClearMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    HabitsPane(
+        state = state,
+        contentPadding = contentPadding,
+        showHeader = true,
+        onCheckIn = onCheckIn,
+        onReminderEnabledChange = onReminderEnabledChange,
+        onReminderTimeChange = onReminderTimeChange,
+        onClearMessage = onClearMessage,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun HabitsPane(
+    state: HabitsUiState,
+    onCheckIn: (String) -> Unit,
+    onReminderEnabledChange: (String, Boolean) -> Unit,
+    onReminderTimeChange: (String, LocalTime) -> Unit,
+    onClearMessage: () -> Unit,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    showHeader: Boolean = true,
+    modifier: Modifier = Modifier,
+) {
+    val panePadding = if (showHeader) PaddingValues(16.dp) else PaddingValues(0.dp)
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .padding(contentPadding),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = panePadding,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
-            Text(
-                text = "Habits",
-                style = MaterialTheme.typography.headlineMedium,
-            )
+        if (showHeader) {
+            item {
+                Text(
+                    text = "Habits",
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+            }
         }
 
         state.message?.let { message ->
@@ -67,21 +95,24 @@ fun HabitsScreen(
 
         when (state.status) {
             HabitsStatus.Loading -> item {
-                CircularProgressIndicator()
+                StatePanel(
+                    title = "Loading habits",
+                    body = "Checking today's streaks and reminders.",
+                    isLoading = true,
+                )
             }
 
             HabitsStatus.Empty -> item {
-                Text(
-                    text = "No habits yet.",
-                    style = MaterialTheme.typography.bodyLarge,
+                StatePanel(
+                    title = "No habits yet",
+                    body = "Add one repeatable action to make this workbench useful.",
                 )
             }
 
             HabitsStatus.Error -> item {
-                Text(
-                    text = state.errorMessage ?: "Unable to load habits.",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyLarge,
+                StatePanel(
+                    title = "Habits could not load",
+                    body = state.errorMessage ?: "Unable to load habits.",
                 )
             }
 
@@ -102,35 +133,24 @@ fun HabitsScreen(
 
 @Composable
 private fun StatsCard(state: HabitsUiState) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            StatText(label = "Habits", value = state.stats.totalHabits.toString())
-            StatText(label = "Today", value = state.stats.checkedInToday.toString())
-            StatText(label = "Reminders", value = state.stats.activeReminders.toString())
-            StatText(label = "Best", value = state.stats.longestStreak.toString())
+            SummaryMetric(
+                value = state.stats.totalHabits.toString(),
+                label = "Habits",
+                helper = "${state.stats.checkedInToday} checked in",
+                modifier = Modifier.weight(1f),
+            )
+            SummaryMetric(
+                value = state.stats.longestStreak.toString(),
+                label = "Best streak",
+                helper = "${state.stats.activeReminders} reminders",
+                modifier = Modifier.weight(1f),
+            )
         }
-    }
-}
-
-@Composable
-private fun StatText(
-    label: String,
-    value: String,
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleLarge,
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-        )
     }
 }
 

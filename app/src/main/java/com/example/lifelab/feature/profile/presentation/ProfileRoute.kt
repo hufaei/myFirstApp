@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.lifelab.core.ui.component.SectionHeader
 import com.example.lifelab.feature.profile.domain.DefaultTaskFilter
 import com.example.lifelab.feature.profile.domain.ProfileOverview
 import com.example.lifelab.feature.profile.domain.ThemeMode
@@ -63,10 +64,9 @@ fun ProfileScreen(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = "Profile",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold,
+        SectionHeader(
+            title = "Me",
+            subtitle = "Your account, defaults, and preferences.",
         )
 
         if (uiState.isLoading) {
@@ -74,6 +74,10 @@ fun ProfileScreen(
         }
 
         AccountHeader(overview = uiState.overview)
+        SectionHeader(
+            title = "Preferences",
+            subtitle = "Decide how LifeLab behaves by default.",
+        )
         PreferencesCard(
             preference = uiState.preference,
             onEvent = onEvent,

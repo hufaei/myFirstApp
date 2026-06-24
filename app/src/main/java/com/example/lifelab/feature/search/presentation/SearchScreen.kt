@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,9 +16,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -29,9 +24,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.example.lifelab.core.ui.component.ActionCard
+import com.example.lifelab.core.ui.component.SectionHeader
+import com.example.lifelab.core.ui.component.StatePanel
 import com.example.lifelab.feature.search.domain.SearchFilter
 import com.example.lifelab.feature.search.domain.SearchResultItem
 import com.example.lifelab.feature.search.domain.SearchResultType
@@ -124,9 +121,9 @@ private fun SearchInputSection(
     onSubmitQuery: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = "Search",
-            style = MaterialTheme.typography.headlineMedium,
+        SectionHeader(
+            title = "Search",
+            subtitle = "Find tasks, habits, articles, and offers.",
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -179,7 +176,7 @@ private fun PreSearchContent(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         KeywordSection(
-            title = "Hot keywords",
+            title = "Hot searches",
             keywords = hotKeywords,
             onKeywordClick = onHotKeywordClick,
         )
@@ -265,51 +262,21 @@ private fun HistorySection(
 
 @Composable
 private fun SearchResultRow(item: SearchResultItem) {
-    Card(
-        shape = RectangleShape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(16.dp),
-        ) {
-            Text(
-                text = item.type.label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = item.summary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
+    ActionCard(
+        title = item.title,
+        body = "${item.type.label}\n${item.summary}",
+        actionLabel = "Open",
+        onAction = {},
+    )
 }
 
 @Composable
 private fun LoadingState() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(180.dp),
-    ) {
-        CircularProgressIndicator()
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = "Searching",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+    StatePanel(
+        title = "Searching",
+        body = "Checking LifeLab content and workspace items.",
+        isLoading = true,
+    )
 }
 
 @Composable
@@ -325,15 +292,12 @@ private fun ErrorState(
     message: String,
     onRetryClick: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        StateMessage(
-            title = "Search failed",
-            body = message,
-        )
-        Button(onClick = onRetryClick) {
-            Text("Retry")
-        }
-    }
+    StatePanel(
+        title = "Search failed",
+        body = message,
+        actionLabel = "Retry",
+        onAction = onRetryClick,
+    )
 }
 
 @Composable
@@ -341,17 +305,10 @@ private fun StateMessage(
     title: String,
     body: String,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(
-            text = body,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    StatePanel(
+        title = title,
+        body = body,
+    )
 }
 
 private val SearchFilter.label: String

@@ -20,9 +20,9 @@
   Purpose: Change the top-level route model to `Today`, `Workbench`, `Discover`, `Me`.
 - Modify: `app/src/main/java/com/example/lifelab/app/navigation/LifeLabNavHost.kt`
   Purpose: Wire the new top-level routes and secondary routes.
-- Create: `app/src/main/java/com/example/lifelab/feature/workbench/presentation/WorkbenchRoute.kt`
-  Purpose: Provide the new shared route that hosts task and habit content.
-- Create: `app/src/main/java/com/example/lifelab/feature/workbench/presentation/WorkbenchScreen.kt`
+- Create: `app/src/main/java/com/example/lifelab/app/workbench/WorkbenchRoute.kt`
+  Purpose: Provide the app-level route that hosts task and habit content without making features depend on each other.
+- Create: `app/src/main/java/com/example/lifelab/app/workbench/WorkbenchScreen.kt`
   Purpose: Render the segmented workbench UI and summary strip.
 
 ### Design System
@@ -88,7 +88,7 @@
   Purpose: Assert the new shell is visible.
 - Create: `app/src/test/java/com/example/lifelab/core/ui/theme/LifeLabThemeTokensTest.kt`
   Purpose: Lock the approved brand colors.
-- Create: `app/src/test/java/com/example/lifelab/feature/workbench/presentation/WorkbenchSummaryTest.kt`
+- Create: `app/src/test/java/com/example/lifelab/app/workbench/WorkbenchSummaryTest.kt`
   Purpose: Verify the summary strip counts derived from task/habit states.
 
 ## Parallelization Notes
@@ -109,7 +109,7 @@ After Task 3 is merged, these domains can be implemented in parallel:
 ## Task 1: Lock The New Navigation Contract
 
 **Files:**
-- Create: `app/src/main/java/com/example/lifelab/feature/workbench/presentation/WorkbenchRoute.kt`
+- Create: `app/src/main/java/com/example/lifelab/app/workbench/WorkbenchRoute.kt`
 - Modify: `app/src/main/java/com/example/lifelab/app/navigation/LifeLabDestination.kt`
 - Modify: `app/src/main/java/com/example/lifelab/app/navigation/LifeLabNavHost.kt`
 - Modify: `app/src/test/java/com/example/lifelab/app/navigation/LifeLabDestinationTest.kt`
@@ -194,7 +194,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit the route-contract baseline**
 
 ```bash
-git add app/src/main/java/com/example/lifelab/app/navigation/LifeLabDestination.kt app/src/main/java/com/example/lifelab/app/navigation/LifeLabNavHost.kt app/src/main/java/com/example/lifelab/feature/workbench/presentation/WorkbenchRoute.kt app/src/test/java/com/example/lifelab/app/navigation/LifeLabDestinationTest.kt
+git add app/src/main/java/com/example/lifelab/app/navigation/LifeLabDestination.kt app/src/main/java/com/example/lifelab/app/navigation/LifeLabNavHost.kt app/src/main/java/com/example/lifelab/app/workbench/WorkbenchRoute.kt app/src/test/java/com/example/lifelab/app/navigation/LifeLabDestinationTest.kt
 git commit -m "feat: establish lifelab navigation contract"
 ```
 
@@ -329,7 +329,7 @@ git commit -m "feat: add lifelab design tokens and primitives"
 - Modify: `app/src/main/java/com/example/lifelab/app/LifeLabApp.kt`
 - Modify: `app/src/androidTest/java/com/example/lifelab/app/LifeLabAppSmokeTest.kt`
 - Modify: `app/src/main/java/com/example/lifelab/app/navigation/LifeLabNavHost.kt`
-- Modify: `app/src/main/java/com/example/lifelab/feature/workbench/presentation/WorkbenchRoute.kt`
+- Modify: `app/src/main/java/com/example/lifelab/app/workbench/WorkbenchRoute.kt`
 
 - [ ] **Step 1: Write the failing shell smoke test**
 
@@ -398,7 +398,7 @@ Expected: PASS if an emulator/device is connected. If no device is available, ru
 - [ ] **Step 5: Commit the shell integration**
 
 ```bash
-git add app/src/main/java/com/example/lifelab/app/LifeLabApp.kt app/src/main/java/com/example/lifelab/app/navigation/LifeLabNavHost.kt app/src/main/java/com/example/lifelab/feature/workbench/presentation/WorkbenchRoute.kt app/src/androidTest/java/com/example/lifelab/app/LifeLabAppSmokeTest.kt
+git add app/src/main/java/com/example/lifelab/app/LifeLabApp.kt app/src/main/java/com/example/lifelab/app/navigation/LifeLabNavHost.kt app/src/main/java/com/example/lifelab/app/workbench/WorkbenchRoute.kt app/src/androidTest/java/com/example/lifelab/app/LifeLabAppSmokeTest.kt
 git commit -m "feat: introduce branded lifelab app shell"
 ```
 
@@ -466,12 +466,12 @@ git commit -m "feat: redesign home as today hub"
 ## Task 5: Introduce The Workbench Surface
 
 **Files:**
-- Create: `app/src/main/java/com/example/lifelab/feature/workbench/presentation/WorkbenchScreen.kt`
-- Modify: `app/src/main/java/com/example/lifelab/feature/workbench/presentation/WorkbenchRoute.kt`
+- Create: `app/src/main/java/com/example/lifelab/app/workbench/WorkbenchScreen.kt`
+- Modify: `app/src/main/java/com/example/lifelab/app/workbench/WorkbenchRoute.kt`
 - Modify: `app/src/main/java/com/example/lifelab/feature/tasks/presentation/TasksRoute.kt`
 - Modify: `app/src/main/java/com/example/lifelab/feature/habits/presentation/HabitsRoute.kt`
 - Modify: `app/src/main/java/com/example/lifelab/feature/habits/presentation/HabitsScreen.kt`
-- Create: `app/src/test/java/com/example/lifelab/feature/workbench/presentation/WorkbenchSummaryTest.kt`
+- Create: `app/src/test/java/com/example/lifelab/app/workbench/WorkbenchSummaryTest.kt`
 
 - [ ] **Step 1: Write the failing workbench summary test**
 
@@ -494,7 +494,7 @@ class WorkbenchSummaryTest {
 
 - [ ] **Step 2: Run the targeted unit test to verify it fails**
 
-Run: `.\gradlew.bat testDebugUnitTest --tests "com.example.lifelab.feature.workbench.presentation.WorkbenchSummaryTest"`
+Run: `.\gradlew.bat testDebugUnitTest --tests "com.example.lifelab.app.workbench.WorkbenchSummaryTest"`
 Expected: FAIL because the summary builder does not exist yet.
 
 - [ ] **Step 3: Implement Workbench and extract reusable task/habit content**
@@ -539,13 +539,13 @@ fun HabitsPane(...) { /* existing stats + habit cards moved out of the old top-l
 
 - [ ] **Step 4: Re-run targeted workbench and feature unit tests**
 
-Run: `.\gradlew.bat testDebugUnitTest --tests "com.example.lifelab.feature.workbench.presentation.WorkbenchSummaryTest" --tests "com.example.lifelab.feature.tasks.presentation.TaskListViewModelTest" --tests "com.example.lifelab.feature.habits.presentation.HabitsViewModelTest"`
+Run: `.\gradlew.bat testDebugUnitTest --tests "com.example.lifelab.app.workbench.WorkbenchSummaryTest" --tests "com.example.lifelab.feature.tasks.presentation.TaskListViewModelTest" --tests "com.example.lifelab.feature.habits.presentation.HabitsViewModelTest"`
 Expected: PASS.
 
 - [ ] **Step 5: Commit the Workbench integration**
 
 ```bash
-git add app/src/main/java/com/example/lifelab/feature/workbench/presentation app/src/main/java/com/example/lifelab/feature/tasks/presentation/TasksRoute.kt app/src/main/java/com/example/lifelab/feature/habits/presentation/HabitsRoute.kt app/src/main/java/com/example/lifelab/feature/habits/presentation/HabitsScreen.kt app/src/test/java/com/example/lifelab/feature/workbench/presentation/WorkbenchSummaryTest.kt
+git add app/src/main/java/com/example/lifelab/app/workbench app/src/main/java/com/example/lifelab/feature/tasks/presentation/TasksRoute.kt app/src/main/java/com/example/lifelab/feature/habits/presentation/HabitsRoute.kt app/src/main/java/com/example/lifelab/feature/habits/presentation/HabitsScreen.kt app/src/test/java/com/example/lifelab/app/workbench/WorkbenchSummaryTest.kt
 git commit -m "feat: add workbench surface"
 ```
 
@@ -569,7 +569,7 @@ fun appShellShowsDiscoverAndSearchEntryPoints() {
 - [ ] **Step 2: Run the smoke test to verify it fails**
 
 Run: `.\gradlew.bat connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.example.lifelab.app.LifeLabAppSmokeTest`
-Expected: FAIL because Search currently uses “Hot keywords”.
+Expected: FAIL because Search has not yet been promoted into the global search surface.
 
 - [ ] **Step 3: Rebuild the page structure using shared components**
 

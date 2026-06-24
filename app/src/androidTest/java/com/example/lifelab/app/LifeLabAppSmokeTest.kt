@@ -15,7 +15,15 @@ class LifeLabAppSmokeTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun appShellShowsHomeDestination() {
-        composeRule.onNodeWithText("Home").assertIsDisplayed()
+    fun appShellShowsNewNavigation() {
+        composeRule.onNodeWithText("Today").assertIsDisplayed()
+        composeRule.onNodeWithText("Workbench").assertIsDisplayed()
+        composeRule.onNodeWithText("Discover").assertIsDisplayed()
+        composeRule.onNodeWithText("Me").assertIsDisplayed()
+    }
+
+    @Test
+    fun appShellShowsTodayFocusSection() {
+        composeRule.onNodeWithText("Today focus").assertIsDisplayed()
     }
 }

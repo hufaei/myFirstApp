@@ -3,28 +3,24 @@ package com.example.lifelab.feature.home.presentation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.lifelab.core.ui.component.ActionCard
+import com.example.lifelab.core.ui.component.PulseCard
+import com.example.lifelab.core.ui.component.PulseMetric
+import com.example.lifelab.core.ui.component.SectionHeader
+import com.example.lifelab.core.ui.component.StatePanel
+import com.example.lifelab.feature.home.domain.HomeDiscoveryTeaser
 import com.example.lifelab.feature.home.domain.HomeFeedContent
 import com.example.lifelab.feature.home.domain.HomeFeedItem
+import com.example.lifelab.feature.home.domain.HomeHabitInsight
 import com.example.lifelab.feature.home.domain.HomeRecommendationEntry
+import com.example.lifelab.feature.home.domain.HomeTaskSummary
 
 @Composable
 fun HomeScreen(
@@ -38,228 +34,163 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(contentPadding)
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        HomeHeader(
-            isActionEnabled = !uiState.isLoading && !uiState.isRefreshing,
-            onRefresh = { onEvent(HomeUiEvent.Refresh) },
-        )
-
         if (uiState.isLoading && uiState.content == null) {
-            LoadingSection()
+            StatePanel(
+                title = "Preparing today",
+                body = "LifeLab is collecting your tasks, habits, and discovery signals.",
+                isLoading = true,
+            )
         }
 
         if (uiState.isRefreshing) {
-            RefreshingSection()
+            StatePanel(
+                title = "Refreshing today",
+                body = "Updating the pulse without moving your place.",
+                isLoading = true,
+            )
         }
 
         uiState.errorMessage?.let { message ->
-            ErrorSection(
-                message = message,
-                onRetry = { onEvent(HomeUiEvent.Retry) },
+            StatePanel(
+                title = "Today could not update",
+                body = message,
+                actionLabel = "Try again",
+                onAction = { onEvent(HomeUiEvent.Retry) },
             )
         }
 
         uiState.content?.let { content ->
-            HomeContentSection(content = content)
+            TodayContent(
+                content = content,
+                onRefresh = { onEvent(HomeUiEvent.Refresh) },
+            )
         }
     }
 }
 
 @Composable
-private fun HomeHeader(
-    isActionEnabled: Boolean,
+private fun TodayContent(
+    content: HomeFeedContent,
     onRefresh: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = "Home",
-                style = MaterialTheme.typography.headlineMedium,
-            )
-            Text(
-                text = "Today in LifeLab",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        OutlinedButton(
-            onClick = onRefresh,
-            enabled = isActionEnabled,
-        ) {
-            Text(text = "Refresh")
-        }
-    }
-}
+    val taskSummary = content.taskSummary()
+    val habitInsight = content.habitInsight()
+    val discoveryTeaser = content.discoveryTeaser()
 
-@Composable
-private fun LoadingSection() {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = "Loading your home feed",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        }
-    }
-}
+    PulseCard(
+        title = "Today focus",
+        subtitle = "A compact read on what needs attention before anything else.",
+        metrics = listOf(
+            PulseMetric(
+                label = "Open tasks",
+                value = (taskSummary?.openTaskCount ?: 0).toString(),
+                helper = "${taskSummary?.dueTodayCount ?: 0} due today",
+            ),
+            PulseMetric(
+                label = "Habits",
+                value = "${habitInsight?.checkedInTodayCount ?: 0}/${habitInsight?.totalHabitCount ?: 0}",
+                helper = "${habitInsight?.bestStreakCount ?: 0} day best",
+            ),
+            PulseMetric(
+                label = "Next idea",
+                value = if (discoveryTeaser == null) "0" else "1",
+                helper = "ready to review",
+            ),
+        ),
+    )
 
-@Composable
-private fun RefreshingSection() {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        Text(
-            text = "Refreshing feed",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+    SectionHeader(
+        title = "Today focus",
+        subtitle = "Start with the most concrete next step.",
+        actionLabel = "Refresh",
+        onAction = onRefresh,
+    )
+
+    ActionCard(
+        title = taskFocusTitle(taskSummary),
+        body = taskFocusBody(taskSummary),
+        actionLabel = "Open workbench",
+        onAction = {},
+    )
+
+    habitInsight?.let {
+        ActionCard(
+            title = "Keep the streak visible",
+            body = "${it.checkedInTodayCount} of ${it.totalHabitCount} habits checked in. Best streak is ${it.bestStreakCount} days.",
+            actionLabel = "Review habits",
+            onAction = {},
         )
     }
-}
 
-@Composable
-private fun ErrorSection(
-    message: String,
-    onRetry: () -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.error,
-            )
-            TextButton(onClick = onRetry) {
-                Text(text = "Retry")
-            }
-        }
-    }
-}
+    SectionHeader(
+        title = "For you",
+        subtitle = "Useful after the plan is clear.",
+    )
 
-@Composable
-private fun HomeContentSection(content: HomeFeedContent) {
     RecommendedEntriesSection(entries = content.recommendedEntries)
-    FeedSection(items = content.feedItems)
+
+    discoveryTeaser?.let {
+        ActionCard(
+            title = it.title,
+            body = it.description,
+            actionLabel = "Read next",
+            onAction = {},
+        )
+    }
 }
 
 @Composable
 private fun RecommendedEntriesSection(entries: List<HomeRecommendationEntry>) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = "Recommended",
-            style = MaterialTheme.typography.titleLarge,
+    if (entries.isEmpty()) {
+        StatePanel(
+            title = "No recommendations yet",
+            body = "Use LifeLab for a little longer and this space will collect relevant next steps.",
         )
+        return
+    }
 
-        if (entries.isEmpty()) {
-            EmptySection(message = "No recommendations yet")
-            return@Column
-        }
-
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         entries.forEach { entry ->
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    Text(
-                        text = entry.title,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        text = entry.subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Button(onClick = {}) {
-                        Text(text = entry.actionLabel)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FeedSection(items: List<HomeFeedItem>) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = "Feed",
-            style = MaterialTheme.typography.titleLarge,
-        )
-
-        if (items.isEmpty() || items.all { it == HomeFeedItem.EmptyState }) {
-            EmptySection(message = "Your feed will appear here as LifeLab learns from your activity")
-            return@Column
-        }
-
-        items.filterNot { it == HomeFeedItem.EmptyState }.forEach { item ->
-            FeedCard(item = item)
-        }
-    }
-}
-
-@Composable
-private fun FeedCard(item: HomeFeedItem) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(
-                text = feedItemTitle(item),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = feedItemDescription(item),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            ActionCard(
+                title = entry.title,
+                body = entry.subtitle,
+                actionLabel = entry.actionLabel,
+                onAction = {},
             )
         }
     }
 }
 
-@Composable
-private fun EmptySection(message: String) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-    Spacer(modifier = Modifier.height(4.dp))
-}
-
-private fun feedItemTitle(item: HomeFeedItem): String =
-    when (item) {
-        is HomeFeedItem.TaskSummary -> "Task summary"
-        is HomeFeedItem.HabitInsight -> "Habit insight"
-        is HomeFeedItem.DiscoveryTeaser -> item.teaser.title
-        HomeFeedItem.EmptyState -> "Home update"
+private fun taskFocusTitle(summary: HomeTaskSummary?): String =
+    when {
+        summary == null -> "Set one clear next action"
+        summary.dueTodayCount > 0 -> "Clear today's due work"
+        summary.openTaskCount > 0 -> "Choose the next open task"
+        else -> "No task pressure today"
     }
 
-private fun feedItemDescription(item: HomeFeedItem): String =
-    when (item) {
-        is HomeFeedItem.TaskSummary -> {
-            "${item.summary.openTaskCount} open tasks | ${item.summary.dueTodayCount} due today"
-        }
-        is HomeFeedItem.HabitInsight -> {
-            "${item.insight.checkedInTodayCount}/${item.insight.totalHabitCount} checked in | " +
-                "${item.insight.bestStreakCount}-day best streak"
-        }
-        is HomeFeedItem.DiscoveryTeaser -> item.teaser.description
-        HomeFeedItem.EmptyState -> "Your feed will appear here as LifeLab learns from your activity"
+private fun taskFocusBody(summary: HomeTaskSummary?): String =
+    when {
+        summary == null -> "Workbench is ready when you want to add structure."
+        summary.dueTodayCount > 0 -> "${summary.dueTodayCount} due today across ${summary.openTaskCount} open tasks."
+        summary.openTaskCount > 0 -> "${summary.openTaskCount} open tasks are waiting for prioritization."
+        else -> "Use the space for a habit check-in or a discovery pass."
+    }
+
+private fun HomeFeedContent.taskSummary(): HomeTaskSummary? =
+    feedItems.firstNotNullOfOrNull { item ->
+        (item as? HomeFeedItem.TaskSummary)?.summary
+    }
+
+private fun HomeFeedContent.habitInsight(): HomeHabitInsight? =
+    feedItems.firstNotNullOfOrNull { item ->
+        (item as? HomeFeedItem.HabitInsight)?.insight
+    }
+
+private fun HomeFeedContent.discoveryTeaser(): HomeDiscoveryTeaser? =
+    feedItems.firstNotNullOfOrNull { item ->
+        (item as? HomeFeedItem.DiscoveryTeaser)?.teaser
     }

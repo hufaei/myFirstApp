@@ -3,26 +3,20 @@ package com.example.lifelab.feature.discover.presentation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.lifelab.core.ui.component.ActionCard
+import com.example.lifelab.core.ui.component.SectionHeader
+import com.example.lifelab.core.ui.component.StatePanel
 import com.example.lifelab.feature.discover.domain.DiscoverCategory
 import com.example.lifelab.feature.discover.domain.DiscoverContent
 
@@ -40,10 +34,9 @@ fun DiscoverScreen(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = "Discover",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold,
+        SectionHeader(
+            title = "Discover",
+            subtitle = "Editorial picks for your next experiment.",
         )
         CategoryFilters(
             selectedCategory = uiState.selectedCategory,
@@ -102,36 +95,21 @@ private fun DiscoverContentState(
 
 @Composable
 private fun LoadingState(modifier: Modifier = Modifier) {
-    Column(
+    StatePanel(
         modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        CircularProgressIndicator()
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = "Loading discovery content...",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+        title = "Loading discovery",
+        body = "Preparing a short list of useful ideas.",
+        isLoading = true,
+    )
 }
 
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
-    Column(
+    StatePanel(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = "No content in this category yet.",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = "Try another filter to keep exploring LifeLab ideas and offers.",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+        title = "No picks in this category",
+        body = "Try another filter to keep exploring LifeLab ideas and offers.",
+    )
 }
 
 @Composable
@@ -140,24 +118,13 @@ private fun ErrorState(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    StatePanel(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = "Unable to load discovery content",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Spacer(Modifier.height(12.dp))
-        Button(onClick = onRetry) {
-            Text("Retry")
-        }
-    }
+        title = "Discovery could not load",
+        body = message,
+        actionLabel = "Retry",
+        onAction = onRetry,
+    )
 }
 
 @Composable
@@ -184,43 +151,13 @@ private fun DiscoverContentCard(
     content: DiscoverContent,
     modifier: Modifier = Modifier,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = content.typeLabel,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    text = content.tag,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Text(
-                text = content.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = content.summary,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = content.detailLabel,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
+    ActionCard(
+        modifier = modifier,
+        title = content.title,
+        body = "${content.typeLabel} / ${content.tag}\n${content.summary}\n${content.detailLabel}",
+        actionLabel = "Review",
+        onAction = {},
+    )
 }
 
 private val discoverCategoryOptions = listOf(

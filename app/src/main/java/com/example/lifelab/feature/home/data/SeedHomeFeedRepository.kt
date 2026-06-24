@@ -17,8 +17,8 @@ class SeedHomeFeedRepository : HomeFeedRepository {
                         id = "today-focus",
                         title = "Plan today's focus",
                         subtitle = "Turn priorities into a short action list.",
-                        actionLabel = "Open Tasks",
-                        route = "tasks",
+                        actionLabel = "Open workbench",
+                        route = "workbench",
                     ),
                 ),
                 taskSummary = HomeTaskSummary(
