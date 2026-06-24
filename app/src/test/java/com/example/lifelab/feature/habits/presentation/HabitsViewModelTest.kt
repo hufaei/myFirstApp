@@ -1,0 +1,155 @@
+package com.example.lifelab.feature.habits.presentation
+
+import com.example.lifelab.core.testing.MainDispatcherRule
+import com.example.lifelab.feature.habits.data.InMemoryHabitRepository
+import com.example.lifelab.feature.habits.domain.model.Habit
+import com.example.lifelab.feature.habits.domain.model.HabitFrequency
+import com.example.lifelab.feature.habits.domain.model.HabitReminder
+import java.time.LocalDate
+import java.time.LocalTime
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
+
+class HabitsViewModelTest {
+
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun initialLoadEmitsContentWithHabitsAndStats() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "hydrate",
+                    reminder = HabitReminder(enabled = true, time = LocalTime.of(9, 0)),
+                ),
+                sampleHabit(
+                    id = "walk",
+                    reminder = HabitReminder(enabled = false, time = null),
+                ),
+            ),
+        )
+
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+        )
+
+        val state = viewModel.uiState.value
+
+        assertEquals(HabitsStatus.Content, state.status)
+        assertEquals(listOf("hydrate", "walk"), state.habits.map { it.id })
+        assertEquals(2, state.stats.totalHabits)
+        assertEquals(0, state.stats.checkedInToday)
+        assertEquals(1, state.stats.activeReminders)
+        assertEquals(0, state.stats.longestStreak)
+    }
+
+    @Test
+    fun checkInEventUpdatesHabitStreakAndCheckedInTodayStats() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "hydrate",
+                    reminder = HabitReminder(enabled = true, time = LocalTime.of(9, 0)),
+                ),
+            ),
+        )
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+        )
+
+        viewModel.checkIn("hydrate")
+
+        val state = viewModel.uiState.value
+        assertEquals(1, state.habits.single().streakCount)
+        assertEquals(today, state.habits.single().lastCheckInDate)
+        assertEquals(1, state.stats.checkedInToday)
+        assertEquals(1, state.stats.longestStreak)
+        assertEquals("Checked in Drink water.", state.message)
+    }
+
+    @Test
+    fun duplicateCheckInExposesMessageWithoutIncreasingStreak() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "hydrate",
+                    reminder = HabitReminder(enabled = true, time = LocalTime.of(9, 0)),
+                ),
+            ),
+        )
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+        )
+
+        viewModel.checkIn("hydrate")
+        viewModel.clearMessage()
+        viewModel.checkIn("hydrate")
+
+        val state = viewModel.uiState.value
+        assertEquals(1, state.habits.single().streakCount)
+        assertEquals(1, state.stats.checkedInToday)
+        assertEquals("Drink water is already checked in today.", state.message)
+    }
+
+    @Test
+    fun reminderUpdateChangesTargetHabitReminderAndActiveReminderCount() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "hydrate",
+                    reminder = HabitReminder(enabled = false, time = null),
+                ),
+                sampleHabit(
+                    id = "walk",
+                    reminder = HabitReminder(enabled = true, time = LocalTime.of(18, 30)),
+                ),
+            ),
+        )
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+        )
+
+        viewModel.setReminderEnabled("hydrate", true)
+        viewModel.updateReminderTime("hydrate", LocalTime.of(8, 15))
+
+        val state = viewModel.uiState.value
+        val hydrate = state.habits.first { it.id == "hydrate" }
+        val walk = state.habits.first { it.id == "walk" }
+        assertEquals(HabitReminder(enabled = true, time = LocalTime.of(8, 15)), hydrate.reminder)
+        assertEquals(HabitReminder(enabled = true, time = LocalTime.of(18, 30)), walk.reminder)
+        assertEquals(2, state.stats.activeReminders)
+        assertEquals("Reminder updated for Drink water.", state.message)
+    }
+
+    private companion object {
+        val today: LocalDate = LocalDate.of(2026, 6, 24)
+
+        fun sampleHabit(
+            id: String,
+            reminder: HabitReminder,
+            name: String = when (id) {
+                "hydrate" -> "Drink water"
+                "walk" -> "Evening walk"
+                else -> id
+            },
+            streakCount: Int = 0,
+            lastCheckInDate: LocalDate? = null,
+            checkInDates: Set<LocalDate> = emptySet(),
+        ) = Habit(
+            id = id,
+            name = name,
+            frequency = HabitFrequency.Daily,
+            streakCount = streakCount,
+            lastCheckInDate = lastCheckInDate,
+            reminder = reminder,
+            checkInDates = checkInDates,
+        )
+    }
+}
