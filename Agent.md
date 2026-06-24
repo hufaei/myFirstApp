@@ -27,6 +27,7 @@
 8. `docs/05-quality/testing-strategy.md`
 9. `docs/06-engineering/coding-standards.md`
 10. `docs/06-engineering/dev-commands.md`
+11. `docs/07-coordination/integration-log.md`
 
 如果本文档与 `docs/` 中的详细规范冲突，以更具体、更近期的设计文档为准。修改工程策略时，同步更新相关文档，不要只改代码。
 
@@ -210,8 +211,8 @@ Android 工程迁移后再逐步启用：
 
 1. 推送 `codex/platform-baseline-architecture` 分支
 2. 基于平台基线创建模块负责人新会话
-3. 先派发 `Productivity Slice Owner`，负责 `Tasks + Habits`
-4. 后续再派发 `Content Discovery Owner` 和 `Account Notifications Owner`
-5. 主会话持续负责跨模块边界、导航契约和共享能力上提
+3. 维护 7 个具体模块负责人会话：`Tasks`、`Habits`、`Home`、`Discover`、`Search`、`Notifications`、`Profile`
+4. 按 `docs/07-coordination/integration-log.md` 跟踪每个模块分支、worktree、基线和交付状态
+5. 主会话持续负责跨模块边界、导航契约、共享依赖和共享能力上提
 
 具体功能模块不要在主会话中直接实现；由模块负责人会话规划、验收并派发自己的子 agent 开发。

@@ -31,6 +31,7 @@
 ### 07-coordination
 
 - [module-thread-prompts.md](07-coordination/module-thread-prompts.md): 后续功能模块负责人会话的初始提示词模板与协作规则
+- [integration-log.md](07-coordination/integration-log.md): 主会话维护的模块负责人线程、worktree、分支和集成状态台账
 
 ## 已确认的设计文档
 
