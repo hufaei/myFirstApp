@@ -6,7 +6,7 @@
 
 - 项目名：`LifeLab`
 - 当前仓库：`myFirstApp`
-- 当前阶段：文档基线已建立，代码仍是 Kotlin JVM 初始化模板，尚未迁移为 Android 工程
+- 当前阶段：`Integrated Demo Slice`，Android `app` module、Compose 宿主、根导航、基础包边界、平台测试基线和 7 个最小正式功能模块已经集成
 - 项目定位：面向学习的原生 Android 综合案例，但按接近正式团队项目的工程标准推进
 - 产品主题：个人效率与成长实验室
 - 当前交付策略：`Modular Monolith + Vertical Slice Delivery + feature-first package structure`
@@ -27,6 +27,7 @@
 8. `docs/05-quality/testing-strategy.md`
 9. `docs/06-engineering/coding-standards.md`
 10. `docs/06-engineering/dev-commands.md`
+11. `docs/07-coordination/integration-log.md`
 
 如果本文档与 `docs/` 中的详细规范冲突，以更具体、更近期的设计文档为准。修改工程策略时，同步更新相关文档，不要只改代码。
 
@@ -39,7 +40,7 @@
 3. `Content Discovery Slice`
 4. `Account And Notifications Slice`
 
-当前下一步应进入 `Platform Baseline` 的切片设计与实施，不要越过平台基线直接开发任务、习惯、首页或账号功能。
+当前主会话已负责 `Platform Baseline` 主体架构，并已统筹 7 个模块负责人会话完成首批功能切片集成。后续新增或深化具体业务功能仍必须通过模块负责人新会话推进，不要在主会话里直接散点开发任务、习惯、首页或账号功能。
 
 每个切片进入实现前，应先有对应设计文档和 implementation plan。不要用一份总设计直接覆盖全 app 的实现细节。
 
@@ -185,6 +186,7 @@ Android 工程迁移后再逐步启用：
 - 本机无法完整运行 app 不应单独阻塞开发，只要测试、构建或静态检查能证明当前改动质量
 - 若某项变更确实需要人工运行验证，应在交付说明中明确验证入口、预期行为和未在本机验证的原因
 - 实际运行调试默认由用户在另一台机器拉取代码后完成
+- 具体模块会话不要自行修改 `app/build.gradle.kts`；共享依赖和测试基础设施由主会话统一维护
 
 ## 10. Documentation Rules
 
@@ -207,10 +209,10 @@ Android 工程迁移后再逐步启用：
 
 下一步建议：
 
-1. 为 `Platform Baseline` 编写切片设计文档
-2. 将 Kotlin JVM 模板迁移为 Android app 工程
-3. 建立 Compose 宿主、主题、根导航和基础包结构
-4. 引入基础依赖注入、统一错误模型和测试基线
-5. 建立最小 App 启动入口和自动化验证链路
+1. 在具备 Android SDK 的环境或 GitHub Actions 中跑 `:app:testDebugUnitTest`、`:app:lintDebug`、`:app:assembleDebug`
+2. 根据 CI/完整环境结果修复真实编译、lint 或测试问题
+3. 继续由主会话维护跨模块边界、导航契约、共享依赖和共享能力上提
+4. 后续功能深化继续通过模块负责人新会话推进，例如持久化、网络、登录态、系统通知和设备级 UI 验证
+5. 按 `docs/07-coordination/integration-log.md` 更新模块状态、验证证据和集成决策
 
-在完成 `Platform Baseline` 之前，不要进入 `Tasks + Habits` 的正式功能实现。
+具体功能模块不要在主会话中直接实现；由模块负责人会话规划、验收并派发自己的子 agent 开发。

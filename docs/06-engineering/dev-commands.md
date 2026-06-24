@@ -1,6 +1,6 @@
 # Development Commands
 
-本文档收录后续开发中最常用的 Gradle、adb 和调试命令。由于当前仓库尚未迁移为 Android 工程，部分命令会在 Android 工程搭建后正式可用。
+本文档收录后续开发中最常用的 Gradle、adb 和调试命令。当前仓库已建立 Android `app` module；需要 Android SDK 的命令只有在本机配置完整 SDK 后才可执行。
 
 当前机器默认只作为开发与自动化验证环境，不要求始终具备完整 IDE、模拟器或真机调试能力。后续 Agent 默认跑构建、测试和静态验证；需要设备或模拟器的运行调试由用户在完整环境中执行。
 
@@ -9,15 +9,22 @@
 默认验证命令：
 
 ```powershell
-./gradlew test
-./gradlew lint
+./gradlew :app:testDebugUnitTest
+./gradlew :app:lintDebug
+./gradlew :app:assembleDebug
+```
+
+Android 工程中常用的定向单元测试命令：
+
+```powershell
+./gradlew :app:testDebugUnitTest
 ```
 
 辅助检查命令：
 
 ```powershell
 ./gradlew tasks
-./gradlew assembleDebug
+./gradlew :app:checkKotlinGradlePluginConfigurationErrors
 ```
 
 需要 Android 设备或模拟器时再运行：
@@ -30,13 +37,25 @@
 用途：
 
 - `tasks`: 查看可用任务
-- `test`: 跑 JVM 单元测试
-- `assembleDebug`: 构建 debug 包
+- `:app:testDebugUnitTest`: 跑 app debug 变体 JVM 单元测试
+- `:app:lintDebug`: 跑 debug 变体 lint
+- `:app:assembleDebug`: 构建 debug APK
 - `installDebug`: 安装到设备，默认不作为本机验证要求
-- `lint`: 跑静态检查
 - `connectedAndroidTest`: 跑设备或模拟器 UI 测试，默认不作为本机验证要求
 
-## 2. adb
+## 2. GitHub Actions
+
+仓库提供 `.github/workflows/android-ci.yml`。远端 CI 使用 GitHub-hosted `ubuntu-24.04` runner，该镜像预装 Android SDK，并设置 `ANDROID_HOME` / `ANDROID_SDK_ROOT`。CI 当前执行：
+
+```bash
+./gradlew :app:testDebugUnitTest --no-daemon
+./gradlew :app:lintDebug --no-daemon
+./gradlew :app:assembleDebug --no-daemon
+```
+
+本机如果没有 Android SDK，相关 Gradle 任务会在 SDK discovery 阶段失败；这种情况下以远端 CI 或用户完整 Android 环境的结果作为最终编译/测试证据。
+
+## 3. adb
 
 以下命令只在具备 Android SDK、设备或模拟器时使用：
 
@@ -58,12 +77,12 @@ adb shell dumpsys activity activities
 - 查看运行日志
 - 检查页面栈与 activity 状态
 
-## 3. 定向启动与调试
+## 4. 定向启动与调试
 
 以下命令用于人工运行调试，不作为当前机器默认验收条件：
 
 ```powershell
-adb shell am start -n com.example.lifelab/.MainActivity
+adb shell am start -n com.example.lifelab/.app.MainActivity
 adb shell input text hello
 adb shell input tap 500 1200
 ```
@@ -74,7 +93,7 @@ adb shell input tap 500 1200
 - 做简单输入
 - 模拟点击
 
-## 4. Git
+## 5. Git
 
 ```powershell
 git status
@@ -90,14 +109,14 @@ git switch -c feature/<topic>
 - 查看最近提交
 - 新建功能分支
 
-## 5. 推荐补充工具
+## 6. 推荐补充工具
 
 - `ktlint` 或 `detekt`: Kotlin 代码风格和静态检查
 - Android Studio Profiler: 性能分析
 - Layout Inspector: Compose/布局检查
 - App Inspection: 数据库、网络、DataStore 观察
 
-## 6. 后续建议加入的脚本
+## 7. 后续建议加入的脚本
 
 等 Android 工程迁移完成后，建议补这些脚本：
 

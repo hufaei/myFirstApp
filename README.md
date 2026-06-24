@@ -2,7 +2,7 @@
 
 LifeLab 是一个面向学习的原生 Android 综合案例项目。它的目标不是做一个单一业务很深的产品，而是用一个结构清晰、标准接近正式团队项目的示例，系统覆盖 Kotlin 与 Android 开发中的高频概念、常见模块边界和工程实践。
 
-当前仓库状态仍然是 Kotlin JVM 初始化模板，尚未迁移为 Android 工程。本仓库当前阶段先完成项目文档和架构基线，再按切片进入 Android 工程搭建与功能实现。
+当前仓库已建立 Android `app` module 主体骨架，包含 Compose 宿主、根导航、基础包边界、平台测试基线和 7 个最小正式功能模块。当前集成分支已经把 `Home`、`Tasks`、`Habits`、`Discover`、`Search`、`Notifications`、`Profile` 接入根导航；各模块先采用内存数据源完成端到端学习 demo，后续再按切片引入 Room、DataStore、网络和系统能力。
 
 ## 项目目标
 
@@ -65,7 +65,8 @@ LifeLab 的主题是“个人效率与成长实验室”，统一承载以下业
 - [测试策略](docs/05-quality/testing-strategy.md)
 - [开发命令](docs/06-engineering/dev-commands.md)
 - [编码规范](docs/06-engineering/coding-standards.md)
+- [模块会话协作提示词](docs/07-coordination/module-thread-prompts.md)
 
 ## 当前阶段
 
-当前处于“文档基线”阶段，尚未开始 Android 代码实现。下一份详细设计不会覆盖全 app，而是只针对 `Platform Baseline` 这一条首个垂直切片展开。
+当前处于 `Integrated Demo Slice` 阶段：平台基线和 7 个模块负责人会话的首批功能切片已经合并。下一步重点是在具备 Android SDK 的环境中跑通 CI/本地完整验证，并按后续切片逐步替换内存数据源、补持久化、网络和设备级验证。
