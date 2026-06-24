@@ -2,14 +2,28 @@
 
 本文档收录后续开发中最常用的 Gradle、adb 和调试命令。由于当前仓库尚未迁移为 Android 工程，部分命令会在 Android 工程搭建后正式可用。
 
+当前机器默认只作为开发与自动化验证环境，不要求始终具备完整 IDE、模拟器或真机调试能力。后续 Agent 默认跑构建、测试和静态验证；需要设备或模拟器的运行调试由用户在完整环境中执行。
+
 ## 1. Gradle
+
+默认验证命令：
+
+```powershell
+./gradlew test
+./gradlew lint
+```
+
+辅助检查命令：
 
 ```powershell
 ./gradlew tasks
-./gradlew test
 ./gradlew assembleDebug
+```
+
+需要 Android 设备或模拟器时再运行：
+
+```powershell
 ./gradlew installDebug
-./gradlew lint
 ./gradlew connectedAndroidTest
 ```
 
@@ -18,11 +32,13 @@
 - `tasks`: 查看可用任务
 - `test`: 跑 JVM 单元测试
 - `assembleDebug`: 构建 debug 包
-- `installDebug`: 安装到设备
+- `installDebug`: 安装到设备，默认不作为本机验证要求
 - `lint`: 跑静态检查
-- `connectedAndroidTest`: 跑设备或模拟器 UI 测试
+- `connectedAndroidTest`: 跑设备或模拟器 UI 测试，默认不作为本机验证要求
 
 ## 2. adb
+
+以下命令只在具备 Android SDK、设备或模拟器时使用：
 
 ```powershell
 adb devices
@@ -43,6 +59,8 @@ adb shell dumpsys activity activities
 - 检查页面栈与 activity 状态
 
 ## 3. 定向启动与调试
+
+以下命令用于人工运行调试，不作为当前机器默认验收条件：
 
 ```powershell
 adb shell am start -n com.example.lifelab/.MainActivity
