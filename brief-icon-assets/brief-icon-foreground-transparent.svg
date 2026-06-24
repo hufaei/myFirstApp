@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Brief adaptive icon foreground">
+  <defs>
+    <clipPath id="vesselClip">
+      <rect x="216" y="176" width="592" height="672" rx="170" ry="170"/>
+    </clipPath>
+  </defs>
+  <g id="foreground">
+    <g clip-path="url(#vesselClip)">
+      <rect x="216" y="524" width="592" height="324" fill="#89C2FF"/>
+      <path d="M216 796 C280 772 344 746 410 724 C500 694 572 770 704 724 C776 704 820 720 860 752 L860 868 L216 868 Z" fill="#E6F7FF" opacity="0.18"/>
+      <rect x="276" y="516" width="472" height="16" rx="8" fill="#E6F7FF" opacity="0.22"/>
+    </g>
+    <rect x="216" y="176" width="592" height="672" rx="170" ry="170" fill="none" stroke="#89C2FF" stroke-width="22" opacity="0.72"/>
+    <g fill="#89C2FF">
+      <rect x="540" y="398" width="24" height="134" rx="12"/>
+      <path d="M548 452 C520 426 492 412 470 418 C488 452 520 468 548 452 Z"/>
+      <path d="M560 432 C592 396 630 384 662 398 C640 436 598 450 560 432 Z"/>
+      <circle cx="552" cy="536" r="24"/>\n    </g>
+  </g>
+</svg>
