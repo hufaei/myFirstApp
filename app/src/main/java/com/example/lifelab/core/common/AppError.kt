@@ -20,7 +20,7 @@ sealed interface AppError {
     ) : AppError
 
     data class Unknown(
-        override val message: String = "Unexpected error",
+        override val message: String = "发生未知错误",
         override val cause: Throwable? = null,
     ) : AppError
 }

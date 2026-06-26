@@ -27,11 +27,11 @@ class ProfileViewModelTest {
         val state = viewModel.uiState.value
 
         assertFalse(state.isLoading)
-        assertEquals("Guest", state.overview.displayName)
-        assertEquals("Sign in to sync your LifeLab profile.", state.overview.description)
+        assertEquals("访客", state.overview.displayName)
+        assertEquals("登录后可同步你的 LifeLab 资料。", state.overview.description)
         assertNull(state.overview.email)
         assertNull(state.overview.membershipLabel)
-        assertEquals("G", state.overview.avatarInitial)
+        assertEquals("访", state.overview.avatarInitial)
         assertEquals(ThemeMode.System, state.appPreferences.themeMode)
         assertTrue(state.preference.notificationEnabled)
         assertEquals(DefaultTaskFilter.All, state.preference.defaultTaskFilter)

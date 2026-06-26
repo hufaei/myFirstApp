@@ -36,9 +36,9 @@ class InMemorySearchRepositoryTest {
     fun `search returns matching content for a query`() = runTest {
         val repository = InMemorySearchRepository()
 
-        val results = repository.search("focus").successValue()
+        val results = repository.search("专注").successValue()
 
-        assertTrue(results.any { it.title.contains("focus", ignoreCase = true) })
+        assertTrue(results.any { it.title.contains("专注", ignoreCase = true) })
     }
 
     @Test
@@ -46,7 +46,7 @@ class InMemorySearchRepositoryTest {
         val repository = InMemorySearchRepository()
 
         val results = repository.search(
-            query = "plan",
+            query = "计划",
             filter = SearchFilter.TASKS,
         ).successValue()
 

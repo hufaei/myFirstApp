@@ -47,11 +47,11 @@ data class ProfileState(
 fun ProfileSession.toOverview(): ProfileOverview =
     when (this) {
         ProfileSession.Guest -> ProfileOverview(
-            displayName = "Guest",
-            description = "Sign in to sync your LifeLab profile.",
+            displayName = "访客",
+            description = "登录后可同步你的 LifeLab 资料。",
             email = null,
             membershipLabel = null,
-            avatarInitial = "G",
+            avatarInitial = "访",
         )
 
         is ProfileSession.SignedIn -> ProfileOverview(

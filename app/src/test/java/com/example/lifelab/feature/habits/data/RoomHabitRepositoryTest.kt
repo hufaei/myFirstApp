@@ -24,7 +24,7 @@ class RoomHabitRepositoryTest {
         val saved = repository.saveHabit(
             Habit(
                 id = "hydrate",
-                name = "Drink water",
+                name = "喝水",
                 frequency = HabitFrequency.Daily,
                 streakCount = 1,
                 lastCheckInDate = checkInDate,

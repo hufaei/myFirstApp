@@ -10,9 +10,9 @@ class ProfileOverviewTest {
     fun guestSessionProvidesStablePlaceholderOverviewWithoutFakeEmail() {
         val overview = ProfileSession.Guest.toOverview()
 
-        assertEquals("Guest", overview.displayName)
-        assertEquals("Sign in to sync your LifeLab profile.", overview.description)
-        assertEquals("G", overview.avatarInitial)
+        assertEquals("访客", overview.displayName)
+        assertEquals("登录后可同步你的 LifeLab 资料。", overview.description)
+        assertEquals("访", overview.avatarInitial)
         assertNull(overview.email)
     }
 

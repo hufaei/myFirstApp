@@ -97,35 +97,35 @@ class DiscoverViewModelTest {
     private fun discoverContentFixture(): List<DiscoverContent> =
         discoverContentFixtureWithoutMembership() + DiscoverContent.Offer.Membership(
             id = "membership-1",
-            title = "LifeLab Plus",
-            summary = "Monthly labs, templates, and expert sessions.",
-            priceLabel = "${'$'}9/month",
-            tag = "Membership",
+            title = "LifeLab 会员",
+            summary = "每月实验室、模板和专家场。",
+            priceLabel = "¥9/月",
+            tag = "会员",
         )
 
     private fun discoverContentFixtureWithoutMembership(): List<DiscoverContent> =
         listOf(
             DiscoverContent.Article(
                 id = "article-1",
-                title = "Design a better morning",
-                summary = "A short guide to making daily experiments stick.",
-                author = "LifeLab Editorial",
-                tag = "Focus",
+                title = "设计更好的早晨",
+                summary = "把日常实验坚持下去的短指南。",
+                author = "LifeLab 编辑部",
+                tag = "专注",
             ),
             DiscoverContent.Course(
                 id = "course-1",
-                title = "Deep Work Sprint",
-                summary = "A compact course for protecting attention.",
-                instructor = "Maya Chen",
-                duration = "42 min",
-                tag = "Productivity",
+                title = "深度工作冲刺",
+                summary = "一门保护注意力的紧凑课程。",
+                instructor = "陈明雅",
+                duration = "42 分钟",
+                tag = "效率",
             ),
             DiscoverContent.Offer.Product(
                 id = "product-1",
-                title = "Habit Journal",
-                summary = "A guided notebook for tracking growth experiments.",
-                priceLabel = "${'$'}18",
-                tag = "Tools",
+                title = "习惯手账",
+                summary = "一本用于记录成长实验的引导式笔记本。",
+                priceLabel = "¥18",
+                tag = "工具",
             ),
         )
 

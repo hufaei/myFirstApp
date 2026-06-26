@@ -12,19 +12,19 @@ class ChangeMessageStatusUseCase(
         targetStatus: NotificationStatus,
     ): AppResult<NotificationMessage> {
         val message = repository.getMessage(messageId)
-            ?: return validationFailure("Unknown notification message id: $messageId")
+            ?: return validationFailure("未知通知消息：$messageId")
 
         return when {
             message.status == targetStatus -> AppResult.Success(message)
             message.status == NotificationStatus.Archived && targetStatus == NotificationStatus.Read ->
-                validationFailure("Archived notification messages cannot be marked read.")
+                validationFailure("已归档的通知不能标记为已读。")
             targetStatus == NotificationStatus.Unread ->
-                validationFailure("Notification messages cannot be moved back to unread.")
+                validationFailure("通知不能恢复为未读。")
             targetStatus == NotificationStatus.Read && message.status == NotificationStatus.Unread ->
                 repository.updateMessageStatus(messageId, NotificationStatus.Read)
             targetStatus == NotificationStatus.Archived ->
                 repository.updateMessageStatus(messageId, NotificationStatus.Archived)
-            else -> validationFailure("Unsupported notification status transition.")
+            else -> validationFailure("不支持这个通知状态变更。")
         }
     }
 

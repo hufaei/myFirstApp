@@ -47,7 +47,7 @@ class RoomHabitRepository(
             listOf(
                 Habit(
                     id = "hydrate",
-                    name = "Drink water",
+                    name = "喝水",
                     frequency = HabitFrequency.Daily,
                     streakCount = 0,
                     lastCheckInDate = null,
@@ -55,7 +55,7 @@ class RoomHabitRepository(
                 ),
                 Habit(
                     id = "walk",
-                    name = "Evening walk",
+                    name = "晚间散步",
                     frequency = HabitFrequency.Daily,
                     streakCount = 0,
                     lastCheckInDate = null,

@@ -45,7 +45,7 @@ class RoomPhotoRecordRepository(
         ).map(PhotoRecordEntity::toDomain)
         if (!policy.canAttach(owner, existingRecords)) {
             return AppResult.Failure(
-                AppError.Validation("Each item can keep up to three photos."),
+                AppError.Validation("每个项目最多保留 3 张照片。"),
             )
         }
 

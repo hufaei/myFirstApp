@@ -15,10 +15,10 @@ class InMemorySearchRepository : SearchRepository {
 
     private val _hotKeywords = MutableStateFlow(
         listOf(
-            "focus",
-            "weekly plan",
-            "habit streak",
-            "learning offer",
+            "专注",
+            "每周计划",
+            "习惯连续",
+            "学习权益",
         ),
     )
     override val hotKeywords: Flow<List<String>> = _hotKeywords
@@ -68,26 +68,26 @@ class InMemorySearchRepository : SearchRepository {
         val seedResults = listOf(
             SearchResultItem(
                 id = "article-deep-focus",
-                title = "Deep Focus Reset",
-                summary = "Article about protecting attention during high-value study blocks.",
+                title = "深度专注重启",
+                summary = "关于在高价值学习时段保护注意力的文章。",
                 type = SearchResultType.ARTICLE,
             ),
             SearchResultItem(
                 id = "offer-learning-sprint",
-                title = "Learning Sprint Offer",
-                summary = "A guided content pack for planning a focused seven-day skill sprint.",
+                title = "学习冲刺权益",
+                summary = "一套引导式内容包，帮助你规划 7 天专注技能冲刺。",
                 type = SearchResultType.OFFER,
             ),
             SearchResultItem(
                 id = "task-weekly-plan",
-                title = "Weekly Planning Task",
-                summary = "Turn goals into a clear plan with review checkpoints.",
+                title = "每周计划任务",
+                summary = "把目标拆成清晰计划，并设置复盘节点。",
                 type = SearchResultType.TASK,
             ),
             SearchResultItem(
                 id = "habit-evening-review",
-                title = "Evening Review Habit",
-                summary = "Build a habit streak by reflecting on focus, tasks, and energy.",
+                title = "晚间复盘习惯",
+                summary = "通过回顾专注、任务和精力，建立连续习惯。",
                 type = SearchResultType.HABIT,
             ),
         )

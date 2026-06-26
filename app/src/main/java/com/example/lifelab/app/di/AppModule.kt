@@ -40,6 +40,8 @@ object AppModule {
             context,
             LifeLabDatabase::class.java,
             "lifelab.db",
+        ).addMigrations(
+            LifeLabDatabase.MIGRATION_1_2,
         ).build()
 
     @Provides

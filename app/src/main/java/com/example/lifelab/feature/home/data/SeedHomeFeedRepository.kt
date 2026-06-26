@@ -15,9 +15,9 @@ class SeedHomeFeedRepository : HomeFeedRepository {
                 recommendedEntries = listOf(
                     HomeRecommendationEntry(
                         id = "today-focus",
-                        title = "Plan today's focus",
-                        subtitle = "Turn priorities into a short action list.",
-                        actionLabel = "Open Tasks",
+                        title = "规划今日重点",
+                        subtitle = "把优先事项整理成一份简短行动清单。",
+                        actionLabel = "打开任务",
                         route = "tasks",
                     ),
                 ),
@@ -31,8 +31,8 @@ class SeedHomeFeedRepository : HomeFeedRepository {
                     bestStreakCount = 6,
                 ),
                 discoveryTeaser = HomeDiscoveryTeaser(
-                    title = "Energy management basics",
-                    description = "A short read for planning sustainable work.",
+                    title = "精力管理入门",
+                    description = "一篇帮助你安排可持续工作节奏的短读。",
                 ),
             ),
         )

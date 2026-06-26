@@ -141,9 +141,9 @@ private fun NotificationSettings.toSystemIntegrationUiState(): SystemNotificatio
     SystemNotificationIntegrationUiState(
         enabled = systemNotificationsEnabled,
         statusLabel = if (systemNotificationsEnabled) {
-            "System notifications enabled"
+            "系统通知已开启"
         } else {
-            "System notifications disabled"
+            "系统通知已关闭"
         },
     )
 
