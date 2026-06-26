@@ -1,5 +1,6 @@
 package com.example.lifelab.feature.profile.domain
 
+import com.example.lifelab.core.datastore.ThemeMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

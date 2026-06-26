@@ -2,12 +2,14 @@ package com.example.lifelab.feature.habits.presentation
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun HabitsRoute(contentPadding: PaddingValues) {
-    val viewModel: HabitsViewModel = viewModel()
+fun HabitsRoute(
+    contentPadding: PaddingValues,
+    viewModel: HabitsViewModel = hiltViewModel(),
+) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
     HabitsScreen(
@@ -16,6 +18,7 @@ fun HabitsRoute(contentPadding: PaddingValues) {
         onCheckIn = viewModel::checkIn,
         onReminderEnabledChange = viewModel::setReminderEnabled,
         onReminderTimeChange = viewModel::updateReminderTime,
+        onAttachPhotos = viewModel::attachHabitPhotos,
         onClearMessage = viewModel::clearMessage,
     )
 }

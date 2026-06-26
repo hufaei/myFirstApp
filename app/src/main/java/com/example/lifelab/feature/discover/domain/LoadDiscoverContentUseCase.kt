@@ -1,11 +1,12 @@
 package com.example.lifelab.feature.discover.domain
 
 import com.example.lifelab.core.common.AppResult
+import javax.inject.Inject
 
-class LoadDiscoverContentUseCase(
+class LoadDiscoverContentUseCase @Inject constructor(
     private val repository: DiscoverRepository,
 ) {
-    operator fun invoke(
+    suspend operator fun invoke(
         category: DiscoverCategory = DiscoverCategory.All,
     ): AppResult<List<DiscoverContent>> =
         when (val result = repository.getContent()) {

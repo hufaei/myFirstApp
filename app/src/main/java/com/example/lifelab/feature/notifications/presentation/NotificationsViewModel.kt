@@ -4,25 +4,31 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.lifelab.core.common.AppError
 import com.example.lifelab.core.common.AppResult
+import com.example.lifelab.core.datastore.AppPreferences
+import com.example.lifelab.core.datastore.AppPreferencesRepository
 import com.example.lifelab.feature.notifications.domain.ChangeMessageStatusUseCase
 import com.example.lifelab.feature.notifications.domain.NotificationRepository
 import com.example.lifelab.feature.notifications.domain.NotificationSettings
 import com.example.lifelab.feature.notifications.domain.NotificationStatus
 import com.example.lifelab.feature.notifications.domain.UpdateNotificationSettingsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class NotificationsViewModel(
+@HiltViewModel
+class NotificationsViewModel @Inject constructor(
     private val repository: NotificationRepository,
-    private val changeMessageStatus: ChangeMessageStatusUseCase = ChangeMessageStatusUseCase(repository),
-    private val updateNotificationSettings: UpdateNotificationSettingsUseCase =
-        UpdateNotificationSettingsUseCase(repository),
+    private val appPreferencesRepository: AppPreferencesRepository? = null,
 ) : ViewModel() {
 
+    private val changeMessageStatus = ChangeMessageStatusUseCase(repository)
+    private val updateNotificationSettings = UpdateNotificationSettingsUseCase(repository)
     private val _uiState = MutableStateFlow(NotificationsUiState())
     val uiState: StateFlow<NotificationsUiState> = _uiState.asStateFlow()
     private var latestSettings: NotificationSettings? = null
@@ -50,21 +56,27 @@ class NotificationsViewModel(
 
     private fun observeRepository() {
         viewModelScope.launch {
-            combine(repository.messages, repository.settings) { messages, settings ->
-                val visibleMessages = if (settings.inAppMessagesEnabled) {
+            val appPreferences = appPreferencesRepository?.appPreferences ?: flowOf(AppPreferences())
+            combine(repository.messages, repository.settings, appPreferences) { messages, settings, preferences ->
+                val effectiveSettings = settings.copy(
+                    inAppMessagesEnabled = settings.inAppMessagesEnabled && preferences.notificationEnabled,
+                    systemNotificationsEnabled = settings.systemNotificationsEnabled && preferences.notificationEnabled,
+                )
+                val visibleMessages = if (effectiveSettings.inAppMessagesEnabled) {
                     messages.filterNot { it.status == NotificationStatus.Archived }
                 } else {
                     emptyList()
                 }
-                settings to visibleMessages
-            }.collect { (settings, visibleMessages) ->
-                latestSettings = settings
+                settings to (effectiveSettings to visibleMessages)
+            }.collect { (baseSettings, effectiveState) ->
+                val (effectiveSettings, visibleMessages) = effectiveState
+                latestSettings = baseSettings
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
                         messages = visibleMessages,
-                        settings = settings,
-                        systemIntegration = settings.toSystemIntegrationUiState(),
+                        settings = effectiveSettings,
+                        systemIntegration = effectiveSettings.toSystemIntegrationUiState(),
                     )
                 }
             }

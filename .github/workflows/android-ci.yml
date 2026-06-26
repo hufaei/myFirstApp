@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - main
-      - codex/platform-baseline-architecture
   pull_request:
     branches:
       - main
-      - codex/platform-baseline-architecture
   workflow_dispatch:
 
 permissions:
@@ -52,3 +50,11 @@ jobs:
 
       - name: Assemble debug APK
         run: ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifelab-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

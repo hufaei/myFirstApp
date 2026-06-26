@@ -5,10 +5,11 @@ import com.example.lifelab.core.common.AppResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
+import kotlinx.coroutines.test.runTest
 
 class LoadDiscoverContentUseCaseTest {
     @Test
-    fun `all category returns mixed content in repository order`() {
+    fun `all category returns mixed content in repository order`() = runTest {
         val content = discoverContentFixture()
         val useCase = LoadDiscoverContentUseCase(SuccessDiscoverRepository(content))
 
@@ -18,7 +19,7 @@ class LoadDiscoverContentUseCaseTest {
     }
 
     @Test
-    fun `article category returns only articles`() {
+    fun `article category returns only articles`() = runTest {
         val useCase = LoadDiscoverContentUseCase(SuccessDiscoverRepository(discoverContentFixture()))
 
         val result = useCase(DiscoverCategory.Articles)
@@ -30,7 +31,7 @@ class LoadDiscoverContentUseCaseTest {
     }
 
     @Test
-    fun `course category returns only courses`() {
+    fun `course category returns only courses`() = runTest {
         val useCase = LoadDiscoverContentUseCase(SuccessDiscoverRepository(discoverContentFixture()))
 
         val result = useCase(DiscoverCategory.Courses)
@@ -42,7 +43,7 @@ class LoadDiscoverContentUseCaseTest {
     }
 
     @Test
-    fun `offers category returns products and memberships`() {
+    fun `offers category returns products and memberships`() = runTest {
         val useCase = LoadDiscoverContentUseCase(SuccessDiscoverRepository(discoverContentFixture()))
 
         val result = useCase(DiscoverCategory.Offers)
@@ -54,7 +55,7 @@ class LoadDiscoverContentUseCaseTest {
     }
 
     @Test
-    fun `membership category returns only memberships`() {
+    fun `membership category returns only memberships`() = runTest {
         val useCase = LoadDiscoverContentUseCase(SuccessDiscoverRepository(discoverContentFixture()))
 
         val result = useCase(DiscoverCategory.Membership)
@@ -66,7 +67,7 @@ class LoadDiscoverContentUseCaseTest {
     }
 
     @Test
-    fun `repository failure is returned unchanged`() {
+    fun `repository failure is returned unchanged`() = runTest {
         val error = AppError.Unknown("Discover content unavailable")
         val useCase = LoadDiscoverContentUseCase(FailureDiscoverRepository(error))
 
@@ -112,12 +113,12 @@ class LoadDiscoverContentUseCaseTest {
     private class SuccessDiscoverRepository(
         private val content: List<DiscoverContent>,
     ) : DiscoverRepository {
-        override fun getContent(): AppResult<List<DiscoverContent>> = AppResult.Success(content)
+        override suspend fun getContent(): AppResult<List<DiscoverContent>> = AppResult.Success(content)
     }
 
     private class FailureDiscoverRepository(
         private val error: AppError,
     ) : DiscoverRepository {
-        override fun getContent(): AppResult<List<DiscoverContent>> = AppResult.Failure(error)
+        override suspend fun getContent(): AppResult<List<DiscoverContent>> = AppResult.Failure(error)
     }
 }

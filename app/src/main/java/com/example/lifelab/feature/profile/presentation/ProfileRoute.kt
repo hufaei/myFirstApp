@@ -1,5 +1,6 @@
 package com.example.lifelab.feature.profile.presentation
 
+import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -23,29 +25,56 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.lifelab.R
+import com.example.lifelab.core.datastore.AppPreferences
+import com.example.lifelab.core.datastore.AppPreferencesRepository
+import com.example.lifelab.core.datastore.DataStoreAppPreferencesRepository
+import com.example.lifelab.core.datastore.LanguageMode
+import com.example.lifelab.core.datastore.ThemeMode
+import com.example.lifelab.core.datastore.appPreferencesDataStore
 import com.example.lifelab.feature.profile.domain.DefaultTaskFilter
 import com.example.lifelab.feature.profile.domain.ProfileOverview
-import com.example.lifelab.feature.profile.domain.ThemeMode
 import com.example.lifelab.feature.profile.domain.UserPreference
 
 @Composable
 fun ProfileRoute(
     contentPadding: PaddingValues,
-    viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    onOpenWebLab: () -> Unit = {},
+    viewModel: ProfileViewModel? = null,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val resolvedViewModel = viewModel ?: rememberProfileViewModel()
+    val uiState by resolvedViewModel.uiState.collectAsState()
 
     ProfileScreen(
         uiState = uiState,
         contentPadding = contentPadding,
-        onEvent = viewModel::onEvent,
+        onEvent = resolvedViewModel::onEvent,
+        onOpenWebLab = onOpenWebLab,
     )
+}
+
+@Composable
+private fun rememberProfileViewModel(): ProfileViewModel {
+    val application = LocalContext.current.applicationContext as Application
+    val appPreferencesRepository = remember(application) {
+        DataStoreAppPreferencesRepository(application.appPreferencesDataStore)
+    }
+    val factory = remember(appPreferencesRepository) {
+        ProfileViewModelFactory(appPreferencesRepository)
+    }
+    return viewModel(factory = factory)
 }
 
 @Composable
@@ -53,6 +82,7 @@ fun ProfileScreen(
     uiState: ProfileUiState,
     contentPadding: PaddingValues,
     onEvent: (ProfileUiEvent) -> Unit,
+    onOpenWebLab: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -64,7 +94,7 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
-            text = "Profile",
+            text = stringResource(R.string.profile_title),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -76,8 +106,10 @@ fun ProfileScreen(
         AccountHeader(overview = uiState.overview)
         PreferencesCard(
             preference = uiState.preference,
+            appPreferences = uiState.appPreferences,
             onEvent = onEvent,
         )
+        WebLabCard(onOpenWebLab = onOpenWebLab)
         InterestsCard(tags = uiState.preference.contentInterestTags)
     }
 }
@@ -151,6 +183,7 @@ private fun AccountHeader(
 @Composable
 private fun PreferencesCard(
     preference: UserPreference,
+    appPreferences: AppPreferences,
     onEvent: (ProfileUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -159,17 +192,37 @@ private fun PreferencesCard(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            SettingGroup(title = "Theme mode") {
+            SettingGroup(title = stringResource(R.string.profile_theme_mode)) {
                 ChipColumn {
                     ThemeMode.entries.forEach { themeMode ->
                         FilterChip(
-                            selected = preference.themeMode == themeMode,
+                            selected = appPreferences.themeMode == themeMode,
                             onClick = {
                                 onEvent(ProfileUiEvent.ThemeModeSelected(themeMode))
                             },
                             label = {
                                 Text(
-                                    text = themeMode.label,
+                                    text = themeMode.label(),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+
+            SettingGroup(title = stringResource(R.string.profile_language_mode)) {
+                ChipColumn {
+                    LanguageMode.entries.forEach { languageMode ->
+                        FilterChip(
+                            selected = appPreferences.languageMode == languageMode,
+                            onClick = {
+                                onEvent(ProfileUiEvent.LanguageModeSelected(languageMode))
+                            },
+                            label = {
+                                Text(
+                                    text = languageMode.label(),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
@@ -189,12 +242,12 @@ private fun PreferencesCard(
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     Text(
-                        text = "Notifications",
+                        text = stringResource(R.string.profile_notifications),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                     )
                     Text(
-                        text = "Receive LifeLab reminders and updates.",
+                        text = stringResource(R.string.profile_notifications_description),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -208,11 +261,11 @@ private fun PreferencesCard(
             }
 
             SettingInfoRow(
-                title = "Notification settings",
-                description = "Manage reminders and notification preferences.",
+                title = stringResource(R.string.profile_notification_settings),
+                description = stringResource(R.string.profile_notification_settings_description),
             )
 
-            SettingGroup(title = "Default task filter") {
+            SettingGroup(title = stringResource(R.string.profile_default_task_filter)) {
                 ChipColumn {
                     DefaultTaskFilter.entries.forEach { defaultTaskFilter ->
                         FilterChip(
@@ -224,7 +277,7 @@ private fun PreferencesCard(
                             },
                             label = {
                                 Text(
-                                    text = defaultTaskFilter.label,
+                                    text = defaultTaskFilter.label(),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
@@ -248,13 +301,13 @@ private fun InterestsCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "Interest tags",
+                text = stringResource(R.string.profile_interest_tags),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
             )
             Text(
                 text = if (tags.isEmpty()) {
-                    "No interest tags have been added yet. Add tags later to personalize your LifeLab content."
+                    stringResource(R.string.profile_interest_tags_empty)
                 } else {
                     tags.joinToString(separator = ", ")
                 },
@@ -309,16 +362,68 @@ private fun ChipColumn(content: @Composable () -> Unit) {
     }
 }
 
-private val ThemeMode.label: String
-    get() = when (this) {
-        ThemeMode.System -> "System"
-        ThemeMode.Light -> "Light"
-        ThemeMode.Dark -> "Dark"
+@Composable
+private fun ThemeMode.label(): String =
+    when (this) {
+        ThemeMode.System -> stringResource(R.string.profile_theme_system)
+        ThemeMode.Light -> stringResource(R.string.profile_theme_light)
+        ThemeMode.Dark -> stringResource(R.string.profile_theme_dark)
     }
 
-private val DefaultTaskFilter.label: String
-    get() = when (this) {
-        DefaultTaskFilter.All -> "All"
-        DefaultTaskFilter.Active -> "Active"
-        DefaultTaskFilter.Completed -> "Completed"
+@Composable
+private fun LanguageMode.label(): String =
+    when (this) {
+        LanguageMode.System -> stringResource(R.string.profile_language_system)
+        LanguageMode.Zh -> stringResource(R.string.profile_language_zh)
+        LanguageMode.En -> stringResource(R.string.profile_language_en)
     }
+
+@Composable
+private fun DefaultTaskFilter.label(): String =
+    when (this) {
+        DefaultTaskFilter.All -> stringResource(R.string.profile_task_filter_all)
+        DefaultTaskFilter.Active -> stringResource(R.string.profile_task_filter_active)
+        DefaultTaskFilter.Completed -> stringResource(R.string.profile_task_filter_completed)
+    }
+
+private class ProfileViewModelFactory(
+    private val appPreferencesRepository: AppPreferencesRepository,
+) : ViewModelProvider.Factory {
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
+            return ProfileViewModel(
+                appPreferencesRepository = appPreferencesRepository,
+            ) as T
+        }
+        error("Unknown ViewModel class: ${modelClass.name}")
+    }
+}
+
+@Composable
+private fun WebLabCard(
+    onOpenWebLab: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.profile_lab_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+            )
+            Text(
+                text = stringResource(R.string.profile_lab_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Button(onClick = onOpenWebLab) {
+                Text(text = stringResource(R.string.profile_open_lab))
+            }
+        }
+    }
+}

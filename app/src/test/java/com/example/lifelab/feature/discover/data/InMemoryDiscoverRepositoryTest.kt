@@ -5,10 +5,11 @@ import com.example.lifelab.feature.discover.domain.DiscoverContent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class InMemoryDiscoverRepositoryTest {
     @Test
-    fun `seed content covers all discover content types`() {
+    fun `seed content covers all discover content types`() = runTest {
         val repository = InMemoryDiscoverRepository()
 
         val result = repository.getContent()
@@ -21,7 +22,7 @@ class InMemoryDiscoverRepositoryTest {
     }
 
     @Test
-    fun `seed content uses stable presentation-ready values`() {
+    fun `seed content uses stable presentation-ready values`() = runTest {
         val repository = InMemoryDiscoverRepository()
 
         val result = repository.getContent()

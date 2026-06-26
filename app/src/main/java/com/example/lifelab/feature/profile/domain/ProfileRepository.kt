@@ -1,5 +1,7 @@
 package com.example.lifelab.feature.profile.domain
 
+import com.example.lifelab.core.datastore.ThemeMode
+
 interface ProfileRepository {
 
     fun getProfileState(): ProfileState

@@ -1,5 +1,7 @@
 package com.example.lifelab.feature.profile.domain
 
+import com.example.lifelab.core.datastore.ThemeMode
+
 data class ProfileUser(
     val id: String,
     val displayName: String,
@@ -14,12 +16,6 @@ data class UserPreference(
     val defaultTaskFilter: DefaultTaskFilter = DefaultTaskFilter.All,
     val contentInterestTags: List<String> = emptyList(),
 )
-
-enum class ThemeMode {
-    System,
-    Light,
-    Dark,
-}
 
 enum class DefaultTaskFilter {
     All,

@@ -2,6 +2,8 @@ package com.example.lifelab.feature.notifications.presentation
 
 import com.example.lifelab.core.common.AppError
 import com.example.lifelab.core.common.AppResult
+import com.example.lifelab.core.datastore.AppPreferences
+import com.example.lifelab.core.datastore.InMemoryAppPreferencesRepository
 import com.example.lifelab.core.testing.MainDispatcherRule
 import com.example.lifelab.feature.notifications.data.InMemoryNotificationRepository
 import com.example.lifelab.feature.notifications.domain.NotificationMessage
@@ -122,6 +124,24 @@ class NotificationsViewModelTest {
 
         assertTrue(archivedViewModel.uiState.value.isEmpty)
         assertEquals(emptyList(), archivedViewModel.uiState.value.messages)
+    }
+
+    @Test
+    fun globalNotificationPreferenceDisablesVisibleMessages() = runTest {
+        val preferencesRepository = InMemoryAppPreferencesRepository(
+            AppPreferences(notificationEnabled = false),
+        )
+        val viewModel = NotificationsViewModel(
+            repository = InMemoryNotificationRepository(),
+            appPreferencesRepository = preferencesRepository,
+        )
+
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isEmpty)
+        assertEquals(emptyList(), state.messages)
+        assertFalse(assertNotNull(state.settings).inAppMessagesEnabled)
     }
 
     @Test
