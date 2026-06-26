@@ -48,7 +48,8 @@ class AndroidManifestConfigurationTest {
         )
     }
 
-    private fun readMainText(path: String): String = Files.readString(mainSourcePath(path))
+    private fun readMainText(path: String): String =
+        String(Files.readAllBytes(mainSourcePath(path)), Charsets.UTF_8)
 
     private fun mainSourcePath(path: String): Path {
         val cwd = Path.of("").toAbsolutePath()
