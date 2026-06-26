@@ -3,11 +3,8 @@ package com.example.lifelab.app.navigation
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.lifelab.R
@@ -44,21 +41,6 @@ val topLevelDestinations = listOf(
         route = LifeLabRoutes.HABITS,
         titleRes = R.string.nav_habits,
         icon = Icons.Filled.CheckCircle,
-    ),
-    LifeLabDestination(
-        route = LifeLabRoutes.DISCOVER,
-        titleRes = R.string.nav_discover,
-        icon = Icons.Filled.Explore,
-    ),
-    LifeLabDestination(
-        route = LifeLabRoutes.SEARCH,
-        titleRes = R.string.nav_search,
-        icon = Icons.Filled.Search,
-    ),
-    LifeLabDestination(
-        route = LifeLabRoutes.NOTIFICATIONS,
-        titleRes = R.string.nav_notifications,
-        icon = Icons.Filled.Notifications,
     ),
     LifeLabDestination(
         route = LifeLabRoutes.PROFILE,

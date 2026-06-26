@@ -9,6 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun SearchRoute(
     contentPadding: PaddingValues,
+    onBack: () -> Unit = {},
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -23,5 +24,6 @@ fun SearchRoute(
         onHistoryClick = viewModel::selectHistoryQuery,
         onClearHistoryClick = viewModel::clearHistory,
         onRetryClick = viewModel::retry,
+        onBack = onBack,
     )
 }

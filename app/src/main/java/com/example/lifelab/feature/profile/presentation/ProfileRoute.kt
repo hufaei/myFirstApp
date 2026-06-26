@@ -7,17 +7,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -51,6 +57,7 @@ import com.example.lifelab.feature.profile.domain.UserPreference
 @Composable
 fun ProfileRoute(
     contentPadding: PaddingValues,
+    onOpenNotifications: () -> Unit = {},
     onOpenWebLab: () -> Unit = {},
     viewModel: ProfileViewModel? = null,
 ) {
@@ -61,6 +68,7 @@ fun ProfileRoute(
         uiState = uiState,
         contentPadding = contentPadding,
         onEvent = resolvedViewModel::onEvent,
+        onOpenNotifications = onOpenNotifications,
         onOpenWebLab = onOpenWebLab,
     )
 }
@@ -82,6 +90,7 @@ fun ProfileScreen(
     uiState: ProfileUiState,
     contentPadding: PaddingValues,
     onEvent: (ProfileUiEvent) -> Unit,
+    onOpenNotifications: () -> Unit = {},
     onOpenWebLab: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -108,6 +117,7 @@ fun ProfileScreen(
             preference = uiState.preference,
             appPreferences = uiState.appPreferences,
             onEvent = onEvent,
+            onOpenNotifications = onOpenNotifications,
         )
         WebLabCard(onOpenWebLab = onOpenWebLab)
         InterestsCard(tags = uiState.preference.contentInterestTags)
@@ -185,6 +195,7 @@ private fun PreferencesCard(
     preference: UserPreference,
     appPreferences: AppPreferences,
     onEvent: (ProfileUiEvent) -> Unit,
+    onOpenNotifications: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
@@ -264,6 +275,15 @@ private fun PreferencesCard(
                 title = stringResource(R.string.profile_notification_settings),
                 description = stringResource(R.string.profile_notification_settings_description),
             )
+            Button(onClick = onOpenNotifications) {
+                Icon(
+                    imageVector = Icons.Filled.Notifications,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = stringResource(R.string.profile_open_notifications))
+            }
 
             SettingGroup(title = stringResource(R.string.profile_default_task_filter)) {
                 ChipColumn {
@@ -422,6 +442,12 @@ private fun WebLabCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Button(onClick = onOpenWebLab) {
+                Icon(
+                    imageVector = Icons.Filled.Science,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(R.string.profile_open_lab))
             }
         }

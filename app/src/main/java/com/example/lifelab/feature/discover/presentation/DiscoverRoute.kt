@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun DiscoverRoute(
     contentPadding: PaddingValues,
+    onBack: () -> Unit = {},
     viewModel: DiscoverViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -17,5 +18,6 @@ fun DiscoverRoute(
         uiState = uiState,
         contentPadding = contentPadding,
         onEvent = viewModel::onEvent,
+        onBack = onBack,
     )
 }
