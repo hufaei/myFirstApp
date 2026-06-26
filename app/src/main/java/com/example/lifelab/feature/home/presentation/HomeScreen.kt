@@ -9,13 +9,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +42,10 @@ fun HomeScreen(
     uiState: HomeUiState,
     contentPadding: PaddingValues,
     onEvent: (HomeUiEvent) -> Unit,
+    onOpenRoute: (String) -> Unit = {},
+    onOpenSearch: () -> Unit = {},
+    onOpenNotifications: () -> Unit = {},
+    onOpenDiscover: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -46,6 +59,11 @@ fun HomeScreen(
         HomeHeader(
             isActionEnabled = !uiState.isLoading && !uiState.isRefreshing,
             onRefresh = { onEvent(HomeUiEvent.Refresh) },
+            onOpenSearch = onOpenSearch,
+            onOpenNotifications = onOpenNotifications,
+        )
+        HomeQuickActions(
+            onOpenDiscover = onOpenDiscover,
         )
 
         if (uiState.isLoading && uiState.content == null) {
@@ -64,7 +82,11 @@ fun HomeScreen(
         }
 
         uiState.content?.let { content ->
-            HomeContentSection(content = content)
+            HomeContentSection(
+                content = content,
+                onOpenRoute = onOpenRoute,
+                onOpenDiscover = onOpenDiscover,
+            )
         }
     }
 }
@@ -73,13 +95,18 @@ fun HomeScreen(
 private fun HomeHeader(
     isActionEnabled: Boolean,
     onRefresh: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onOpenNotifications: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             Text(
                 text = stringResource(R.string.home_title),
                 style = MaterialTheme.typography.headlineMedium,
@@ -90,11 +117,62 @@ private fun HomeHeader(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        OutlinedButton(
-            onClick = onRefresh,
-            enabled = isActionEnabled,
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = stringResource(R.string.common_refresh))
+            IconButton(onClick = onOpenSearch) {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = stringResource(R.string.home_action_search),
+                )
+            }
+            IconButton(onClick = onOpenNotifications) {
+                Icon(
+                    imageVector = Icons.Filled.Notifications,
+                    contentDescription = stringResource(R.string.home_action_notifications),
+                )
+            }
+            IconButton(
+                onClick = onRefresh,
+                enabled = isActionEnabled,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Refresh,
+                    contentDescription = stringResource(R.string.common_refresh),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeQuickActions(
+    onOpenDiscover: () -> Unit,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.home_quick_actions),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(R.string.home_quick_actions_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FilledTonalButton(onClick = onOpenDiscover) {
+                Icon(
+                    imageVector = Icons.Filled.Explore,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = stringResource(R.string.home_action_discover))
+            }
         }
     }
 }
@@ -150,13 +228,26 @@ private fun ErrorSection(
 }
 
 @Composable
-private fun HomeContentSection(content: HomeFeedContent) {
-    RecommendedEntriesSection(entries = content.recommendedEntries)
-    FeedSection(items = content.feedItems)
+private fun HomeContentSection(
+    content: HomeFeedContent,
+    onOpenRoute: (String) -> Unit,
+    onOpenDiscover: () -> Unit,
+) {
+    RecommendedEntriesSection(
+        entries = content.recommendedEntries,
+        onOpenRoute = onOpenRoute,
+    )
+    FeedSection(
+        items = content.feedItems,
+        onOpenDiscover = onOpenDiscover,
+    )
 }
 
 @Composable
-private fun RecommendedEntriesSection(entries: List<HomeRecommendationEntry>) {
+private fun RecommendedEntriesSection(
+    entries: List<HomeRecommendationEntry>,
+    onOpenRoute: (String) -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = stringResource(R.string.home_recommended),
@@ -183,7 +274,13 @@ private fun RecommendedEntriesSection(entries: List<HomeRecommendationEntry>) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Button(onClick = {}) {
+                    Button(onClick = { onOpenRoute(entry.route) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Explore,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(text = entry.actionLabel)
                     }
                 }
@@ -193,7 +290,10 @@ private fun RecommendedEntriesSection(entries: List<HomeRecommendationEntry>) {
 }
 
 @Composable
-private fun FeedSection(items: List<HomeFeedItem>) {
+private fun FeedSection(
+    items: List<HomeFeedItem>,
+    onOpenDiscover: () -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = stringResource(R.string.home_feed),
@@ -206,13 +306,19 @@ private fun FeedSection(items: List<HomeFeedItem>) {
         }
 
         items.filterNot { it == HomeFeedItem.EmptyState }.forEach { item ->
-            FeedCard(item = item)
+            FeedCard(
+                item = item,
+                onOpenDiscover = onOpenDiscover,
+            )
         }
     }
 }
 
 @Composable
-private fun FeedCard(item: HomeFeedItem) {
+private fun FeedCard(
+    item: HomeFeedItem,
+    onOpenDiscover: () -> Unit,
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -227,6 +333,17 @@ private fun FeedCard(item: HomeFeedItem) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (item is HomeFeedItem.DiscoveryTeaser) {
+                FilledTonalButton(onClick = onOpenDiscover) {
+                    Icon(
+                        imageVector = Icons.Filled.Explore,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = stringResource(R.string.home_action_discover))
+                }
+            }
         }
     }
 }

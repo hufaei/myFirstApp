@@ -10,9 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -33,6 +37,7 @@ import com.example.lifelab.feature.notifications.domain.NotificationStatus
 @Composable
 fun NotificationsRoute(
     contentPadding: PaddingValues,
+    onBack: () -> Unit = {},
     viewModel: NotificationsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -41,6 +46,7 @@ fun NotificationsRoute(
         contentPadding = contentPadding,
         uiState = uiState,
         onEvent = viewModel::onEvent,
+        onBack = onBack,
     )
 }
 
@@ -49,23 +55,27 @@ fun NotificationsScreen(
     contentPadding: PaddingValues,
     uiState: NotificationsUiState,
     onEvent: (NotificationsUiEvent) -> Unit,
+    onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     when {
         uiState.isLoading -> LoadingContent(
             contentPadding = contentPadding,
+            onBack = onBack,
             modifier = modifier,
         )
         uiState.errorMessage != null -> ErrorContent(
             contentPadding = contentPadding,
             errorMessage = uiState.errorMessage,
             onRetry = { onEvent(NotificationsUiEvent.RetryRefresh) },
+            onBack = onBack,
             modifier = modifier,
         )
         else -> NotificationsContent(
             contentPadding = contentPadding,
             uiState = uiState,
             onEvent = onEvent,
+            onBack = onBack,
             modifier = modifier,
         )
     }
@@ -74,21 +84,52 @@ fun NotificationsScreen(
 @Composable
 private fun LoadingContent(
     contentPadding: PaddingValues,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(contentPadding),
-        contentAlignment = Alignment.Center,
+            .padding(contentPadding)
+            .padding(24.dp),
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        NotificationsHeader(onBack = onBack)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
+            contentAlignment = Alignment.Center,
         ) {
-            CircularProgressIndicator()
-            Text(text = stringResource(R.string.notifications_loading))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                CircularProgressIndicator()
+                Text(text = stringResource(R.string.notifications_loading))
+            }
         }
+    }
+}
+
+@Composable
+private fun NotificationsHeader(
+    onBack: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.common_back),
+            )
+        }
+        Text(
+            text = stringResource(R.string.notifications_title),
+            style = MaterialTheme.typography.headlineMedium,
+        )
     }
 }
 
@@ -97,6 +138,7 @@ private fun ErrorContent(
     contentPadding: PaddingValues,
     errorMessage: String,
     onRetry: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -104,9 +146,10 @@ private fun ErrorContent(
             .fillMaxSize()
             .padding(contentPadding)
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        NotificationsHeader(onBack = onBack)
         Text(
             text = stringResource(R.string.notifications_unavailable),
             style = MaterialTheme.typography.titleLarge,
@@ -130,6 +173,7 @@ private fun NotificationsContent(
     contentPadding: PaddingValues,
     uiState: NotificationsUiState,
     onEvent: (NotificationsUiEvent) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -140,10 +184,7 @@ private fun NotificationsContent(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Text(
-            text = stringResource(R.string.notifications_title),
-            style = MaterialTheme.typography.headlineMedium,
-        )
+        NotificationsHeader(onBack = onBack)
 
         uiState.settings?.let { settings ->
             SettingsContent(

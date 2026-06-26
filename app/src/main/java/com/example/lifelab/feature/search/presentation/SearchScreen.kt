@@ -16,12 +16,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -49,6 +53,7 @@ fun SearchScreen(
     onHistoryClick: (String) -> Unit,
     onClearHistoryClick: () -> Unit,
     onRetryClick: () -> Unit,
+    onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -63,6 +68,7 @@ fun SearchScreen(
                 query = uiState.query,
                 onQueryChanged = onQueryChanged,
                 onSubmitQuery = onSubmitQuery,
+                onBack = onBack,
             )
         }
 
@@ -124,12 +130,24 @@ private fun SearchInputSection(
     query: String,
     onQueryChanged: (String) -> Unit,
     onSubmitQuery: () -> Unit,
+    onBack: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = stringResource(R.string.search_title),
-            style = MaterialTheme.typography.headlineMedium,
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.common_back),
+                )
+            }
+            Text(
+                text = stringResource(R.string.search_title),
+                style = MaterialTheme.typography.headlineMedium,
+            )
+        }
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,

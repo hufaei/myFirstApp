@@ -23,15 +23,43 @@ fun LifeLabNavHost(
         navController = navController,
         startDestination = LifeLabRoutes.HOME,
     ) {
-        composable(LifeLabRoutes.HOME) { HomeRoute(contentPadding = contentPadding) }
+        composable(LifeLabRoutes.HOME) {
+            HomeRoute(
+                contentPadding = contentPadding,
+                onOpenRoute = { route -> navController.navigateSingleTop(route) },
+                onOpenSearch = { navController.navigateSingleTop(LifeLabRoutes.SEARCH) },
+                onOpenNotifications = {
+                    navController.navigateSingleTop(LifeLabRoutes.NOTIFICATIONS)
+                },
+                onOpenDiscover = { navController.navigateSingleTop(LifeLabRoutes.DISCOVER) },
+            )
+        }
         composable(LifeLabRoutes.TASKS) { TasksRoute(contentPadding = contentPadding) }
         composable(LifeLabRoutes.HABITS) { HabitsRoute(contentPadding = contentPadding) }
-        composable(LifeLabRoutes.DISCOVER) { DiscoverRoute(contentPadding = contentPadding) }
-        composable(LifeLabRoutes.SEARCH) { SearchRoute(contentPadding = contentPadding) }
-        composable(LifeLabRoutes.NOTIFICATIONS) { NotificationsRoute(contentPadding = contentPadding) }
+        composable(LifeLabRoutes.DISCOVER) {
+            DiscoverRoute(
+                contentPadding = contentPadding,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(LifeLabRoutes.SEARCH) {
+            SearchRoute(
+                contentPadding = contentPadding,
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(LifeLabRoutes.NOTIFICATIONS) {
+            NotificationsRoute(
+                contentPadding = contentPadding,
+                onBack = { navController.popBackStack() },
+            )
+        }
         composable(LifeLabRoutes.PROFILE) {
             ProfileRoute(
                 contentPadding = contentPadding,
+                onOpenNotifications = {
+                    navController.navigateSingleTop(LifeLabRoutes.NOTIFICATIONS)
+                },
                 onOpenWebLab = { navController.navigate(LifeLabRoutes.WEB_LAB) },
             )
         }
@@ -41,5 +69,11 @@ fun LifeLabNavHost(
                 onClose = { navController.popBackStack() },
             )
         }
+    }
+}
+
+private fun NavHostController.navigateSingleTop(route: String) {
+    navigate(route) {
+        launchSingleTop = true
     }
 }

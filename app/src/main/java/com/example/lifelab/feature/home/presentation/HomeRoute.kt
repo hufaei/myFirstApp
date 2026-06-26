@@ -9,6 +9,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun HomeRoute(
     contentPadding: PaddingValues,
+    onOpenRoute: (String) -> Unit = {},
+    onOpenSearch: () -> Unit = {},
+    onOpenNotifications: () -> Unit = {},
+    onOpenDiscover: () -> Unit = {},
     viewModel: HomeViewModel = viewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -17,5 +21,9 @@ fun HomeRoute(
         uiState = uiState,
         contentPadding = contentPadding,
         onEvent = viewModel::onEvent,
+        onOpenRoute = onOpenRoute,
+        onOpenSearch = onOpenSearch,
+        onOpenNotifications = onOpenNotifications,
+        onOpenDiscover = onOpenDiscover,
     )
 }
