@@ -1,8 +1,21 @@
 package com.example.lifelab.app.navigation
 
+import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.lifelab.R
+
 data class LifeLabDestination(
     val route: String,
-    val title: String,
+    @StringRes val titleRes: Int,
+    val icon: ImageVector,
 )
 
 object LifeLabRoutes {
@@ -13,14 +26,43 @@ object LifeLabRoutes {
     const val SEARCH = "search"
     const val NOTIFICATIONS = "notifications"
     const val PROFILE = "profile"
+    const val WEB_LAB = "web_lab"
 }
 
 val topLevelDestinations = listOf(
-    LifeLabDestination(route = LifeLabRoutes.HOME, title = "Home"),
-    LifeLabDestination(route = LifeLabRoutes.TASKS, title = "Tasks"),
-    LifeLabDestination(route = LifeLabRoutes.HABITS, title = "Habits"),
-    LifeLabDestination(route = LifeLabRoutes.DISCOVER, title = "Discover"),
-    LifeLabDestination(route = LifeLabRoutes.SEARCH, title = "Search"),
-    LifeLabDestination(route = LifeLabRoutes.NOTIFICATIONS, title = "Notifications"),
-    LifeLabDestination(route = LifeLabRoutes.PROFILE, title = "Profile"),
+    LifeLabDestination(
+        route = LifeLabRoutes.HOME,
+        titleRes = R.string.nav_home,
+        icon = Icons.Filled.Home,
+    ),
+    LifeLabDestination(
+        route = LifeLabRoutes.TASKS,
+        titleRes = R.string.nav_tasks,
+        icon = Icons.Filled.TaskAlt,
+    ),
+    LifeLabDestination(
+        route = LifeLabRoutes.HABITS,
+        titleRes = R.string.nav_habits,
+        icon = Icons.Filled.CheckCircle,
+    ),
+    LifeLabDestination(
+        route = LifeLabRoutes.DISCOVER,
+        titleRes = R.string.nav_discover,
+        icon = Icons.Filled.Explore,
+    ),
+    LifeLabDestination(
+        route = LifeLabRoutes.SEARCH,
+        titleRes = R.string.nav_search,
+        icon = Icons.Filled.Search,
+    ),
+    LifeLabDestination(
+        route = LifeLabRoutes.NOTIFICATIONS,
+        titleRes = R.string.nav_notifications,
+        icon = Icons.Filled.Notifications,
+    ),
+    LifeLabDestination(
+        route = LifeLabRoutes.PROFILE,
+        titleRes = R.string.nav_profile,
+        icon = Icons.Filled.Person,
+    ),
 )

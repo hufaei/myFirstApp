@@ -6,13 +6,16 @@ import com.example.lifelab.core.common.AppResult
 import com.example.lifelab.feature.search.domain.SearchFilter
 import com.example.lifelab.feature.search.domain.SearchRepository
 import com.example.lifelab.feature.search.domain.SearchResultItem
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SearchViewModel(
+@HiltViewModel
+class SearchViewModel @Inject constructor(
     private val repository: SearchRepository,
 ) : ViewModel() {
 

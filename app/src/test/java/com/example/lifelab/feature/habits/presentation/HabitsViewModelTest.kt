@@ -1,6 +1,8 @@
 package com.example.lifelab.feature.habits.presentation
 
 import com.example.lifelab.core.testing.MainDispatcherRule
+import com.example.lifelab.core.media.PhotoOwnerType
+import com.example.lifelab.core.media.PhotoSource
 import com.example.lifelab.feature.habits.data.InMemoryHabitRepository
 import com.example.lifelab.feature.habits.domain.model.Habit
 import com.example.lifelab.feature.habits.domain.model.HabitFrequency
@@ -126,6 +128,42 @@ class HabitsViewModelTest {
         assertEquals(HabitReminder(enabled = true, time = LocalTime.of(18, 30)), walk.reminder)
         assertEquals(2, state.stats.activeReminders)
         assertEquals("Reminder updated for Drink water.", state.message)
+    }
+
+    @Test
+    fun attachingHabitPhotosKeepsOnlyThreePhotosForThatHabit() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "hydrate",
+                    reminder = HabitReminder(enabled = true, time = LocalTime.of(9, 0)),
+                ),
+                sampleHabit(
+                    id = "walk",
+                    reminder = HabitReminder(enabled = false, time = null),
+                ),
+            ),
+        )
+        var clock = 2_000L
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+            nowMillis = { clock++ },
+        )
+
+        viewModel.attachHabitPhotos(
+            habitId = "hydrate",
+            localUris = listOf("content://habit/1", "content://habit/2", "content://habit/3", "content://habit/4"),
+            source = PhotoSource.Picker,
+        )
+
+        val state = viewModel.uiState.value
+        val photos = state.photosForHabit("hydrate")
+        assertEquals(3, photos.size)
+        assertEquals(listOf("content://habit/1", "content://habit/2", "content://habit/3"), photos.map { it.localUri })
+        assertEquals(PhotoOwnerType.Habit, photos.first().owner.type)
+        assertEquals("hydrate", photos.first().owner.id)
+        assertEquals(emptyList(), state.photosForHabit("walk"))
     }
 
     private companion object {

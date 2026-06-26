@@ -21,7 +21,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.lifelab.R
 import com.example.lifelab.feature.home.domain.HomeFeedContent
 import com.example.lifelab.feature.home.domain.HomeFeedItem
 import com.example.lifelab.feature.home.domain.HomeRecommendationEntry
@@ -79,11 +81,11 @@ private fun HomeHeader(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = "Home",
+                text = stringResource(R.string.home_title),
                 style = MaterialTheme.typography.headlineMedium,
             )
             Text(
-                text = "Today in LifeLab",
+                text = stringResource(R.string.home_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -92,7 +94,7 @@ private fun HomeHeader(
             onClick = onRefresh,
             enabled = isActionEnabled,
         ) {
-            Text(text = "Refresh")
+            Text(text = stringResource(R.string.common_refresh))
         }
     }
 }
@@ -105,7 +107,7 @@ private fun LoadingSection() {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Loading your home feed",
+                text = stringResource(R.string.home_loading),
                 style = MaterialTheme.typography.titleMedium,
             )
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -118,7 +120,7 @@ private fun RefreshingSection() {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         Text(
-            text = "Refreshing feed",
+            text = stringResource(R.string.home_refreshing),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -141,7 +143,7 @@ private fun ErrorSection(
                 color = MaterialTheme.colorScheme.error,
             )
             TextButton(onClick = onRetry) {
-                Text(text = "Retry")
+                Text(text = stringResource(R.string.common_retry))
             }
         }
     }
@@ -157,12 +159,12 @@ private fun HomeContentSection(content: HomeFeedContent) {
 private fun RecommendedEntriesSection(entries: List<HomeRecommendationEntry>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Recommended",
+            text = stringResource(R.string.home_recommended),
             style = MaterialTheme.typography.titleLarge,
         )
 
         if (entries.isEmpty()) {
-            EmptySection(message = "No recommendations yet")
+            EmptySection(message = stringResource(R.string.home_no_recommendations))
             return@Column
         }
 
@@ -194,12 +196,12 @@ private fun RecommendedEntriesSection(entries: List<HomeRecommendationEntry>) {
 private fun FeedSection(items: List<HomeFeedItem>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Feed",
+            text = stringResource(R.string.home_feed),
             style = MaterialTheme.typography.titleLarge,
         )
 
         if (items.isEmpty() || items.all { it == HomeFeedItem.EmptyState }) {
-            EmptySection(message = "Your feed will appear here as LifeLab learns from your activity")
+            EmptySection(message = stringResource(R.string.home_feed_empty))
             return@Column
         }
 
@@ -243,23 +245,33 @@ private fun EmptySection(message: String) {
     Spacer(modifier = Modifier.height(4.dp))
 }
 
+@Composable
 private fun feedItemTitle(item: HomeFeedItem): String =
     when (item) {
-        is HomeFeedItem.TaskSummary -> "Task summary"
-        is HomeFeedItem.HabitInsight -> "Habit insight"
+        is HomeFeedItem.TaskSummary -> stringResource(R.string.home_task_summary)
+        is HomeFeedItem.HabitInsight -> stringResource(R.string.home_habit_insight)
         is HomeFeedItem.DiscoveryTeaser -> item.teaser.title
-        HomeFeedItem.EmptyState -> "Home update"
+        HomeFeedItem.EmptyState -> stringResource(R.string.home_update)
     }
 
+@Composable
 private fun feedItemDescription(item: HomeFeedItem): String =
     when (item) {
         is HomeFeedItem.TaskSummary -> {
-            "${item.summary.openTaskCount} open tasks | ${item.summary.dueTodayCount} due today"
+            stringResource(
+                R.string.home_task_summary_detail,
+                item.summary.openTaskCount,
+                item.summary.dueTodayCount,
+            )
         }
         is HomeFeedItem.HabitInsight -> {
-            "${item.insight.checkedInTodayCount}/${item.insight.totalHabitCount} checked in | " +
-                "${item.insight.bestStreakCount}-day best streak"
+            stringResource(
+                R.string.home_habit_insight_detail,
+                item.insight.checkedInTodayCount,
+                item.insight.totalHabitCount,
+                item.insight.bestStreakCount,
+            )
         }
         is HomeFeedItem.DiscoveryTeaser -> item.teaser.description
-        HomeFeedItem.EmptyState -> "Your feed will appear here as LifeLab learns from your activity"
+        HomeFeedItem.EmptyState -> stringResource(R.string.home_feed_empty)
     }

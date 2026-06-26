@@ -1,5 +1,9 @@
 package com.example.lifelab.feature.tasks.presentation
 
+import com.example.lifelab.core.media.PhotoAttachmentPolicy
+import com.example.lifelab.core.media.PhotoOwner
+import com.example.lifelab.core.media.PhotoOwnerType
+import com.example.lifelab.core.media.PhotoRecord
 import com.example.lifelab.feature.tasks.domain.Task
 import com.example.lifelab.feature.tasks.domain.TaskPriority
 import com.example.lifelab.feature.tasks.domain.TaskStatus
@@ -11,6 +15,8 @@ data class TasksUiState(
     val selectedTask: Task? = null,
     val mode: TaskScreenMode = TaskScreenMode.List,
     val editorState: TaskEditorState = TaskEditorState(),
+    val taskPhotos: Map<String, List<PhotoRecord>> = emptyMap(),
+    val editorPhotos: List<PhotoRecord> = emptyList(),
     val message: String? = null,
 ) {
     val filteredTasks: List<Task>
@@ -21,6 +27,9 @@ data class TasksUiState(
                 TaskFilter.Completed -> task.status == TaskStatus.Completed
             }
         }
+
+    fun photosForTask(taskId: String): List<PhotoRecord> =
+        taskPhotos[taskId].orEmpty().take(PhotoAttachmentPolicy.MAX_PHOTOS_PER_OWNER)
 }
 
 enum class TaskFilter {
@@ -43,3 +52,6 @@ data class TaskEditorState(
     val tags: String = "",
     val dueLabel: String = "",
 )
+
+fun taskPhotoOwner(taskId: String): PhotoOwner =
+    PhotoOwner(type = PhotoOwnerType.Task, id = taskId)

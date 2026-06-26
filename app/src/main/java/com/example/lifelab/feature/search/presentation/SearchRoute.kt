@@ -4,14 +4,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.lifelab.feature.search.data.InMemorySearchRepository
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun SearchRoute(contentPadding: PaddingValues) {
-    val viewModel: SearchViewModel = viewModel(factory = SearchViewModelFactory)
+fun SearchRoute(
+    contentPadding: PaddingValues,
+    viewModel: SearchViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     SearchScreen(
@@ -25,14 +24,4 @@ fun SearchRoute(contentPadding: PaddingValues) {
         onClearHistoryClick = viewModel::clearHistory,
         onRetryClick = viewModel::retry,
     )
-}
-
-private object SearchViewModelFactory : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(SearchViewModel::class.java)) {
-            return SearchViewModel(InMemorySearchRepository()) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
-    }
 }

@@ -1,10 +1,10 @@
 package com.example.lifelab.feature.profile.data
 
+import com.example.lifelab.core.datastore.ThemeMode
 import com.example.lifelab.feature.profile.domain.DefaultTaskFilter
 import com.example.lifelab.feature.profile.domain.ProfileRepository
 import com.example.lifelab.feature.profile.domain.ProfileSession
 import com.example.lifelab.feature.profile.domain.ProfileState
-import com.example.lifelab.feature.profile.domain.ThemeMode
 import com.example.lifelab.feature.profile.domain.UserPreference
 
 class InMemoryProfileRepository(

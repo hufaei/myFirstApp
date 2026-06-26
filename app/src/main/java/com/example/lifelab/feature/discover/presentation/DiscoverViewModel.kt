@@ -1,19 +1,21 @@
 package com.example.lifelab.feature.discover.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.lifelab.core.common.AppResult
-import com.example.lifelab.feature.discover.data.InMemoryDiscoverRepository
 import com.example.lifelab.feature.discover.domain.DiscoverCategory
 import com.example.lifelab.feature.discover.domain.LoadDiscoverContentUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class DiscoverViewModel(
-    private val loadDiscoverContent: LoadDiscoverContentUseCase = LoadDiscoverContentUseCase(
-        InMemoryDiscoverRepository(),
-    ),
+@HiltViewModel
+class DiscoverViewModel @Inject constructor(
+    private val loadDiscoverContent: LoadDiscoverContentUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DiscoverUiState())
     val uiState: StateFlow<DiscoverUiState> = _uiState.asStateFlow()
@@ -45,17 +47,19 @@ class DiscoverViewModel(
             )
         }
 
-        val listState = when (val result = loadDiscoverContent(category)) {
-            is AppResult.Failure -> DiscoverListState.Error(result.error.message)
-            is AppResult.Success -> {
-                if (result.value.isEmpty()) {
-                    DiscoverListState.Empty
-                } else {
-                    DiscoverListState.Content(result.value)
+        viewModelScope.launch {
+            val listState = when (val result = loadDiscoverContent(category)) {
+                is AppResult.Failure -> DiscoverListState.Error(result.error.message)
+                is AppResult.Success -> {
+                    if (result.value.isEmpty()) {
+                        DiscoverListState.Empty
+                    } else {
+                        DiscoverListState.Content(result.value)
+                    }
                 }
             }
-        }
 
-        _uiState.update { it.copy(listState = listState) }
+            _uiState.update { it.copy(listState = listState) }
+        }
     }
 }

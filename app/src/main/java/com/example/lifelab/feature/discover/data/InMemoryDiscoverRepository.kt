@@ -5,7 +5,7 @@ import com.example.lifelab.feature.discover.domain.DiscoverContent
 import com.example.lifelab.feature.discover.domain.DiscoverRepository
 
 class InMemoryDiscoverRepository : DiscoverRepository {
-    override fun getContent(): AppResult<List<DiscoverContent>> =
+    override suspend fun getContent(): AppResult<List<DiscoverContent>> =
         AppResult.Success(seedContent)
 
     private companion object {

@@ -19,26 +19,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.lifelab.feature.notifications.data.InMemoryNotificationRepository
+import com.example.lifelab.R
 import com.example.lifelab.feature.notifications.domain.NotificationMessage
-import com.example.lifelab.feature.notifications.domain.NotificationRepository
 import com.example.lifelab.feature.notifications.domain.NotificationSettings
 import com.example.lifelab.feature.notifications.domain.NotificationStatus
 
 @Composable
-fun NotificationsRoute(contentPadding: PaddingValues) {
-    val repository = remember { InMemoryNotificationRepository() }
-    val viewModel: NotificationsViewModel = viewModel(
-        factory = NotificationsViewModelFactory(repository),
-    )
+fun NotificationsRoute(
+    contentPadding: PaddingValues,
+    viewModel: NotificationsViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     NotificationsScreen(
@@ -91,7 +87,7 @@ private fun LoadingContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             CircularProgressIndicator()
-            Text(text = "Loading notifications")
+            Text(text = stringResource(R.string.notifications_loading))
         }
     }
 }
@@ -112,7 +108,7 @@ private fun ErrorContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Notifications unavailable",
+            text = stringResource(R.string.notifications_unavailable),
             style = MaterialTheme.typography.titleLarge,
         )
         Text(
@@ -124,7 +120,7 @@ private fun ErrorContent(
             onClick = onRetry,
             modifier = Modifier.padding(top = 16.dp),
         ) {
-            Text(text = "Retry")
+            Text(text = stringResource(R.string.common_retry))
         }
     }
 }
@@ -145,7 +141,7 @@ private fun NotificationsContent(
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Text(
-            text = "Notifications",
+            text = stringResource(R.string.notifications_title),
             style = MaterialTheme.typography.headlineMedium,
         )
 
@@ -181,21 +177,27 @@ private fun SettingsContent(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SettingRow(
-            label = "In-app messages",
+            label = stringResource(R.string.notifications_in_app_messages),
             checked = settings.inAppMessagesEnabled,
             onCheckedChange = { onEvent(NotificationsUiEvent.SetInAppMessagesEnabled(it)) },
         )
         SettingRow(
-            label = "System notifications",
+            label = stringResource(R.string.notifications_system_notifications),
             checked = settings.systemNotificationsEnabled,
             onCheckedChange = { onEvent(NotificationsUiEvent.SetSystemNotificationsEnabled(it)) },
         )
         Text(
-            text = "System notification integration",
+            text = stringResource(R.string.notifications_system_integration),
             style = MaterialTheme.typography.titleMedium,
         )
         Text(
-            text = systemIntegration.statusLabel,
+            text = stringResource(
+                if (systemIntegration.enabled) {
+                    R.string.notifications_system_enabled
+                } else {
+                    R.string.notifications_system_disabled
+                },
+            ),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -227,9 +229,9 @@ private fun SettingRow(
 private fun EmptyContent(inAppMessagesEnabled: Boolean) {
     Text(
         text = if (inAppMessagesEnabled) {
-            "No active notifications"
+            stringResource(R.string.notifications_empty_active)
         } else {
-            "In-app messages are disabled"
+            stringResource(R.string.notifications_empty_disabled)
         },
         style = MaterialTheme.typography.bodyLarge,
     )
@@ -251,45 +253,34 @@ private fun MessageContent(
             style = MaterialTheme.typography.bodyMedium,
         )
         Text(
-            text = "Category: ${message.category}",
+            text = stringResource(R.string.notifications_category_value, message.category),
             style = MaterialTheme.typography.bodySmall,
         )
         Text(
-            text = "Created: ${message.createdAtLabel}",
+            text = stringResource(R.string.notifications_created_value, message.createdAtLabel),
             style = MaterialTheme.typography.bodySmall,
         )
         Text(
-            text = "Status: ${message.status.label()}",
+            text = stringResource(R.string.notifications_status_value, message.status.label()),
             style = MaterialTheme.typography.bodySmall,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (message.status == NotificationStatus.Unread) {
                 TextButton(onClick = onMarkRead) {
-                    Text(text = "Mark read")
+                    Text(text = stringResource(R.string.notifications_mark_read))
                 }
             }
             TextButton(onClick = onArchive) {
-                Text(text = "Archive")
+                Text(text = stringResource(R.string.notifications_archive))
             }
         }
         HorizontalDivider()
     }
 }
 
+@Composable
 private fun NotificationStatus.label(): String = when (this) {
-    NotificationStatus.Unread -> "Unread"
-    NotificationStatus.Read -> "Read"
-    NotificationStatus.Archived -> "Archived"
-}
-
-private class NotificationsViewModelFactory(
-    private val repository: NotificationRepository,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(NotificationsViewModel::class.java)) {
-            return NotificationsViewModel(repository) as T
-        }
-        error("Unknown ViewModel class: ${modelClass.name}")
-    }
+    NotificationStatus.Unread -> stringResource(R.string.notifications_status_unread)
+    NotificationStatus.Read -> stringResource(R.string.notifications_status_read)
+    NotificationStatus.Archived -> stringResource(R.string.notifications_status_archived)
 }

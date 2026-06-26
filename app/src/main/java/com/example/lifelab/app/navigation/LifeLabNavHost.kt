@@ -12,6 +12,7 @@ import com.example.lifelab.feature.notifications.presentation.NotificationsRoute
 import com.example.lifelab.feature.profile.presentation.ProfileRoute
 import com.example.lifelab.feature.search.presentation.SearchRoute
 import com.example.lifelab.feature.tasks.presentation.TasksRoute
+import com.example.lifelab.feature.weblab.presentation.WebLabRoute
 
 @Composable
 fun LifeLabNavHost(
@@ -28,6 +29,17 @@ fun LifeLabNavHost(
         composable(LifeLabRoutes.DISCOVER) { DiscoverRoute(contentPadding = contentPadding) }
         composable(LifeLabRoutes.SEARCH) { SearchRoute(contentPadding = contentPadding) }
         composable(LifeLabRoutes.NOTIFICATIONS) { NotificationsRoute(contentPadding = contentPadding) }
-        composable(LifeLabRoutes.PROFILE) { ProfileRoute(contentPadding = contentPadding) }
+        composable(LifeLabRoutes.PROFILE) {
+            ProfileRoute(
+                contentPadding = contentPadding,
+                onOpenWebLab = { navController.navigate(LifeLabRoutes.WEB_LAB) },
+            )
+        }
+        composable(LifeLabRoutes.WEB_LAB) {
+            WebLabRoute(
+                contentPadding = contentPadding,
+                onClose = { navController.popBackStack() },
+            )
+        }
     }
 }

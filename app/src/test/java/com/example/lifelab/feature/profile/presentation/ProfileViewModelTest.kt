@@ -1,11 +1,11 @@
 package com.example.lifelab.feature.profile.presentation
 
+import com.example.lifelab.core.datastore.ThemeMode
 import com.example.lifelab.core.testing.MainDispatcherRule
 import com.example.lifelab.feature.profile.data.InMemoryProfileRepository
 import com.example.lifelab.feature.profile.domain.DefaultTaskFilter
 import com.example.lifelab.feature.profile.domain.ProfileSession
 import com.example.lifelab.feature.profile.domain.ProfileUser
-import com.example.lifelab.feature.profile.domain.ThemeMode
 import com.example.lifelab.feature.profile.domain.UserPreference
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -32,7 +32,7 @@ class ProfileViewModelTest {
         assertNull(state.overview.email)
         assertNull(state.overview.membershipLabel)
         assertEquals("G", state.overview.avatarInitial)
-        assertEquals(ThemeMode.System, state.preference.themeMode)
+        assertEquals(ThemeMode.System, state.appPreferences.themeMode)
         assertTrue(state.preference.notificationEnabled)
         assertEquals(DefaultTaskFilter.All, state.preference.defaultTaskFilter)
         assertEquals(emptyList(), state.preference.contentInterestTags)
@@ -67,7 +67,7 @@ class ProfileViewModelTest {
 
         viewModel.onEvent(ProfileUiEvent.ThemeModeSelected(ThemeMode.Dark))
 
-        assertEquals(ThemeMode.Dark, viewModel.uiState.value.preference.themeMode)
+        assertEquals(ThemeMode.Dark, viewModel.uiState.value.appPreferences.themeMode)
     }
 
     @Test

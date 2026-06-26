@@ -21,8 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.lifelab.R
 import com.example.lifelab.feature.discover.domain.DiscoverCategory
 import com.example.lifelab.feature.discover.domain.DiscoverContent
 
@@ -41,7 +43,7 @@ fun DiscoverScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
-            text = "Discover",
+            text = stringResource(R.string.discover_title),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -73,7 +75,7 @@ private fun CategoryFilters(
             FilterChip(
                 selected = category == selectedCategory,
                 onClick = { onCategorySelected(category) },
-                label = { Text(category.label) },
+                label = { Text(category.label()) },
             )
         }
     }
@@ -110,7 +112,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
         CircularProgressIndicator()
         Spacer(Modifier.height(12.dp))
         Text(
-            text = "Loading discovery content...",
+            text = stringResource(R.string.discover_loading),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -123,12 +125,12 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = "No content in this category yet.",
+            text = stringResource(R.string.discover_empty_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = "Try another filter to keep exploring LifeLab ideas and offers.",
+            text = stringResource(R.string.discover_empty_body),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -145,7 +147,7 @@ private fun ErrorState(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = "Unable to load discovery content",
+            text = stringResource(R.string.discover_error_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -155,7 +157,7 @@ private fun ErrorState(
         )
         Spacer(Modifier.height(12.dp))
         Button(onClick = onRetry) {
-            Text("Retry")
+            Text(stringResource(R.string.common_retry))
         }
     }
 }
@@ -195,7 +197,7 @@ private fun DiscoverContentCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = content.typeLabel,
+                    text = content.typeLabel(),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -215,7 +217,7 @@ private fun DiscoverContentCard(
                 style = MaterialTheme.typography.bodyMedium,
             )
             Text(
-                text = content.detailLabel,
+                text = content.detailLabel(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -231,27 +233,30 @@ private val discoverCategoryOptions = listOf(
     DiscoverCategory.Membership,
 )
 
-private val DiscoverCategory.label: String
-    get() = when (this) {
-        DiscoverCategory.All -> "All"
-        DiscoverCategory.Articles -> "Articles"
-        DiscoverCategory.Courses -> "Courses"
-        DiscoverCategory.Offers -> "Offers"
-        DiscoverCategory.Membership -> "Membership"
+@Composable
+private fun DiscoverCategory.label(): String =
+    when (this) {
+        DiscoverCategory.All -> stringResource(R.string.discover_category_all)
+        DiscoverCategory.Articles -> stringResource(R.string.discover_category_articles)
+        DiscoverCategory.Courses -> stringResource(R.string.discover_category_courses)
+        DiscoverCategory.Offers -> stringResource(R.string.discover_category_offers)
+        DiscoverCategory.Membership -> stringResource(R.string.discover_category_membership)
     }
 
-private val DiscoverContent.typeLabel: String
-    get() = when (this) {
-        is DiscoverContent.Article -> "Article"
-        is DiscoverContent.Course -> "Course"
-        is DiscoverContent.Offer.Product -> "Product"
-        is DiscoverContent.Offer.Membership -> "Membership"
+@Composable
+private fun DiscoverContent.typeLabel(): String =
+    when (this) {
+        is DiscoverContent.Article -> stringResource(R.string.discover_type_article)
+        is DiscoverContent.Course -> stringResource(R.string.discover_type_course)
+        is DiscoverContent.Offer.Product -> stringResource(R.string.discover_type_product)
+        is DiscoverContent.Offer.Membership -> stringResource(R.string.discover_type_membership)
     }
 
-private val DiscoverContent.detailLabel: String
-    get() = when (this) {
-        is DiscoverContent.Article -> "By $author"
-        is DiscoverContent.Course -> "$instructor - $duration"
+@Composable
+private fun DiscoverContent.detailLabel(): String =
+    when (this) {
+        is DiscoverContent.Article -> stringResource(R.string.discover_detail_by_author, author)
+        is DiscoverContent.Course -> stringResource(R.string.discover_detail_course, instructor, duration)
         is DiscoverContent.Offer.Product -> priceLabel
         is DiscoverContent.Offer.Membership -> priceLabel
     }

@@ -10,6 +10,8 @@ import com.example.lifelab.feature.discover.domain.LoadDiscoverContentUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 
 class DiscoverViewModelTest {
@@ -17,8 +19,9 @@ class DiscoverViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     @Test
-    fun `initial load success enters content state`() {
+    fun `initial load success enters content state`() = runTest {
         val viewModel = DiscoverViewModel(useCaseWith(discoverContentFixture()))
+        advanceUntilIdle()
 
         val state = viewModel.uiState.value
 
@@ -30,12 +33,14 @@ class DiscoverViewModelTest {
     }
 
     @Test
-    fun `selecting membership with no membership content enters empty state`() {
+    fun `selecting membership with no membership content enters empty state`() = runTest {
         val viewModel = DiscoverViewModel(
             useCaseWith(discoverContentFixtureWithoutMembership()),
         )
+        advanceUntilIdle()
 
         viewModel.onEvent(DiscoverUiEvent.CategorySelected(DiscoverCategory.Membership))
+        advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertEquals(DiscoverCategory.Membership, state.selectedCategory)
@@ -43,9 +48,10 @@ class DiscoverViewModelTest {
     }
 
     @Test
-    fun `repository failure enters error state`() {
+    fun `repository failure enters error state`() = runTest {
         val error = AppError.Unknown("Discover content unavailable")
         val viewModel = DiscoverViewModel(LoadDiscoverContentUseCase(FakeDiscoverRepository(error)))
+        advanceUntilIdle()
 
         val state = viewModel.uiState.value
 
@@ -54,12 +60,14 @@ class DiscoverViewModelTest {
     }
 
     @Test
-    fun `retry event after failure can recover content state`() {
+    fun `retry event after failure can recover content state`() = runTest {
         val repository = FakeDiscoverRepository(AppError.Network("Temporary outage"))
         val viewModel = DiscoverViewModel(LoadDiscoverContentUseCase(repository))
+        advanceUntilIdle()
 
         repository.result = AppResult.Success(discoverContentFixture())
         viewModel.onEvent(DiscoverUiEvent.RetrySelected)
+        advanceUntilIdle()
 
         assertEquals(
             discoverContentFixture().map { it.id },
@@ -68,10 +76,12 @@ class DiscoverViewModelTest {
     }
 
     @Test
-    fun `category selection event updates selected category and filters content`() {
+    fun `category selection event updates selected category and filters content`() = runTest {
         val viewModel = DiscoverViewModel(useCaseWith(discoverContentFixture()))
+        advanceUntilIdle()
 
         viewModel.onEvent(DiscoverUiEvent.CategorySelected(DiscoverCategory.Courses))
+        advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertEquals(DiscoverCategory.Courses, state.selectedCategory)
@@ -130,6 +140,6 @@ class DiscoverViewModelTest {
             result = AppResult.Failure(error)
         }
 
-        override fun getContent(): AppResult<List<DiscoverContent>> = result
+        override suspend fun getContent(): AppResult<List<DiscoverContent>> = result
     }
 }

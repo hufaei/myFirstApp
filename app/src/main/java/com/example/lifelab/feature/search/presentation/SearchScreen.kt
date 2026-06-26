@@ -30,8 +30,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.example.lifelab.R
 import com.example.lifelab.feature.search.domain.SearchFilter
 import com.example.lifelab.feature.search.domain.SearchResultItem
 import com.example.lifelab.feature.search.domain.SearchResultType
@@ -125,7 +127,7 @@ private fun SearchInputSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Search",
+            text = stringResource(R.string.search_title),
             style = MaterialTheme.typography.headlineMedium,
         )
         Row(
@@ -136,14 +138,14 @@ private fun SearchInputSection(
             OutlinedTextField(
                 value = query,
                 onValueChange = onQueryChanged,
-                label = { Text("Keyword") },
+                label = { Text(stringResource(R.string.search_keyword_label)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { onSubmitQuery() }),
                 modifier = Modifier.weight(1f),
             )
             Button(onClick = onSubmitQuery) {
-                Text("Search")
+                Text(stringResource(R.string.search_action))
             }
         }
     }
@@ -163,7 +165,7 @@ private fun SearchFilterChips(
             FilterChip(
                 selected = filter == selectedFilter,
                 onClick = { onFilterSelected(filter) },
-                label = { Text(filter.label) },
+                label = { Text(filter.label()) },
             )
         }
     }
@@ -179,7 +181,7 @@ private fun PreSearchContent(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         KeywordSection(
-            title = "Hot keywords",
+            title = stringResource(R.string.search_hot_keywords),
             keywords = hotKeywords,
             onKeywordClick = onHotKeywordClick,
         )
@@ -229,20 +231,20 @@ private fun HistorySection(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = "History",
+                text = stringResource(R.string.search_history),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f),
             )
             if (history.isNotEmpty()) {
                 TextButton(onClick = onClearHistoryClick) {
-                    Text("Clear")
+                    Text(stringResource(R.string.search_clear_history))
                 }
             }
         }
 
         if (history.isEmpty()) {
             Text(
-                text = "No recent searches",
+                text = stringResource(R.string.search_no_recent),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -277,7 +279,7 @@ private fun SearchResultRow(item: SearchResultItem) {
             modifier = Modifier.padding(16.dp),
         ) {
             Text(
-                text = item.type.label,
+                text = item.type.label(),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -306,7 +308,7 @@ private fun LoadingState() {
         CircularProgressIndicator()
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Searching",
+            text = stringResource(R.string.search_searching),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -315,8 +317,8 @@ private fun LoadingState() {
 @Composable
 private fun EmptyState() {
     StateMessage(
-        title = "No results",
-        body = "Try another keyword or filter.",
+        title = stringResource(R.string.search_empty_title),
+        body = stringResource(R.string.search_empty_body),
     )
 }
 
@@ -327,11 +329,11 @@ private fun ErrorState(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         StateMessage(
-            title = "Search failed",
+            title = stringResource(R.string.search_error_title),
             body = message,
         )
         Button(onClick = onRetryClick) {
-            Text("Retry")
+            Text(stringResource(R.string.common_retry))
         }
     }
 }
@@ -354,19 +356,21 @@ private fun StateMessage(
     }
 }
 
-private val SearchFilter.label: String
-    get() = when (this) {
-        SearchFilter.ALL -> "All"
-        SearchFilter.ARTICLES -> "Articles"
-        SearchFilter.OFFERS -> "Offers"
-        SearchFilter.TASKS -> "Tasks"
-        SearchFilter.HABITS -> "Habits"
+@Composable
+private fun SearchFilter.label(): String =
+    when (this) {
+        SearchFilter.ALL -> stringResource(R.string.search_filter_all)
+        SearchFilter.ARTICLES -> stringResource(R.string.search_filter_articles)
+        SearchFilter.OFFERS -> stringResource(R.string.search_filter_offers)
+        SearchFilter.TASKS -> stringResource(R.string.search_filter_tasks)
+        SearchFilter.HABITS -> stringResource(R.string.search_filter_habits)
     }
 
-private val SearchResultType.label: String
-    get() = when (this) {
-        SearchResultType.ARTICLE -> "Article"
-        SearchResultType.OFFER -> "Offer"
-        SearchResultType.TASK -> "Task"
-        SearchResultType.HABIT -> "Habit"
+@Composable
+private fun SearchResultType.label(): String =
+    when (this) {
+        SearchResultType.ARTICLE -> stringResource(R.string.search_type_article)
+        SearchResultType.OFFER -> stringResource(R.string.search_type_offer)
+        SearchResultType.TASK -> stringResource(R.string.search_type_task)
+        SearchResultType.HABIT -> stringResource(R.string.search_type_habit)
     }
