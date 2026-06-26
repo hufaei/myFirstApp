@@ -26,7 +26,7 @@ class RoomTaskRepository(
             .map { tasks -> tasks.map(TaskEntity::toDomain) }
 
     override suspend fun getTask(id: String): AppResult<Task> =
-        taskDao.getTask(id)?.toDomain()?.let(AppResult::Success)
+        taskDao.getTask(id)?.toDomain()?.let { task -> AppResult.Success(task) }
             ?: missingTaskFailure(id)
 
     override suspend fun createTask(draft: TaskDraft): AppResult<Task> {
@@ -92,10 +92,10 @@ class RoomTaskRepository(
             .filter { it.isNotBlank() }
             .distinct()
 
-    private fun validationFailure(): AppResult.Failure =
+    private fun validationFailure(): AppResult<Nothing> =
         AppResult.Failure(AppError.Validation(message = "Task title is required"))
 
-    private fun missingTaskFailure(id: String): AppResult.Failure =
+    private fun missingTaskFailure(id: String): AppResult<Nothing> =
         AppResult.Failure(AppError.Storage(message = "Task not found: $id"))
 
     private companion object {
