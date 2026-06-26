@@ -84,4 +84,12 @@ private class FakeAppPreferencesRepository(
     override suspend fun updateLanguageMode(languageMode: LanguageMode) {
         preferences.value = preferences.value.copy(languageMode = languageMode)
     }
+
+    override suspend fun updateNotificationEnabled(enabled: Boolean) {
+        preferences.value = preferences.value.copy(notificationEnabled = enabled)
+    }
+
+    override suspend fun updateDefaultTaskFilterName(name: String) {
+        preferences.value = preferences.value.copy(defaultTaskFilterName = name)
+    }
 }
