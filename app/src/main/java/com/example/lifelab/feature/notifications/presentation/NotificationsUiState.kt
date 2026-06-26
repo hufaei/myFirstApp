@@ -18,7 +18,7 @@ data class NotificationsUiState(
 
 data class SystemNotificationIntegrationUiState(
     val enabled: Boolean = false,
-    val statusLabel: String = "System notifications disabled",
+    val statusLabel: String = "系统通知已关闭",
 )
 
 sealed interface NotificationsUiEvent {

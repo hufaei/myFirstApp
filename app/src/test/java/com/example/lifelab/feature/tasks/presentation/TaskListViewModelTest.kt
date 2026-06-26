@@ -47,7 +47,7 @@ class TaskListViewModelTest {
         assertEquals(TaskScreenMode.List, state.mode)
         assertEquals(3, state.tasks.size)
         assertEquals(state.tasks, state.filteredTasks)
-        assertTrue(state.tasks.any { it.title == "Plan the weekly reset" })
+        assertTrue(state.tasks.any { it.title == "规划每周复盘" })
     }
 
     @Test

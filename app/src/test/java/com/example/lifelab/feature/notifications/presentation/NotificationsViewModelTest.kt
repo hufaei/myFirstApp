@@ -39,7 +39,7 @@ class NotificationsViewModelTest {
         val settings = assertNotNull(state.settings)
         assertTrue(settings.inAppMessagesEnabled)
         assertFalse(settings.systemNotificationsEnabled)
-        assertEquals("System notifications disabled", state.systemIntegration.statusLabel)
+        assertEquals("系统通知已关闭", state.systemIntegration.statusLabel)
         assertEquals(null, state.errorMessage)
     }
 
@@ -80,7 +80,7 @@ class NotificationsViewModelTest {
         assertFalse(settings.inAppMessagesEnabled)
         assertTrue(settings.systemNotificationsEnabled)
         assertTrue(state.systemIntegration.enabled)
-        assertEquals("System notifications enabled", state.systemIntegration.statusLabel)
+        assertEquals("系统通知已开启", state.systemIntegration.statusLabel)
     }
 
     @Test

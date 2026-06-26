@@ -101,34 +101,34 @@ class InMemoryTaskRepository : TaskRepository {
         return listOf(
             Task(
                 id = "task-1",
-                title = "Plan the weekly reset",
-                description = "Pick the top three LifeLab priorities for the week.",
+                title = "规划每周复盘",
+                description = "选出本周最重要的三个 LifeLab 优先事项。",
                 status = TaskStatus.Active,
                 priority = TaskPriority.High,
                 dueAt = baseTime.plusSeconds(86_400),
-                tags = listOf("planning", "home"),
+                tags = listOf("计划", "居家"),
                 createdAt = baseTime,
                 updatedAt = baseTime,
             ),
             Task(
                 id = "task-2",
-                title = "Book health checkup",
-                description = "Confirm the appointment window and required documents.",
+                title = "预约健康检查",
+                description = "确认可预约时间和所需材料。",
                 status = TaskStatus.Active,
                 priority = TaskPriority.Medium,
                 dueAt = baseTime.plusSeconds(259_200),
-                tags = listOf("health"),
+                tags = listOf("健康"),
                 createdAt = baseTime.plusSeconds(1),
                 updatedAt = baseTime.plusSeconds(1),
             ),
             Task(
                 id = "task-3",
-                title = "Archive completed receipts",
-                description = "Move scanned receipts into the finance folder.",
+                title = "归档已完成票据",
+                description = "把扫描票据整理到财务文件夹。",
                 status = TaskStatus.Completed,
                 priority = TaskPriority.Low,
                 dueAt = null,
-                tags = listOf("finance", "admin"),
+                tags = listOf("财务", "整理"),
                 createdAt = baseTime.plusSeconds(2),
                 updatedAt = baseTime.plusSeconds(3),
             ),
@@ -142,10 +142,10 @@ class InMemoryTaskRepository : TaskRepository {
     }
 
     private fun validationFailure(): AppResult.Failure {
-        return AppResult.Failure(AppError.Validation(message = "Task title is required"))
+        return AppResult.Failure(AppError.Validation(message = "任务标题不能为空"))
     }
 
     private fun missingTaskFailure(id: String): AppResult.Failure {
-        return AppResult.Failure(AppError.Storage(message = "Task not found: $id"))
+        return AppResult.Failure(AppError.Storage(message = "没有找到任务：$id"))
     }
 }

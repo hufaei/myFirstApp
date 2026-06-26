@@ -107,7 +107,7 @@ class CheckInHabitUseCaseTest {
         checkInDates: Set<LocalDate> = emptySet(),
     ) = Habit(
         id = "hydrate",
-        name = "Drink water",
+        name = "喝水",
         frequency = HabitFrequency.Daily,
         streakCount = streakCount,
         lastCheckInDate = lastCheckInDate,

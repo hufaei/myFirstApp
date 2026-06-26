@@ -38,7 +38,7 @@ class RoomNotificationRepository(
     ): AppResult<NotificationMessage> {
         val entity = notificationDao.getMessage(messageId)
             ?: return AppResult.Failure(
-                AppError.Validation(message = "Unknown notification message id: $messageId"),
+                AppError.Validation(message = "未知通知消息：$messageId"),
             )
 
         val updatedEntity = entity.copy(status = status.name)
@@ -84,18 +84,18 @@ class RoomNotificationRepository(
             listOf(
                 NotificationMessage(
                     id = "welcome",
-                    title = "Welcome to LifeLab",
-                    body = "Your notification center is ready.",
-                    category = "Account",
-                    createdAtLabel = "Today",
+                    title = "欢迎使用 LifeLab",
+                    body = "你的通知中心已准备就绪。",
+                    category = "账号",
+                    createdAtLabel = "今天",
                     status = NotificationStatus.Unread,
                 ),
                 NotificationMessage(
                     id = "weekly-summary",
-                    title = "Weekly health summary",
-                    body = "Your weekly LifeLab summary is available.",
-                    category = "Summary",
-                    createdAtLabel = "Yesterday",
+                    title = "每周健康摘要",
+                    body = "你的 LifeLab 每周摘要已经生成。",
+                    category = "摘要",
+                    createdAtLabel = "昨天",
                     status = NotificationStatus.Read,
                 ),
             )

@@ -70,18 +70,18 @@ class InMemoryHabitRepository(
 
     private companion object {
         fun sampleHabits() = listOf(
-            Habit(
-                id = "hydrate",
-                name = "Drink water",
-                frequency = HabitFrequency.Daily,
+        Habit(
+            id = "hydrate",
+            name = "喝水",
+            frequency = HabitFrequency.Daily,
                 streakCount = 0,
                 lastCheckInDate = null,
                 reminder = HabitReminder(enabled = true, time = LocalTime.of(9, 0)),
             ),
-            Habit(
-                id = "walk",
-                name = "Evening walk",
-                frequency = HabitFrequency.Daily,
+        Habit(
+            id = "walk",
+            name = "晚间散步",
+            frequency = HabitFrequency.Daily,
                 streakCount = 0,
                 lastCheckInDate = null,
                 reminder = HabitReminder(enabled = false, time = null),
