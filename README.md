@@ -52,6 +52,10 @@ LifeLab 的主题是“个人效率与成长实验室”，统一承载以下业
 - Coil
 - JUnit + MockK + Compose UI Test
 
+## Android CI
+
+GitHub Actions 的日常 PR 只运行 `:app:testDebugUnitTest` 和 `:app:lintDebug`，不自动构建 APK。需要 APK 时，在 Actions 页面手动运行 `Android CI` workflow，或推送 `v*` 版本 tag；生成的 `lifelab-debug-apk` artifact 可在对应 workflow run 的 Artifacts 区域下载，保留 7 天。
+
 ## 文档入口
 
 - [项目文档总览](docs/README.md)
