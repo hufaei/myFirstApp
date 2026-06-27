@@ -71,7 +71,7 @@ class HabitsViewModelTest {
         assertEquals(today, state.habits.single().lastCheckInDate)
         assertEquals(1, state.stats.checkedInToday)
         assertEquals(1, state.stats.longestStreak)
-        assertEquals("Checked in 喝水.", state.message)
+        assertEquals("喝水已打卡。", state.message)
     }
 
     @Test
@@ -96,7 +96,7 @@ class HabitsViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(1, state.habits.single().streakCount)
         assertEquals(1, state.stats.checkedInToday)
-        assertEquals("喝水 is already checked in today.", state.message)
+        assertEquals("喝水今天已经打过卡。", state.message)
     }
 
     @Test
@@ -127,7 +127,7 @@ class HabitsViewModelTest {
         assertEquals(HabitReminder(enabled = true, time = LocalTime.of(8, 15)), hydrate.reminder)
         assertEquals(HabitReminder(enabled = true, time = LocalTime.of(18, 30)), walk.reminder)
         assertEquals(2, state.stats.activeReminders)
-        assertEquals("Reminder updated for 喝水.", state.message)
+        assertEquals("喝水的提醒已更新。", state.message)
     }
 
     @Test

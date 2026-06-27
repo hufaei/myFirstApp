@@ -88,7 +88,7 @@ class TaskListViewModelTest {
             created.dueAt?.atZone(ZoneId.systemDefault())?.format(DateTimeFormatter.ISO_LOCAL_DATE),
         )
         assertEquals(TaskScreenMode.List, state.mode)
-        assertEquals("Task created", state.message)
+        assertEquals("任务已创建", state.message)
         val photos = state.photosForTask(created.id)
         assertEquals(3, photos.size)
         assertEquals(listOf("content://task/1", "content://task/2", "content://task/3"), photos.map { it.localUri })
@@ -119,7 +119,7 @@ class TaskListViewModelTest {
         val listState = viewModel.uiState.value
         assertEquals(TaskScreenMode.List, listState.mode)
         assertEquals("Updated weekly reset", listState.tasks.first { it.id == taskId }.title)
-        assertEquals("Task updated", listState.message)
+        assertEquals("任务已更新", listState.message)
     }
 
     @Test
@@ -133,6 +133,7 @@ class TaskListViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(TaskStatus.Completed, state.selectedTask?.status)
         assertEquals(TaskStatus.Completed, state.tasks.first { it.id == activeTaskId }.status)
+        assertEquals("任务已完成", state.message)
     }
 
     @Test
@@ -146,6 +147,7 @@ class TaskListViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(TaskStatus.Active, state.selectedTask?.status)
         assertEquals(TaskStatus.Active, state.tasks.first { it.id == completedTaskId }.status)
+        assertEquals("任务已恢复", state.message)
     }
 
     @Test

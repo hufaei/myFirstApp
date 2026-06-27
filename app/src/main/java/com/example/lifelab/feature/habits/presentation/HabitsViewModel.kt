@@ -56,7 +56,7 @@ class HabitsViewModel(
                 .catch {
                     _uiState.value = _uiState.value.copy(
                         status = HabitsStatus.Error,
-                        errorMessage = "Unable to load habits.",
+                        errorMessage = "无法加载习惯。",
                     )
                 }
                 .collect { habits ->
@@ -71,15 +71,15 @@ class HabitsViewModel(
         viewModelScope.launch {
             when (val result = checkInHabit(habitId = habitId, checkInDate = today())) {
                 is HabitCheckInResult.CheckedIn -> {
-                    showMessage("Checked in ${result.habit.name}.")
+                    showMessage("${result.habit.name}已打卡。")
                 }
 
                 is HabitCheckInResult.AlreadyCheckedIn -> {
-                    showMessage("${result.habit.name} is already checked in today.")
+                    showMessage("${result.habit.name}今天已经打过卡。")
                 }
 
                 HabitCheckInResult.HabitMissing -> {
-                    showMessage("Habit was not found.")
+                    showMessage("没有找到这个习惯。")
                 }
             }
         }
@@ -142,9 +142,9 @@ class HabitsViewModel(
             val updatedHabit = repository.updateReminder(habitId = habitId, reminder = reminder)
             showMessage(
                 if (updatedHabit == null) {
-                    "Habit was not found."
+                    "没有找到这个习惯。"
                 } else {
-                    "Reminder updated for ${updatedHabit.name}."
+                    "${updatedHabit.name}的提醒已更新。"
                 },
             )
         }

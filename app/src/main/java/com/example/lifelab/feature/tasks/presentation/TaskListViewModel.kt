@@ -266,7 +266,7 @@ class TaskListViewModel(
                             } else {
                                 it.taskPhotos + (result.value.id to visiblePhotos)
                             },
-                            message = if (isEditing) "Task updated" else "Task created",
+                            message = if (isEditing) "任务已更新" else "任务已创建",
                         )
                     }
                 }
@@ -277,7 +277,7 @@ class TaskListViewModel(
     }
 
     fun completeSelectedTask() {
-        changeSelectedTaskStatus(completeTask::invoke, "Task completed")
+        changeSelectedTaskStatus(completeTask::invoke, "任务已完成")
     }
 
     fun completeOpenedTask() {
@@ -285,7 +285,7 @@ class TaskListViewModel(
     }
 
     fun restoreSelectedTask() {
-        changeSelectedTaskStatus(restoreTask::invoke, "Task restored")
+        changeSelectedTaskStatus(restoreTask::invoke, "任务已恢复")
     }
 
     fun restoreOpenedTask() {
