@@ -34,11 +34,12 @@ import com.example.lifelab.R
 fun LifeLabScreenHeader(
     title: String,
     subtitle: String? = null,
+    modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -85,10 +86,11 @@ fun LifeLabStateCard(
     title: String,
     body: String? = null,
     actionLabel: String? = null,
+    modifier: Modifier = Modifier,
     onAction: (() -> Unit)? = null,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -123,10 +125,11 @@ fun LifeLabStateCard(
 @Composable
 fun LifeLabMessageBanner(
     message: String,
+    modifier: Modifier = Modifier,
     onDismiss: (() -> Unit)? = null,
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -160,10 +163,11 @@ fun LifeLabMessageBanner(
 fun LifeLabSectionTitle(
     title: String,
     actionLabel: String? = null,
+    modifier: Modifier = Modifier,
     onAction: (() -> Unit)? = null,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
