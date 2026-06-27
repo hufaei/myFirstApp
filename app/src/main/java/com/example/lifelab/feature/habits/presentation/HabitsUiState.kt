@@ -6,6 +6,7 @@ import com.example.lifelab.core.media.PhotoOwnerType
 import com.example.lifelab.core.media.PhotoRecord
 import com.example.lifelab.feature.habits.domain.model.Habit
 import com.example.lifelab.feature.habits.domain.model.HabitStats
+import java.time.LocalDate
 
 enum class HabitsStatus {
     Loading,
@@ -24,11 +25,20 @@ data class HabitsUiState(
         longestStreak = 0,
     ),
     val habitPhotos: Map<String, List<PhotoRecord>> = emptyMap(),
-    val message: String? = null,
-    val errorMessage: String? = null,
+    val today: LocalDate = LocalDate.now(),
+    val message: HabitUiMessage? = null,
+    val errorMessage: HabitUiMessage? = null,
 ) {
     fun photosForHabit(habitId: String): List<PhotoRecord> =
         habitPhotos[habitId].orEmpty().take(PhotoAttachmentPolicy.MAX_PHOTOS_PER_OWNER)
+}
+
+sealed interface HabitUiMessage {
+    data class CheckedIn(val habitName: String) : HabitUiMessage
+    data class AlreadyCheckedIn(val habitName: String) : HabitUiMessage
+    data class ReminderUpdated(val habitName: String) : HabitUiMessage
+    data object Missing : HabitUiMessage
+    data object LoadError : HabitUiMessage
 }
 
 fun habitPhotoOwner(habitId: String): PhotoOwner =

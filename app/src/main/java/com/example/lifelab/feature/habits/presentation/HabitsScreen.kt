@@ -69,7 +69,7 @@ fun HabitsScreen(
         state.message?.let { message ->
             item {
                 LifeLabMessageBanner(
-                    message = message,
+                    message = message.text(),
                     onDismiss = onClearMessage,
                 )
             }
@@ -97,7 +97,7 @@ fun HabitsScreen(
 
             HabitsStatus.Error -> item {
                 LifeLabStateCard(
-                    title = state.errorMessage ?: stringResource(R.string.habits_load_error),
+                    title = state.errorMessage?.text() ?: stringResource(R.string.habits_load_error),
                 )
             }
 
@@ -108,6 +108,7 @@ fun HabitsScreen(
                 HabitCard(
                     habit = habit,
                     photos = state.photosForHabit(habit.id),
+                    isCheckedInToday = habit.isCheckedInOn(state.today),
                     onCheckIn = onCheckIn,
                     onReminderEnabledChange = onReminderEnabledChange,
                     onReminderTimeChange = onReminderTimeChange,
@@ -186,6 +187,7 @@ private fun StatText(
 private fun HabitCard(
     habit: Habit,
     photos: List<PhotoRecord>,
+    isCheckedInToday: Boolean,
     onCheckIn: (String) -> Unit,
     onReminderEnabledChange: (String, Boolean) -> Unit,
     onReminderTimeChange: (String, LocalTime) -> Unit,
@@ -226,12 +228,26 @@ private fun HabitCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    Text(
+                        text = if (isCheckedInToday) {
+                            stringResource(R.string.habits_checked_today)
+                        } else {
+                            stringResource(R.string.habits_not_checked_today)
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (isCheckedInToday) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
                 }
             }
 
             Button(
                 onClick = { onCheckIn(habit.id) },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !isCheckedInToday,
             ) {
                 androidx.compose.material3.Icon(
                     imageVector = Icons.Filled.CheckCircle,
@@ -239,7 +255,13 @@ private fun HabitCard(
                     modifier = Modifier.size(18.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.habits_check_in))
+                Text(
+                    if (isCheckedInToday) {
+                        stringResource(R.string.habits_checked_today)
+                    } else {
+                        stringResource(R.string.habits_check_in)
+                    },
+                )
             }
 
             ReminderControls(
@@ -268,6 +290,23 @@ private fun HabitCard(
         }
     }
 }
+
+@Composable
+private fun HabitUiMessage.text(): String =
+    when (this) {
+        is HabitUiMessage.CheckedIn -> stringResource(R.string.habits_message_checked_in, habitName)
+        is HabitUiMessage.AlreadyCheckedIn -> {
+            stringResource(R.string.habits_message_already_checked_in, habitName)
+        }
+        is HabitUiMessage.ReminderUpdated -> {
+            stringResource(R.string.habits_message_reminder_updated, habitName)
+        }
+        HabitUiMessage.Missing -> stringResource(R.string.habits_message_missing)
+        HabitUiMessage.LoadError -> stringResource(R.string.habits_load_error)
+    }
+
+private fun Habit.isCheckedInOn(date: java.time.LocalDate): Boolean =
+    lastCheckInDate == date || date in checkInDates
 
 @Composable
 private fun ReminderControls(

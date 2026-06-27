@@ -40,6 +40,7 @@
     <string name="home_today_subtitle">Today, %1$s</string>
     <string name="home_action_search">Search</string>
     <string name="home_action_notifications">Messages</string>
+    <string name="home_action_create_task">New task</string>
     <string name="home_action_tasks">Today tasks</string>
     <string name="home_action_habits">Check habits</string>
     <string name="home_action_discover">Explore</string>
@@ -105,6 +106,7 @@
     <string name="tasks_message_updated">Task updated</string>
     <string name="tasks_message_completed">Task completed</string>
     <string name="tasks_message_restored">Task restored</string>
+    <string name="tasks_message_error">Task action failed. Try again later.</string>
     <string name="discover_title">Discover</string>
     <string name="discover_loading">Loading discovery content…</string>
     <string name="discover_empty_title">No content in this category yet</string>
@@ -153,6 +155,8 @@
     <string name="habits_stat_reminders">Reminders</string>
     <string name="habits_stat_best">Best</string>
     <string name="habits_current_streak">Current streak: %1$d</string>
+    <string name="habits_checked_today">Checked in today</string>
+    <string name="habits_not_checked_today">Not checked in today</string>
     <string name="habits_check_in">Check in</string>
     <string name="habits_reminder">Reminder</string>
     <string name="habits_no_time">No time set</string>

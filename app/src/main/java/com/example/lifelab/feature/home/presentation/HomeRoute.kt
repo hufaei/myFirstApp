@@ -12,6 +12,9 @@ fun HomeRoute(
     onOpenRoute: (String) -> Unit = {},
     onOpenSearch: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
+    onCreateTask: () -> Unit = {},
+    onOpenTasks: () -> Unit = {},
+    onOpenHabits: () -> Unit = {},
     onOpenDiscover: () -> Unit = {},
     viewModel: HomeViewModel = viewModel(),
 ) {
@@ -24,6 +27,9 @@ fun HomeRoute(
         onOpenRoute = onOpenRoute,
         onOpenSearch = onOpenSearch,
         onOpenNotifications = onOpenNotifications,
+        onCreateTask = onCreateTask,
+        onOpenTasks = onOpenTasks,
+        onOpenHabits = onOpenHabits,
         onOpenDiscover = onOpenDiscover,
     )
 }

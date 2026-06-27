@@ -2,6 +2,7 @@ package com.example.lifelab.feature.tasks.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.lifelab.core.common.AppError
 import com.example.lifelab.core.common.AppResult
 import com.example.lifelab.core.datastore.AppPreferencesRepository
 import com.example.lifelab.core.media.PhotoAttachmentPolicy
@@ -133,7 +134,7 @@ class TaskListViewModel(
                     }
                 }
 
-                is AppResult.Failure -> showError(result.error.message)
+                is AppResult.Failure -> showError(result.error)
             }
         }
     }
@@ -266,18 +267,18 @@ class TaskListViewModel(
                             } else {
                                 it.taskPhotos + (result.value.id to visiblePhotos)
                             },
-                            message = if (isEditing) "任务已更新" else "任务已创建",
+                            message = if (isEditing) TaskUiMessage.Updated else TaskUiMessage.Created,
                         )
                     }
                 }
 
-                is AppResult.Failure -> showError(result.error.message)
+                is AppResult.Failure -> showError(result.error)
             }
         }
     }
 
     fun completeSelectedTask() {
-        changeSelectedTaskStatus(completeTask::invoke, "任务已完成")
+        changeSelectedTaskStatus(completeTask::invoke, TaskUiMessage.Completed)
     }
 
     fun completeOpenedTask() {
@@ -285,7 +286,7 @@ class TaskListViewModel(
     }
 
     fun restoreSelectedTask() {
-        changeSelectedTaskStatus(restoreTask::invoke, "任务已恢复")
+        changeSelectedTaskStatus(restoreTask::invoke, TaskUiMessage.Restored)
     }
 
     fun restoreOpenedTask() {
@@ -309,7 +310,7 @@ class TaskListViewModel(
 
     private fun changeSelectedTaskStatus(
         action: suspend (String) -> AppResult<Task>,
-        successMessage: String,
+        successMessage: TaskUiMessage,
     ) {
         val taskId = _uiState.value.selectedTask?.id ?: return
         viewModelScope.launch {
@@ -323,7 +324,7 @@ class TaskListViewModel(
                     }
                 }
 
-                is AppResult.Failure -> showError(result.error.message)
+                is AppResult.Failure -> showError(result.error)
             }
         }
     }
@@ -332,7 +333,13 @@ class TaskListViewModel(
         _uiState.update { it.copy(editorState = transform(it.editorState)) }
     }
 
-    private fun showError(message: String) {
+    private fun showError(error: AppError) {
+        val message = when (error) {
+            is AppError.Network,
+            is AppError.Storage,
+            is AppError.Unknown,
+            is AppError.Validation -> TaskUiMessage.Error
+        }
         _uiState.update { it.copy(message = message) }
     }
 

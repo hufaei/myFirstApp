@@ -33,6 +33,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,9 +61,16 @@ import java.time.format.FormatStyle
 @Composable
 fun TasksRoute(
     contentPadding: PaddingValues,
+    startInCreateMode: Boolean = false,
     viewModel: TaskListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(startInCreateMode) {
+        if (startInCreateMode) {
+            viewModel.startCreate()
+        }
+    }
 
     TasksScreen(
         state = state,
@@ -122,7 +130,7 @@ private fun TasksScreen(
 
         state.message?.let { message ->
             LifeLabMessageBanner(
-                message = message,
+                message = message.text(),
                 onDismiss = onClearMessage,
             )
         }
@@ -547,5 +555,17 @@ private fun TaskStatus.color() = when (this) {
 private fun Task.dueLabelOrNull(): String? =
     dueAt?.atZone(ZoneId.systemDefault())
         ?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+
+@Composable
+private fun TaskUiMessage.text(): String =
+    stringResource(
+        when (this) {
+            TaskUiMessage.Created -> R.string.tasks_message_created
+            TaskUiMessage.Updated -> R.string.tasks_message_updated
+            TaskUiMessage.Completed -> R.string.tasks_message_completed
+            TaskUiMessage.Restored -> R.string.tasks_message_restored
+            TaskUiMessage.Error -> R.string.tasks_message_error
+        },
+    )
 
 private const val DraftTaskPhotoOwnerId = "draft-task-editor"

@@ -19,4 +19,10 @@ class LifeLabDestinationTest {
             routes,
         )
     }
+
+    @Test
+    fun taskCreateRouteStaysOutsideTopLevelDestinations() {
+        assertEquals("tasks/create", LifeLabRoutes.TASKS_CREATE)
+        assertEquals(false, topLevelDestinations.any { it.route == LifeLabRoutes.TASKS_CREATE })
+    }
 }

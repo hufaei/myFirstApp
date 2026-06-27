@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Notifications
@@ -30,7 +31,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -57,6 +57,9 @@ fun HomeScreen(
     onOpenRoute: (String) -> Unit = {},
     onOpenSearch: () -> Unit = {},
     onOpenNotifications: () -> Unit = {},
+    onCreateTask: () -> Unit = {},
+    onOpenTasks: () -> Unit = {},
+    onOpenHabits: () -> Unit = {},
     onOpenDiscover: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -95,6 +98,9 @@ fun HomeScreen(
             HomeContentSection(
                 content = content,
                 onOpenRoute = onOpenRoute,
+                onCreateTask = onCreateTask,
+                onOpenTasks = onOpenTasks,
+                onOpenHabits = onOpenHabits,
                 onOpenDiscover = onOpenDiscover,
             )
         }
@@ -108,9 +114,7 @@ private fun HomeHeader(
     onOpenSearch: () -> Unit,
     onOpenNotifications: () -> Unit,
 ) {
-    val today = remember {
-        LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
-    }
+    val today = LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
 
     LifeLabScreenHeader(
         title = stringResource(R.string.home_title),
@@ -166,6 +170,9 @@ private fun RefreshingSection() {
 private fun HomeContentSection(
     content: HomeFeedContent,
     onOpenRoute: (String) -> Unit,
+    onCreateTask: () -> Unit,
+    onOpenTasks: () -> Unit,
+    onOpenHabits: () -> Unit,
     onOpenDiscover: () -> Unit,
 ) {
     val taskSummary = content.feedItems
@@ -180,12 +187,13 @@ private fun HomeContentSection(
     DailyDashboardCards(
         taskSummary = taskSummary,
         habitInsight = habitInsight,
-        onOpenTasks = { onOpenRoute(HomeTasksRoute) },
-        onOpenHabits = { onOpenRoute(HomeHabitsRoute) },
+        onOpenTasks = onOpenTasks,
+        onOpenHabits = onOpenHabits,
     )
     HomeQuickActions(
-        onOpenTasks = { onOpenRoute(HomeTasksRoute) },
-        onOpenHabits = { onOpenRoute(HomeHabitsRoute) },
+        onCreateTask = onCreateTask,
+        onOpenTasks = onOpenTasks,
+        onOpenHabits = onOpenHabits,
         onOpenDiscover = onOpenDiscover,
     )
     RecommendedEntriesSection(
@@ -339,6 +347,7 @@ private fun DashboardCard(
 
 @Composable
 private fun HomeQuickActions(
+    onCreateTask: () -> Unit,
     onOpenTasks: () -> Unit,
     onOpenHabits: () -> Unit,
     onOpenDiscover: () -> Unit,
@@ -348,6 +357,11 @@ private fun HomeQuickActions(
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             if (maxWidth < 560.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    QuickActionButton(
+                        label = stringResource(R.string.home_action_create_task),
+                        onClick = onCreateTask,
+                        icon = { QuickActionIcon(Icons.Filled.Add) },
+                    )
                     QuickActionButton(
                         label = stringResource(R.string.home_action_tasks),
                         onClick = onOpenTasks,
@@ -366,6 +380,12 @@ private fun HomeQuickActions(
                 }
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickActionButton(
+                        label = stringResource(R.string.home_action_create_task),
+                        onClick = onCreateTask,
+                        modifier = Modifier.weight(1f),
+                        icon = { QuickActionIcon(Icons.Filled.Add) },
+                    )
                     QuickActionButton(
                         label = stringResource(R.string.home_action_tasks),
                         onClick = onOpenTasks,
@@ -509,6 +529,3 @@ private fun FeedSection(
         }
     }
 }
-
-private const val HomeTasksRoute = "tasks"
-private const val HomeHabitsRoute = "habits"

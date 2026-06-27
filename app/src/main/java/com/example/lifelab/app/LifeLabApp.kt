@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.lifelab.app.navigation.LifeLabNavHost
+import com.example.lifelab.app.navigation.LifeLabRoutes
 import com.example.lifelab.app.navigation.topLevelDestinations
 import com.example.lifelab.core.datastore.AppPreferences
 import com.example.lifelab.core.datastore.DataStoreAppPreferencesRepository
@@ -45,8 +46,12 @@ fun LifeLabApp() {
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route ?: topLevelDestinations.first().route
+        val selectedTopLevelRoute = when (currentRoute) {
+            LifeLabRoutes.TASKS_CREATE -> LifeLabRoutes.TASKS
+            else -> currentRoute
+        }
         val showBottomBar = topLevelDestinations.any { destination ->
-            destination.route == currentRoute
+            destination.route == selectedTopLevelRoute
         }
 
         Scaffold(
@@ -59,7 +64,7 @@ fun LifeLabApp() {
                     ) {
                         topLevelDestinations.forEach { destination ->
                             NavigationBarItem(
-                                selected = currentRoute == destination.route,
+                                selected = selectedTopLevelRoute == destination.route,
                                 onClick = {
                                     navController.navigate(destination.route) {
                                         launchSingleTop = true
