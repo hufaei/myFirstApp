@@ -11,7 +11,6 @@
 ```powershell
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:lintDebug
-./gradlew :app:assembleDebug
 ```
 
 Android 工程中常用的定向单元测试命令：
@@ -39,7 +38,7 @@ Android 工程中常用的定向单元测试命令：
 - `tasks`: 查看可用任务
 - `:app:testDebugUnitTest`: 跑 app debug 变体 JVM 单元测试
 - `:app:lintDebug`: 跑 debug 变体 lint
-- `:app:assembleDebug`: 构建 debug APK
+- `:app:assembleRelease`: 构建正式签名 APK，仅在 release signing 属性齐全时使用
 - `installDebug`: 安装到设备，默认不作为本机验证要求
 - `connectedAndroidTest`: 跑设备或模拟器 UI 测试，默认不作为本机验证要求
 
@@ -50,8 +49,19 @@ Android 工程中常用的定向单元测试命令：
 ```bash
 ./gradlew :app:testDebugUnitTest --no-daemon
 ./gradlew :app:lintDebug --no-daemon
-./gradlew :app:assembleDebug --no-daemon
 ```
+
+PR workflow 只执行上述 unit test 和 lint，不构建 APK。手动运行 workflow 或推送 `v*` tag 时，CI 会检查 release signing secrets，解码 release keystore，并执行：
+
+```bash
+./gradlew :app:assembleRelease --no-daemon \
+  -PLIFELAB_RELEASE_STORE_FILE="$RUNNER_TEMP/lifelab-signing/lifelab-release.jks" \
+  -PLIFELAB_RELEASE_KEY_ALIAS="$ANDROID_RELEASE_KEY_ALIAS" \
+  -PLIFELAB_RELEASE_KEY_PASSWORD="$ANDROID_RELEASE_KEY_PASSWORD" \
+  -PLIFELAB_RELEASE_STORE_PASSWORD="$ANDROID_RELEASE_STORE_PASSWORD"
+```
+
+生成的 artifact 名称为 `lifelab-release-apk`，路径为 `app/build/outputs/apk/release/app-release.apk`。release 签名配置、secret 生成和发版步骤见 [release-signing.md](release-signing.md)。
 
 本机如果没有 Android SDK，相关 Gradle 任务会在 SDK discovery 阶段失败；这种情况下以远端 CI 或用户完整 Android 环境的结果作为最终编译/测试证据。
 
@@ -61,9 +71,9 @@ Android 工程中常用的定向单元测试命令：
 
 ```powershell
 adb devices
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am force-stop com.example.lifelab
-adb shell pm clear com.example.lifelab
+adb install -r app/build/outputs/apk/release/app-release.apk
+adb shell am force-stop com.study.lifelab
+adb shell pm clear com.study.lifelab
 adb logcat
 adb shell dumpsys activity activities
 ```
@@ -82,7 +92,7 @@ adb shell dumpsys activity activities
 以下命令用于人工运行调试，不作为当前机器默认验收条件：
 
 ```powershell
-adb shell am start -n com.example.lifelab/.app.MainActivity
+adb shell am start -n com.study.lifelab/com.example.lifelab.app.MainActivity
 adb shell input text hello
 adb shell input tap 500 1200
 ```

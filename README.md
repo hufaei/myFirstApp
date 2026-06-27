@@ -54,7 +54,9 @@ LifeLab 的主题是“个人效率与成长实验室”，统一承载以下业
 
 ## Android CI
 
-GitHub Actions 的日常 PR 只运行 `:app:testDebugUnitTest` 和 `:app:lintDebug`，不自动构建 APK。需要 APK 时，在 Actions 页面手动运行 `Android CI` workflow，或推送 `v*` 版本 tag；生成的 `lifelab-debug-apk` artifact 可在对应 workflow run 的 Artifacts 区域下载，保留 7 天。
+GitHub Actions 的日常 PR 只运行 `:app:testDebugUnitTest` 和 `:app:lintDebug`，不自动构建 APK。需要 release APK 时，在 Actions 页面手动运行 `Android CI` workflow，或推送 `v*` 版本 tag；workflow 会要求配置 Android release signing secrets，并上传 `lifelab-release-apk` artifact，保留 7 天。
+
+稳定升级链路约束见 [Release Signing](docs/06-engineering/release-signing.md)：首次从 `com.example.lifelab` 切到 `com.study.lifelab` 会被 Android 视为新应用，不能覆盖旧包；之后只要 `applicationId`、release 签名保持一致且 `versionCode` 递增，同一渠道 APK 就可以覆盖升级。
 
 ## 文档入口
 
@@ -68,6 +70,7 @@ GitHub Actions 的日常 PR 只运行 `:app:testDebugUnitTest` 和 `:app:lintDeb
 - [领域模型](docs/02-domain/domain-model.md)
 - [测试策略](docs/05-quality/testing-strategy.md)
 - [开发命令](docs/06-engineering/dev-commands.md)
+- [Release Signing](docs/06-engineering/release-signing.md)
 - [编码规范](docs/06-engineering/coding-standards.md)
 - [模块会话协作提示词](docs/07-coordination/module-thread-prompts.md)
 

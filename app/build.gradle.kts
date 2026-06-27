@@ -6,18 +6,52 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+val lifeLabApplicationId = providers.gradleProperty("LIFELAB_APPLICATION_ID").orElse("com.study.lifelab")
+val lifeLabVersionCode = providers.gradleProperty("LIFELAB_VERSION_CODE").map { it.toInt() }.orElse(1)
+val lifeLabVersionName = providers.gradleProperty("LIFELAB_VERSION_NAME").orElse("1.0")
+
+val releaseStoreFile = providers.gradleProperty("LIFELAB_RELEASE_STORE_FILE")
+val releaseStorePassword = providers.gradleProperty("LIFELAB_RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = providers.gradleProperty("LIFELAB_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = providers.gradleProperty("LIFELAB_RELEASE_KEY_PASSWORD")
+val hasReleaseSigningProperties = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { it.isPresent }
+
 android {
     namespace = "com.example.lifelab"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.lifelab"
+        applicationId = lifeLabApplicationId.get()
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = lifeLabVersionCode.get()
+        versionName = lifeLabVersionName.get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (hasReleaseSigningProperties) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile.get())
+                storePassword = releaseStorePassword.get()
+                keyAlias = releaseKeyAlias.get()
+                keyPassword = releaseKeyPassword.get()
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (hasReleaseSigningProperties) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
     }
 
     buildFeatures {

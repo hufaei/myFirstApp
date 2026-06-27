@@ -48,6 +48,24 @@ class AndroidManifestConfigurationTest {
         )
     }
 
+    @Test
+    fun manifestUsesFullyQualifiedAppClassNames() {
+        val manifest = readMainText("AndroidManifest.xml")
+
+        assertTrue(
+            manifest.contains("""android:name="com.example.lifelab.app.LifeLabApplication""""),
+            "Application class must remain fully qualified when applicationId differs from source namespace.",
+        )
+        assertTrue(
+            manifest.contains("""android:name="com.example.lifelab.app.MainActivity""""),
+            "Launcher activity must remain fully qualified when applicationId differs from source namespace.",
+        )
+        assertTrue(
+            !manifest.contains("""android:name=".app."""),
+            "Manifest must not use relative app class names after applicationId changes.",
+        )
+    }
+
     private fun readMainText(path: String): String =
         String(Files.readAllBytes(mainSourcePath(path)), Charsets.UTF_8)
 
