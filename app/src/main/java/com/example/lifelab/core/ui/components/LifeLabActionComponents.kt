@@ -136,9 +136,11 @@ private fun RowScope.ActionButtonContent(
 }
 
 private fun String?.isWideActionLabel(): Boolean {
-    val weightedLength = this?.sumOf { character ->
-        if (character.code < 128) 1 else 2
-    } ?: 0
+    val label = this ?: return false
+    var weightedLength = 0
+    for (character in label) {
+        weightedLength += if (character.code < 128) 1 else 2
+    }
     return weightedLength > 22
 }
 
