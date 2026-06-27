@@ -8,44 +8,51 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.example.lifelab.core.datastore.ThemeMode
 
+val LifeBlue = Color(0xFF89C2FF)
+val LifeMist = Color(0xFFE6F7FF)
+val LifeBlueStrong = Color(0xFF1F6FB8)
+val LifeInk = Color(0xFF0D1B2A)
+val LifeNavy = Color(0xFF061524)
+val LifeNavySurface = Color(0xFF0D2033)
+
 private val LifeLabLightColors = lightColorScheme(
-    primary = Color(0xFF2F7FCE),
+    primary = LifeBlueStrong,
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFF89C2FF),
+    primaryContainer = LifeBlue,
     onPrimaryContainer = Color(0xFF05213D),
     secondary = Color(0xFF4E6F8F),
     onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFE6F7FF),
+    secondaryContainer = LifeMist,
     onSecondaryContainer = Color(0xFF123044),
     tertiary = Color(0xFF287C89),
     onTertiary = Color(0xFFFFFFFF),
     tertiaryContainer = Color(0xFFC9F2FA),
     onTertiaryContainer = Color(0xFF06343B),
     background = Color(0xFFF7FBFF),
-    onBackground = Color(0xFF111827),
+    onBackground = LifeInk,
     surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF111827),
-    surfaceVariant = Color(0xFFE6F7FF),
+    onSurface = LifeInk,
+    surfaceVariant = LifeMist,
     onSurfaceVariant = Color(0xFF3E5266),
     outline = Color(0xFF7890A8),
 )
 
 private val LifeLabDarkColors = darkColorScheme(
-    primary = Color(0xFF89C2FF),
+    primary = LifeBlue,
     onPrimary = Color(0xFF08233D),
-    primaryContainer = Color(0xFF164A78),
-    onPrimaryContainer = Color(0xFFE6F7FF),
+    primaryContainer = LifeBlueStrong,
+    onPrimaryContainer = LifeMist,
     secondary = Color(0xFFC7E4FF),
     onSecondary = Color(0xFF15324A),
     secondaryContainer = Color(0xFF213D56),
-    onSecondaryContainer = Color(0xFFE6F7FF),
+    onSecondaryContainer = LifeMist,
     tertiary = Color(0xFF87DCE8),
     onTertiary = Color(0xFF09343B),
     tertiaryContainer = Color(0xFF164F59),
     onTertiaryContainer = Color(0xFFD6F6FB),
-    background = Color(0xFF07131F),
+    background = LifeNavy,
     onBackground = Color(0xFFEAF3FC),
-    surface = Color(0xFF0B1724),
+    surface = LifeNavySurface,
     onSurface = Color(0xFFEAF3FC),
     surfaceVariant = Color(0xFF17283A),
     onSurfaceVariant = Color(0xFFC6D6E6),

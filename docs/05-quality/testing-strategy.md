@@ -2,137 +2,75 @@
 
 ## 1. 测试目标
 
-LifeLab 的测试不是为了堆覆盖率数字，而是为了验证：
+LifeLab 的测试保护稳定产品行为，而不是保护每一种历史实现方式。当前阶段优先验证：
 
-- 关键业务规则不被回归破坏
-- 页面状态流转符合预期
-- 数据层在成功、失败、空数据场景下都行为稳定
-- 关键用户路径在工程演进后仍具备明确运行入口和验证路径
+- 任务、习惯、搜索、发现、消息、资料页等核心用户路径不会回归
+- Room、DataStore 和媒体存储策略等本地优先数据契约稳定
+- ViewModel 对加载、空态、错误、重试、筛选、提交等 UI 状态流转有覆盖
+- Manifest、应用身份、种子数据本地化、发布签名和版本配置等静态约束可被自动检查
+- PR 质量门只运行测试和 lint，发布 APK 构建只在 tag/manual release 路径运行
 
 ## 2. 测试质量原则
 
-TDD 可以作为实现流程，但新增测试必须保持高质量：
+- 每个测试必须对应明确业务规则、用户可感知状态、数据持久化契约或工程发布约束
+- 优先保留能覆盖真实数据路径的 Room/DataStore 测试和能覆盖用户操作的 ViewModel 测试
+- 删除被更高价值测试覆盖的 in-memory repository 变体测试，避免维护重复实现细节
+- UI/状态测试关注稳定结果，例如关键文案、按钮、状态、列表内容和错误恢复
+- 不为了测试数量保留只证明 getter/setter、样板映射或旧 fake 行为的测试
+- 新增测试名称要表达行为和条件，而不是只描述方法名
 
-- 每个新增测试都要对应明确业务行为、状态转换或工程约束
-- TDD 迭代中产生的临时、重复、只保护实现细节的测试必须及时合并或删除
-- 不为了覆盖率数字堆叠低价值测试
-- UI 和状态测试优先验证应当存在的稳定结果，例如关键文案、按钮、状态或数据可见
-- 除非产品规则、安全规则或明确缺陷需要，不写以 `not have`、`not exist`、`not visible` 为核心的否定式测试
-- 测试名称要表达行为和条件，而不是只描述方法名或组件名
+## 3. 核心测试矩阵
 
-## 3. 测试金字塔
+### Static Guards
 
-### 单元测试
+保留并持续维护：
 
-重点覆盖：
+- `AppIdentityGradleConfigurationTest`
+- `AndroidManifestConfigurationTest`
+- `SeedDataLocalizationTest`
+- 发布工作流静态检查，确保 `assembleRelease`、签名 secret 校验和 APK artifact 上传只在 `workflow_dispatch` 或 `refs/tags/v*` 下运行
 
-- UseCase
-- Repository
-- Mapper
-- ViewModel
-- 日期、筛选、状态转换等纯逻辑
+### Data And Storage
 
-这是主力测试层，数量最多、运行最快。
+保留并持续维护：
 
-### UI 测试
+- DataStore 偏好映射：主题、语言、通知、默认任务筛选
+- Room repository：任务、习惯、搜索、发现、消息、照片记录等持久化映射和关键查询
+- 媒体策略：最多三张照片、owner 隔离、app-specific 文件路径和相机文件创建
 
-重点覆盖：
+不再单独保留：
 
-- Compose 页面在不同 `UiState` 下的展示
-- 表单输入与按钮交互
-- 列表点击与导航触发
-- 错误态与重试行为
+- 与 Room repository 或 ViewModel 覆盖重复的 `InMemory...RepositoryTest`
+- 只验证 demo seed repository 固定列表的低价值测试，除非该列表本身成为产品契约
 
-### 集成级验证
+### Domain And ViewModel
 
-重点覆盖：
+保留并持续维护：
 
-- 导航主链路
-- Repository 与本地/远程数据源联动
-- 登录态、设置项、缓存回填等跨层行为
+- Task/Habit/Search/WebLab ViewModel 的核心 happy path 和错误/重试路径
+- 任务创建、筛选、完成/恢复、照片附加
+- 习惯打卡、重复打卡、提醒更新时间、照片附加
+- 搜索提交、历史记录、筛选、清空历史、慢请求竞争处理
+- Discover/Notifications 的加载、筛选、状态变更和错误恢复
+- Profile 偏好持久化和资料概览映射
 
-## 4. 切片式质量门槛
+## 4. UX Flow Policy
 
-测试门槛按“当前正在交付的切片”计算，不对未进入实现的后续功能做空承诺。
+UI polish 类变更优先依靠状态和 ViewModel 测试保护行为，再用人工或设备验证检查视觉层：
 
-### Slice A: Platform Baseline
+- 主要页面应有可验证的加载、空态、错误、内容态
+- 长中文/英文标签应通过稳定控件、换行或堆叠布局避免挤压
+- 次级页面的返回、刷新、重试、筛选、归档、已读等操作不得因外壳统一而改变
+- WebLab 必须继续加载 `https://hufaei.github.io/`，保留网页返回、刷新、错误覆盖层和外部链接跳转
 
-- App 启动入口可被静态检查或 smoke test 验证
-- 主导航壳至少有一条 smoke test
-- 基础依赖注入与 Result/ErrorModel 至少有单元测试
+## 5. 完成门槛
 
-### Slice B: Productivity Slice
+在声称一个阶段完成前，应至少完成：
 
-- `Tasks + Habits` 的关键 UseCase 有单元测试
-- 至少一条 Room 或 DataStore 持久化链路被验证
-- 至少一条表单或打卡交互有 UI 测试
+- `.\gradlew.bat :app:testDebugUnitTest --no-daemon`
+- `.\gradlew.bat :app:lintDebug --no-daemon`
+- `git diff --check`
+- 中英文 `strings.xml` key 对齐检查
+- Android CI workflow 静态检查，确认 PR 不构建 release APK
 
-### Slice C / D
-
-- 在对应切片进入实施时补充各自的详细测试矩阵
-
-## 5. 各层最低测试要求
-
-### Domain
-
-- 每个关键 use case 至少有成功与失败两类测试
-- 涉及日期、状态流转、连续打卡等规则必须覆盖边界值
-
-### Data
-
-- 每个 repository 至少覆盖：
-  - 远程成功
-  - 远程失败
-  - 本地回退或缓存命中
-- 每个 mapper 至少有一组稳定转换测试
-
-### Presentation
-
-- 每个复杂 ViewModel 至少覆盖：
-  - 初始加载
-  - 用户操作后状态变化
-  - 错误恢复或重试
-
-### UI
-
-- 当前切片内的每个关键 feature 至少一条 happy path
-- 每个关键表单至少一条输入与校验路径
-
-## 6. 不测什么
-
-- 纯样式细节
-- 第三方库自身行为
-- 低价值 getter/setter
-- 无业务含义的样板代码
-- 单纯为了证明某元素不存在的否定式 UI 断言
-- TDD 过程中已经被更高价值行为测试覆盖的临时测试
-
-## 7. 测试数据策略
-
-- 优先使用 builder/factory 构造测试对象
-- 避免在测试里内联大段重复数据
-- 日期、时间、时区逻辑统一走可注入时钟
-- UI 测试尽量用稳定 fake repository，而不是依赖真实网络
-
-## 8. 统一质量门槛
-
-在声称一个阶段“完成”之前，应满足：
-
-- 相关单元测试通过
-- 新增核心页面有至少基础 UI 测试，或在本机环境无法运行 UI 测试时给出可执行的人工验证说明
-- 构建通过
-- 无阻塞级崩溃
-- 文档与实际结构没有明显偏离
-- 当前开发机器只要求构建、测试和静态验证通过；设备或模拟器运行调试由用户在完整环境中执行
-
-## 9. 首批重点测试对象
-
-第一批实现时，优先保证这些测试：
-
-- App 启动与导航壳 smoke test
-- `CreateTaskUseCase`
-- `CompleteTaskUseCase`
-- `CheckInHabitUseCase`
-- `TaskListViewModel`
-- `TaskEditorViewModel`
-- `HabitViewModel`
+如果本机缺少 Android SDK 或环境阻塞 Gradle，记录原始错误，并运行可执行的静态检查作为替代证据。

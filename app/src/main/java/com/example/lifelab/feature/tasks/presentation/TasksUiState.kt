@@ -17,7 +17,7 @@ data class TasksUiState(
     val editorState: TaskEditorState = TaskEditorState(),
     val taskPhotos: Map<String, List<PhotoRecord>> = emptyMap(),
     val editorPhotos: List<PhotoRecord> = emptyList(),
-    val message: String? = null,
+    val message: TaskUiMessage? = null,
 ) {
     val filteredTasks: List<Task>
         get() = tasks.filter { task ->
@@ -52,6 +52,14 @@ data class TaskEditorState(
     val tags: String = "",
     val dueLabel: String = "",
 )
+
+sealed interface TaskUiMessage {
+    data object Created : TaskUiMessage
+    data object Updated : TaskUiMessage
+    data object Completed : TaskUiMessage
+    data object Restored : TaskUiMessage
+    data object Error : TaskUiMessage
+}
 
 fun taskPhotoOwner(taskId: String): PhotoOwner =
     PhotoOwner(type = PhotoOwnerType.Task, id = taskId)

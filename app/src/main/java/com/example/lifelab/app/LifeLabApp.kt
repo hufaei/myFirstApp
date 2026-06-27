@@ -2,8 +2,10 @@ package com.example.lifelab.app
 
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,11 +14,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.lifelab.app.navigation.LifeLabNavHost
+import com.example.lifelab.app.navigation.LifeLabRoutes
 import com.example.lifelab.app.navigation.topLevelDestinations
 import com.example.lifelab.core.datastore.AppPreferences
 import com.example.lifelab.core.datastore.DataStoreAppPreferencesRepository
@@ -42,17 +46,25 @@ fun LifeLabApp() {
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route ?: topLevelDestinations.first().route
+        val selectedTopLevelRoute = when (currentRoute) {
+            LifeLabRoutes.TASKS_CREATE -> LifeLabRoutes.TASKS
+            else -> currentRoute
+        }
         val showBottomBar = topLevelDestinations.any { destination ->
-            destination.route == currentRoute
+            destination.route == selectedTopLevelRoute
         }
 
         Scaffold(
             bottomBar = {
                 if (showBottomBar) {
-                    NavigationBar {
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        tonalElevation = 0.dp,
+                    ) {
                         topLevelDestinations.forEach { destination ->
                             NavigationBarItem(
-                                selected = currentRoute == destination.route,
+                                selected = selectedTopLevelRoute == destination.route,
                                 onClick = {
                                     navController.navigate(destination.route) {
                                         launchSingleTop = true
@@ -69,6 +81,13 @@ fun LifeLabApp() {
                                         contentDescription = stringResource(destination.titleRes),
                                     )
                                 },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                ),
                             )
                         }
                     }

@@ -6,38 +6,31 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.lifelab.R
+import com.example.lifelab.core.ui.components.LifeLabPrimaryActionRow
+import com.example.lifelab.core.ui.components.LifeLabScreenHeader
+import com.example.lifelab.core.ui.components.LifeLabSectionTitle
+import com.example.lifelab.core.ui.components.LifeLabStateCard
 import com.example.lifelab.feature.search.domain.SearchFilter
 import com.example.lifelab.feature.search.domain.SearchResultItem
 import com.example.lifelab.feature.search.domain.SearchResultType
@@ -133,39 +126,24 @@ private fun SearchInputSection(
     onBack: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.common_back),
-                )
-            }
-            Text(
-                text = stringResource(R.string.search_title),
-                style = MaterialTheme.typography.headlineMedium,
-            )
-        }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        LifeLabScreenHeader(
+            title = stringResource(R.string.search_title),
+            subtitle = stringResource(R.string.search_subtitle),
+            onBack = onBack,
+        )
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChanged,
+            label = { Text(stringResource(R.string.search_keyword_label)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSubmitQuery() }),
             modifier = Modifier.fillMaxWidth(),
-        ) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = onQueryChanged,
-                label = { Text(stringResource(R.string.search_keyword_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { onSubmitQuery() }),
-                modifier = Modifier.weight(1f),
-            )
-            Button(onClick = onSubmitQuery) {
-                Text(stringResource(R.string.search_action))
-            }
-        }
+        )
+        LifeLabPrimaryActionRow(
+            primaryLabel = stringResource(R.string.search_action),
+            onPrimaryClick = onSubmitQuery,
+        )
     }
 }
 
@@ -219,10 +197,7 @@ private fun KeywordSection(
     onKeywordClick: (String) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-        )
+        LifeLabSectionTitle(title = title)
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -244,21 +219,11 @@ private fun HistorySection(
     onClearHistoryClick: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = stringResource(R.string.search_history),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f),
-            )
-            if (history.isNotEmpty()) {
-                TextButton(onClick = onClearHistoryClick) {
-                    Text(stringResource(R.string.search_clear_history))
-                }
-            }
-        }
+        LifeLabSectionTitle(
+            title = stringResource(R.string.search_history),
+            actionLabel = stringResource(R.string.search_clear_history).takeIf { history.isNotEmpty() },
+            onAction = onClearHistoryClick.takeIf { history.isNotEmpty() },
+        )
 
         if (history.isEmpty()) {
             Text(
@@ -286,7 +251,7 @@ private fun HistorySection(
 @Composable
 private fun SearchResultRow(item: SearchResultItem) {
     Card(
-        shape = RectangleShape,
+        shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
@@ -316,25 +281,12 @@ private fun SearchResultRow(item: SearchResultItem) {
 
 @Composable
 private fun LoadingState() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(180.dp),
-    ) {
-        CircularProgressIndicator()
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = stringResource(R.string.search_searching),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+    LifeLabStateCard(title = stringResource(R.string.search_searching))
 }
 
 @Composable
 private fun EmptyState() {
-    StateMessage(
+    LifeLabStateCard(
         title = stringResource(R.string.search_empty_title),
         body = stringResource(R.string.search_empty_body),
     )
@@ -345,33 +297,12 @@ private fun ErrorState(
     message: String,
     onRetryClick: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        StateMessage(
-            title = stringResource(R.string.search_error_title),
-            body = message,
-        )
-        Button(onClick = onRetryClick) {
-            Text(stringResource(R.string.common_retry))
-        }
-    }
-}
-
-@Composable
-private fun StateMessage(
-    title: String,
-    body: String,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(
-            text = body,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    LifeLabStateCard(
+        title = stringResource(R.string.search_error_title),
+        body = message,
+        actionLabel = stringResource(R.string.common_retry),
+        onAction = onRetryClick,
+    )
 }
 
 @Composable

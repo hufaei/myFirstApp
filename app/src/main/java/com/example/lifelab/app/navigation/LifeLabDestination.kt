@@ -18,6 +18,7 @@ data class LifeLabDestination(
 object LifeLabRoutes {
     const val HOME = "home"
     const val TASKS = "tasks"
+    const val TASKS_CREATE = "tasks/create"
     const val HABITS = "habits"
     const val DISCOVER = "discover"
     const val SEARCH = "search"

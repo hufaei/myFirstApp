@@ -1,67 +1,76 @@
 package com.example.lifelab.feature.tasks.presentation
 
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.lifelab.R
-import com.example.lifelab.core.media.PhotoAttachmentActions
-import com.example.lifelab.core.media.PhotoAttachmentPolicy
-import com.example.lifelab.core.media.PhotoFileStorage
 import com.example.lifelab.core.media.PhotoRecord
 import com.example.lifelab.core.media.PhotoSource
-import com.example.lifelab.core.media.copyPhotosToAppStorage
-import com.example.lifelab.core.media.toLifeLabFileProviderUri
+import com.example.lifelab.core.ui.components.LifeLabMessageBanner
+import com.example.lifelab.core.ui.components.LifeLabPhotoStrip
+import com.example.lifelab.core.ui.components.LifeLabPrimaryActionRow
+import com.example.lifelab.core.ui.components.LifeLabScreenHeader
+import com.example.lifelab.core.ui.components.LifeLabSectionTitle
+import com.example.lifelab.core.ui.components.LifeLabStateCard
 import com.example.lifelab.feature.tasks.domain.Task
 import com.example.lifelab.feature.tasks.domain.TaskPriority
 import com.example.lifelab.feature.tasks.domain.TaskStatus
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 fun TasksRoute(
     contentPadding: PaddingValues,
+    startInCreateMode: Boolean = false,
     viewModel: TaskListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(startInCreateMode) {
+        if (startInCreateMode) {
+            viewModel.startCreate()
+        }
+    }
 
     TasksScreen(
         state = state,
@@ -115,12 +124,13 @@ private fun TasksScreen(
     ) {
         TasksHeader(
             mode = state.mode,
+            onStartCreate = onStartCreate,
             onBackToList = onBackToList,
         )
 
         state.message?.let { message ->
-            MessageBanner(
-                message = message,
+            LifeLabMessageBanner(
+                message = message.text(),
                 onDismiss = onClearMessage,
             )
         }
@@ -130,7 +140,7 @@ private fun TasksScreen(
                 state = state,
                 onSelectFilter = onSelectFilter,
                 onOpenDetail = onOpenDetail,
-                onStartCreate = onStartCreate,
+                modifier = Modifier.weight(1f),
             )
 
             TaskScreenMode.Detail -> TaskDetailContent(
@@ -140,6 +150,7 @@ private fun TasksScreen(
                 onStartEdit = onStartEdit,
                 onComplete = onComplete,
                 onRestore = onRestore,
+                modifier = Modifier.weight(1f),
             )
 
             TaskScreenMode.Editor -> TaskEditorContent(
@@ -152,6 +163,7 @@ private fun TasksScreen(
                 photos = state.editorPhotos,
                 onAttachPhotos = onAttachEditorPhotos,
                 onSaveEditor = onSaveEditor,
+                modifier = Modifier.weight(1f),
             )
         }
     }
@@ -160,54 +172,32 @@ private fun TasksScreen(
 @Composable
 private fun TasksHeader(
     mode: TaskScreenMode,
+    onStartCreate: () -> Unit,
     onBackToList: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column {
-            Text(
-                text = stringResource(R.string.tasks_title),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = mode.title,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        if (mode != TaskScreenMode.List) {
-            TextButton(onClick = onBackToList) {
-                Text(stringResource(R.string.common_back))
+    LifeLabScreenHeader(
+        title = stringResource(R.string.tasks_title),
+        subtitle = mode.title,
+        onBack = if (mode == TaskScreenMode.List) null else onBackToList,
+        actions = {
+            if (mode == TaskScreenMode.List) {
+                Button(onClick = onStartCreate) {
+                    IconSmallAdd()
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.tasks_new))
+                }
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable
-private fun MessageBanner(
-    message: String,
-    onDismiss: () -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = message.localizedTaskMessage(),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.common_dismiss))
-            }
-        }
-    }
+private fun IconSmallAdd() {
+    androidx.compose.material3.Icon(
+        imageVector = Icons.Filled.Add,
+        contentDescription = null,
+        modifier = Modifier.size(18.dp),
+    )
 }
 
 @Composable
@@ -215,58 +205,65 @@ private fun TaskListContent(
     state: TasksUiState,
     onSelectFilter: (TaskFilter) -> Unit,
     onOpenDetail: (String) -> Unit,
-    onStartCreate: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        LifeLabSectionTitle(title = stringResource(R.string.tasks_filter_section))
         TaskFilterRow(
             selectedFilter = state.selectedFilter,
             onSelectFilter = onSelectFilter,
         )
-        Button(onClick = onStartCreate) {
-            Text(stringResource(R.string.tasks_new))
-        }
-    }
 
-    if (state.isLoading) {
-        Text(stringResource(R.string.tasks_loading))
-        return
-    }
+        when {
+            state.isLoading -> {
+                LifeLabStateCard(title = stringResource(R.string.tasks_loading))
+            }
 
-    if (state.filteredTasks.isEmpty()) {
-        TaskEmptyState(filter = state.selectedFilter)
-        return
-    }
+            state.filteredTasks.isEmpty() -> {
+                TaskEmptyState(filter = state.selectedFilter)
+            }
 
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        items(
-            items = state.filteredTasks,
-            key = { it.id },
-        ) { task ->
-            TaskRow(
-                task = task,
-                onClick = { onOpenDetail(task.id) },
-            )
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(
+                        items = state.filteredTasks,
+                        key = { it.id },
+                    ) { task ->
+                        TaskRow(
+                            task = task,
+                            onClick = { onOpenDetail(task.id) },
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun TaskFilterRow(
     selectedFilter: TaskFilter,
     onSelectFilter: (TaskFilter) -> Unit,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        TaskFilter.entries.forEach { filter ->
-            FilterChip(
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        TaskFilter.entries.forEachIndexed { index, filter ->
+            SegmentedButton(
                 selected = selectedFilter == filter,
                 onClick = { onSelectFilter(filter) },
-                label = { Text(filter.label()) },
-            )
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = TaskFilter.entries.size,
+                ),
+            ) {
+                Text(filter.label())
+            }
         }
     }
 }
@@ -280,14 +277,19 @@ private fun TaskRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top,
             ) {
                 Text(
                     text = task.title,
@@ -312,8 +314,16 @@ private fun TaskRow(
 }
 
 @Composable
-private fun TaskMetaRow(task: Task) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+@OptIn(ExperimentalLayoutApi::class)
+private fun TaskMetaRow(
+    task: Task,
+    modifier: Modifier = Modifier,
+) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         AssistChip(
             onClick = {},
             label = { Text(task.priority.label()) },
@@ -322,23 +332,21 @@ private fun TaskMetaRow(task: Task) {
             onClick = {},
             label = { Text(task.dueLabelOrNull() ?: stringResource(R.string.tasks_no_due_date)) },
         )
+        if (task.tags.isNotEmpty()) {
+            AssistChip(
+                onClick = {},
+                label = { Text(stringResource(R.string.tasks_tags_count, task.tags.size)) },
+            )
+        }
     }
 }
 
 @Composable
 private fun TaskEmptyState(filter: TaskFilter) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(filter.emptyTitleRes()),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = stringResource(R.string.tasks_empty_body),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    LifeLabStateCard(
+        title = stringResource(filter.emptyTitleRes()),
+        body = stringResource(R.string.tasks_empty_body),
+    )
 }
 
 @Composable
@@ -349,13 +357,19 @@ private fun TaskDetailContent(
     onStartEdit: () -> Unit,
     onComplete: () -> Unit,
     onRestore: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     if (task == null) {
-        Text(stringResource(R.string.tasks_select_detail))
+        LifeLabStateCard(title = stringResource(R.string.tasks_select_detail))
         return
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
         Text(
             text = task.title,
             style = MaterialTheme.typography.headlineSmall,
@@ -364,6 +378,7 @@ private fun TaskDetailContent(
         Text(
             text = task.description.ifBlank { stringResource(R.string.tasks_no_description) },
             style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         TaskMetaRow(task = task)
         if (task.tags.isNotEmpty()) {
@@ -373,26 +388,23 @@ private fun TaskDetailContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        TaskPhotoSection(
-            ownerId = task.id,
+        LifeLabPhotoStrip(
+            owner = taskPhotoOwner(task.id),
             photos = photos,
             onAttachPhotos = onAttachPhotos,
         )
-
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = onStartEdit) {
-                Text(stringResource(R.string.tasks_edit))
-            }
-            if (task.status == TaskStatus.Completed) {
-                OutlinedButton(onClick = onRestore) {
-                    Text(stringResource(R.string.tasks_restore))
-                }
+        LifeLabPrimaryActionRow(
+            primaryLabel = if (task.status == TaskStatus.Completed) {
+                stringResource(R.string.tasks_restore)
             } else {
-                OutlinedButton(onClick = onComplete) {
-                    Text(stringResource(R.string.tasks_complete))
-                }
-            }
-        }
+                stringResource(R.string.tasks_complete)
+            },
+            onPrimaryClick = if (task.status == TaskStatus.Completed) onRestore else onComplete,
+            secondaryLabel = stringResource(R.string.tasks_edit),
+            onSecondaryClick = onStartEdit,
+            primaryIcon = Icons.Filled.CheckCircle,
+            secondaryIcon = Icons.Filled.Edit,
+        )
     }
 }
 
@@ -407,8 +419,14 @@ private fun TaskEditorContent(
     photos: List<PhotoRecord>,
     onAttachPhotos: (List<String>, PhotoSource) -> Unit,
     onSaveEditor: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         OutlinedTextField(
             value = editorState.title,
             onValueChange = onUpdateTitle,
@@ -447,112 +465,16 @@ private fun TaskEditorContent(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
-        TaskPhotoSection(
-            ownerId = editorState.editingTaskId ?: "draft-task-editor",
+        LifeLabPhotoStrip(
+            owner = taskPhotoOwner(editorState.editingTaskId ?: DraftTaskPhotoOwnerId),
             photos = photos,
             onAttachPhotos = onAttachPhotos,
         )
-        Spacer(modifier = Modifier.height(4.dp))
         Button(
             onClick = onSaveEditor,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(R.string.tasks_save))
-        }
-    }
-}
-
-@Composable
-private fun TaskPhotoSection(
-    ownerId: String,
-    photos: List<PhotoRecord>,
-    onAttachPhotos: (List<String>, PhotoSource) -> Unit,
-) {
-    val owner = remember(ownerId) { taskPhotoOwner(ownerId) }
-    val context = LocalContext.current
-    val remainingSlots = PhotoAttachmentPolicy().remainingSlots(owner, photos)
-    val cameraCaptureUri = rememberCameraCaptureUri(
-        ownerId = ownerId,
-        remainingSlots = remainingSlots,
-    )
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column {
-                Text(
-                    text = stringResource(R.string.photo_section_title),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-                Text(
-                    text = stringResource(R.string.photo_remaining_count, remainingSlots),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            PhotoAttachmentActions(
-                remainingSlots = remainingSlots,
-                cameraCaptureUri = cameraCaptureUri,
-                pickerLabel = stringResource(R.string.photo_add_from_album),
-                cameraLabel = stringResource(R.string.photo_take_photo),
-                onPickerPhotosSelected = { uris ->
-                    val storedUris = context.copyPhotosToAppStorage(
-                        owner = owner,
-                        uris = uris.take(remainingSlots),
-                        startSequence = photos.size,
-                        createdAtMillis = System.currentTimeMillis(),
-                    )
-                    onAttachPhotos(storedUris.map { it.toString() }, PhotoSource.Picker)
-                },
-                onCameraPhotoCaptured = { uri ->
-                    onAttachPhotos(listOf(uri.toString()), PhotoSource.Camera)
-                },
-            )
-        }
-
-        if (photos.isEmpty()) {
-            Text(
-                text = stringResource(R.string.photo_empty_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                photos.take(PhotoAttachmentPolicy.MAX_PHOTOS_PER_OWNER).forEach { photo ->
-                    AsyncImage(
-                        model = photo.localUri,
-                        contentDescription = stringResource(R.string.photo_preview_description),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun rememberCameraCaptureUri(
-    ownerId: String,
-    remainingSlots: Int,
-): Uri? {
-    val context = LocalContext.current
-    return remember(ownerId, remainingSlots) {
-        if (remainingSlots <= 0) {
-            null
-        } else {
-            PhotoFileStorage(
-                filesDir = context.filesDir,
-                cacheDir = context.cacheDir,
-            ).createCameraCaptureFile(
-                owner = taskPhotoOwner(ownerId),
-                createdAtMillis = System.currentTimeMillis(),
-            ).toLifeLabFileProviderUri(context)
         }
     }
 }
@@ -632,14 +554,18 @@ private fun TaskStatus.color() = when (this) {
 
 private fun Task.dueLabelOrNull(): String? =
     dueAt?.atZone(ZoneId.systemDefault())
-        ?.format(DateTimeFormatter.ofPattern("MMM d"))
+        ?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
 
 @Composable
-private fun String.localizedTaskMessage(): String =
-    when (this) {
-        "Task created" -> stringResource(R.string.tasks_message_created)
-        "Task updated" -> stringResource(R.string.tasks_message_updated)
-        "Task completed" -> stringResource(R.string.tasks_message_completed)
-        "Task restored" -> stringResource(R.string.tasks_message_restored)
-        else -> this
-    }
+private fun TaskUiMessage.text(): String =
+    stringResource(
+        when (this) {
+            TaskUiMessage.Created -> R.string.tasks_message_created
+            TaskUiMessage.Updated -> R.string.tasks_message_updated
+            TaskUiMessage.Completed -> R.string.tasks_message_completed
+            TaskUiMessage.Restored -> R.string.tasks_message_restored
+            TaskUiMessage.Error -> R.string.tasks_message_error
+        },
+    )
+
+private const val DraftTaskPhotoOwnerId = "draft-task-editor"

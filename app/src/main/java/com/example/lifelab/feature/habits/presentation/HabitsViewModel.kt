@@ -56,7 +56,7 @@ class HabitsViewModel(
                 .catch {
                     _uiState.value = _uiState.value.copy(
                         status = HabitsStatus.Error,
-                        errorMessage = "Unable to load habits.",
+                        errorMessage = HabitUiMessage.LoadError,
                     )
                 }
                 .collect { habits ->
@@ -71,15 +71,15 @@ class HabitsViewModel(
         viewModelScope.launch {
             when (val result = checkInHabit(habitId = habitId, checkInDate = today())) {
                 is HabitCheckInResult.CheckedIn -> {
-                    showMessage("Checked in ${result.habit.name}.")
+                    showMessage(HabitUiMessage.CheckedIn(result.habit.name))
                 }
 
                 is HabitCheckInResult.AlreadyCheckedIn -> {
-                    showMessage("${result.habit.name} is already checked in today.")
+                    showMessage(HabitUiMessage.AlreadyCheckedIn(result.habit.name))
                 }
 
                 HabitCheckInResult.HabitMissing -> {
-                    showMessage("Habit was not found.")
+                    showMessage(HabitUiMessage.Missing)
                 }
             }
         }
@@ -142,15 +142,15 @@ class HabitsViewModel(
             val updatedHabit = repository.updateReminder(habitId = habitId, reminder = reminder)
             showMessage(
                 if (updatedHabit == null) {
-                    "Habit was not found."
+                    HabitUiMessage.Missing
                 } else {
-                    "Reminder updated for ${updatedHabit.name}."
+                    HabitUiMessage.ReminderUpdated(updatedHabit.name)
                 },
             )
         }
     }
 
-    private fun showMessage(message: String) {
+    private fun showMessage(message: HabitUiMessage) {
         _uiState.value = _uiState.value.copy(message = message)
     }
 
@@ -208,12 +208,16 @@ class HabitsViewModel(
         return this + (owner.id to (existingPhotos + newPhotos))
     }
 
-    private fun HabitsUiState.forHabits(habits: List<Habit>): HabitsUiState = copy(
-        status = if (habits.isEmpty()) HabitsStatus.Empty else HabitsStatus.Content,
-        habits = habits,
-        stats = calculateStats(habits, today()),
-        errorMessage = null,
-    )
+    private fun HabitsUiState.forHabits(habits: List<Habit>): HabitsUiState {
+        val currentDate = today()
+        return copy(
+            status = if (habits.isEmpty()) HabitsStatus.Empty else HabitsStatus.Content,
+            habits = habits,
+            stats = calculateStats(habits, currentDate),
+            today = currentDate,
+            errorMessage = null,
+        )
+    }
 
     private companion object {
         val DefaultReminderTime: LocalTime = LocalTime.of(9, 0)

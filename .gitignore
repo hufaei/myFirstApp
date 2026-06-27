@@ -1,5 +1,6 @@
 .gradle
 .kotlin/
+.worktrees/
 build/
 local.properties
 !gradle/wrapper/gradle-wrapper.jar

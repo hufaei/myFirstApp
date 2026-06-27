@@ -4,22 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.lifelab.R
+import com.example.lifelab.core.ui.components.LifeLabScreenHeader
+import com.example.lifelab.core.ui.components.LifeLabStateCard
 import com.example.lifelab.feature.discover.domain.DiscoverCategory
 import com.example.lifelab.feature.discover.domain.DiscoverContent
 
@@ -47,22 +42,11 @@ fun DiscoverScreen(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.common_back),
-                )
-            }
-            Text(
-                text = stringResource(R.string.discover_title),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
+        LifeLabScreenHeader(
+            title = stringResource(R.string.discover_title),
+            subtitle = stringResource(R.string.discover_subtitle),
+            onBack = onBack,
+        )
         CategoryFilters(
             selectedCategory = uiState.selectedCategory,
             onCategorySelected = { category ->
@@ -120,36 +104,19 @@ private fun DiscoverContentState(
 
 @Composable
 private fun LoadingState(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        CircularProgressIndicator()
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = stringResource(R.string.discover_loading),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+    LifeLabStateCard(
+        title = stringResource(R.string.discover_loading),
+        modifier = modifier,
+    )
 }
 
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.discover_empty_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = stringResource(R.string.discover_empty_body),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
+    LifeLabStateCard(
+        title = stringResource(R.string.discover_empty_title),
+        body = stringResource(R.string.discover_empty_body),
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -158,24 +125,13 @@ private fun ErrorState(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.discover_error_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Spacer(Modifier.height(12.dp))
-        Button(onClick = onRetry) {
-            Text(stringResource(R.string.common_retry))
-        }
-    }
+    LifeLabStateCard(
+        title = stringResource(R.string.discover_error_title),
+        body = message,
+        actionLabel = stringResource(R.string.common_retry),
+        onAction = onRetry,
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -202,7 +158,10 @@ private fun DiscoverContentCard(
     content: DiscoverContent,
     modifier: Modifier = Modifier,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+    ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),

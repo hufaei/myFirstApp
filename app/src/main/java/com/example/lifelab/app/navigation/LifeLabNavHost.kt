@@ -31,10 +31,19 @@ fun LifeLabNavHost(
                 onOpenNotifications = {
                     navController.navigateSingleTop(LifeLabRoutes.NOTIFICATIONS)
                 },
+                onCreateTask = { navController.navigateSingleTop(LifeLabRoutes.TASKS_CREATE) },
+                onOpenTasks = { navController.navigateSingleTop(LifeLabRoutes.TASKS) },
+                onOpenHabits = { navController.navigateSingleTop(LifeLabRoutes.HABITS) },
                 onOpenDiscover = { navController.navigateSingleTop(LifeLabRoutes.DISCOVER) },
             )
         }
         composable(LifeLabRoutes.TASKS) { TasksRoute(contentPadding = contentPadding) }
+        composable(LifeLabRoutes.TASKS_CREATE) {
+            TasksRoute(
+                contentPadding = contentPadding,
+                startInCreateMode = true,
+            )
+        }
         composable(LifeLabRoutes.HABITS) { HabitsRoute(contentPadding = contentPadding) }
         composable(LifeLabRoutes.DISCOVER) {
             DiscoverRoute(

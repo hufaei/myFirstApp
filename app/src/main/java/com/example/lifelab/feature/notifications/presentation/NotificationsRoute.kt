@@ -1,22 +1,18 @@
 package com.example.lifelab.feature.notifications.presentation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -26,10 +22,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.lifelab.R
+import com.example.lifelab.core.ui.components.LifeLabScreenHeader
+import com.example.lifelab.core.ui.components.LifeLabStateCard
 import com.example.lifelab.feature.notifications.domain.NotificationMessage
 import com.example.lifelab.feature.notifications.domain.NotificationSettings
 import com.example.lifelab.feature.notifications.domain.NotificationStatus
@@ -92,22 +91,10 @@ private fun LoadingContent(
             .fillMaxSize()
             .padding(contentPadding)
             .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         NotificationsHeader(onBack = onBack)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                CircularProgressIndicator()
-                Text(text = stringResource(R.string.notifications_loading))
-            }
-        }
+        LifeLabStateCard(title = stringResource(R.string.notifications_loading))
     }
 }
 
@@ -115,22 +102,11 @@ private fun LoadingContent(
 private fun NotificationsHeader(
     onBack: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                contentDescription = stringResource(R.string.common_back),
-            )
-        }
-        Text(
-            text = stringResource(R.string.notifications_title),
-            style = MaterialTheme.typography.headlineMedium,
-        )
-    }
+    LifeLabScreenHeader(
+        title = stringResource(R.string.notifications_title),
+        subtitle = stringResource(R.string.notifications_subtitle),
+        onBack = onBack,
+    )
 }
 
 @Composable
@@ -147,24 +123,14 @@ private fun ErrorContent(
             .padding(contentPadding)
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         NotificationsHeader(onBack = onBack)
-        Text(
-            text = stringResource(R.string.notifications_unavailable),
-            style = MaterialTheme.typography.titleLarge,
+        LifeLabStateCard(
+            title = stringResource(R.string.notifications_unavailable),
+            body = errorMessage,
+            actionLabel = stringResource(R.string.common_retry),
+            onAction = onRetry,
         )
-        Text(
-            text = errorMessage,
-            modifier = Modifier.padding(top = 8.dp),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Button(
-            onClick = onRetry,
-            modifier = Modifier.padding(top = 16.dp),
-        ) {
-            Text(text = stringResource(R.string.common_retry))
-        }
     }
 }
 
@@ -216,31 +182,45 @@ private fun SettingsContent(
     systemIntegration: SystemNotificationIntegrationUiState,
     onEvent: (NotificationsUiEvent) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SettingRow(
-            label = stringResource(R.string.notifications_in_app_messages),
-            checked = settings.inAppMessagesEnabled,
-            onCheckedChange = { onEvent(NotificationsUiEvent.SetInAppMessagesEnabled(it)) },
-        )
-        SettingRow(
-            label = stringResource(R.string.notifications_system_notifications),
-            checked = settings.systemNotificationsEnabled,
-            onCheckedChange = { onEvent(NotificationsUiEvent.SetSystemNotificationsEnabled(it)) },
-        )
-        Text(
-            text = stringResource(R.string.notifications_system_integration),
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(
-            text = stringResource(
-                if (systemIntegration.enabled) {
-                    R.string.notifications_system_enabled
-                } else {
-                    R.string.notifications_system_disabled
-                },
-            ),
-            style = MaterialTheme.typography.bodyMedium,
-        )
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.notifications_settings_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            SettingRow(
+                label = stringResource(R.string.notifications_in_app_messages),
+                checked = settings.inAppMessagesEnabled,
+                onCheckedChange = { onEvent(NotificationsUiEvent.SetInAppMessagesEnabled(it)) },
+            )
+            SettingRow(
+                label = stringResource(R.string.notifications_system_notifications),
+                checked = settings.systemNotificationsEnabled,
+                onCheckedChange = { onEvent(NotificationsUiEvent.SetSystemNotificationsEnabled(it)) },
+            )
+            Text(
+                text = stringResource(R.string.notifications_system_integration),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(
+                    if (systemIntegration.enabled) {
+                        R.string.notifications_system_enabled
+                    } else {
+                        R.string.notifications_system_disabled
+                    },
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -252,11 +232,12 @@ private fun SettingRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = label,
+            modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
         )
         Switch(
@@ -268,54 +249,68 @@ private fun SettingRow(
 
 @Composable
 private fun EmptyContent(inAppMessagesEnabled: Boolean) {
-    Text(
-        text = if (inAppMessagesEnabled) {
+    LifeLabStateCard(
+        title = if (inAppMessagesEnabled) {
             stringResource(R.string.notifications_empty_active)
         } else {
             stringResource(R.string.notifications_empty_disabled)
         },
-        style = MaterialTheme.typography.bodyLarge,
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MessageContent(
     message: NotificationMessage,
     onMarkRead: () -> Unit,
     onArchive: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = message.title,
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Text(
-            text = message.body,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Text(
-            text = stringResource(R.string.notifications_category_value, message.category),
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Text(
-            text = stringResource(R.string.notifications_created_value, message.createdAtLabel),
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Text(
-            text = stringResource(R.string.notifications_status_value, message.status.label()),
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (message.status == NotificationStatus.Unread) {
-                TextButton(onClick = onMarkRead) {
-                    Text(text = stringResource(R.string.notifications_mark_read))
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = message.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = message.body,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = stringResource(R.string.notifications_category_value, message.category),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(R.string.notifications_created_value, message.createdAtLabel),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(R.string.notifications_status_value, message.status.label()),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (message.status == NotificationStatus.Unread) {
+                    TextButton(onClick = onMarkRead) {
+                        Text(text = stringResource(R.string.notifications_mark_read))
+                    }
+                }
+                TextButton(onClick = onArchive) {
+                    Text(text = stringResource(R.string.notifications_archive))
                 }
             }
-            TextButton(onClick = onArchive) {
-                Text(text = stringResource(R.string.notifications_archive))
-            }
         }
-        HorizontalDivider()
     }
 }
 

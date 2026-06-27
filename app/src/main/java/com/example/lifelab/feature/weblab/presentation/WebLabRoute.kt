@@ -10,24 +10,20 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
@@ -48,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lifelab.R
+import com.example.lifelab.core.ui.components.LifeLabScreenHeader
+import com.example.lifelab.core.ui.components.LifeLabStateCard
 
 @Composable
 fun WebLabRoute(
@@ -101,13 +99,6 @@ fun WebLabScreen(
     ) {
         WebLabTopBar(
             isLoading = uiState.isLoading,
-            backLabel = stringResource(
-                if (uiState.canGoBack) {
-                    R.string.web_lab_back
-                } else {
-                    R.string.common_back
-                },
-            ),
             onBack = {
                 if (uiState.canGoBack) {
                     onEvent(WebLabUiEvent.WebBackRequested)
@@ -167,46 +158,32 @@ fun WebLabScreen(
 @Composable
 private fun WebLabTopBar(
     isLoading: Boolean,
-    backLabel: String,
     onBack: () -> Unit,
     onRefresh: () -> Unit,
 ) {
-    Row(
+    LifeLabScreenHeader(
+        title = stringResource(R.string.web_lab_title),
+        subtitle = stringResource(R.string.web_lab_subtitle),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        WebLabIconButton(
-            tooltip = backLabel,
-            enabled = true,
-            onClick = onBack,
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = backLabel,
-            )
-        }
-        Text(
-            text = stringResource(R.string.web_lab_title),
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.titleLarge,
-        )
-        if (isLoading) {
-            CircularProgressIndicator()
-        }
-        WebLabIconButton(
-            tooltip = stringResource(R.string.web_lab_refresh),
-            enabled = true,
-            onClick = onRefresh,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Refresh,
-                contentDescription = stringResource(R.string.web_lab_refresh),
-            )
-        }
-    }
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        onBack = onBack,
+        actions = {
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+            }
+            WebLabIconButton(
+                tooltip = stringResource(R.string.web_lab_refresh),
+                enabled = true,
+                onClick = onRefresh,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Refresh,
+                    contentDescription = stringResource(R.string.web_lab_refresh),
+                )
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -241,23 +218,13 @@ private fun WebLabErrorOverlay(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    LifeLabStateCard(
+        title = stringResource(R.string.web_lab_unavailable),
+        body = message,
+        actionLabel = stringResource(R.string.web_lab_retry),
+        onAction = onRetry,
         modifier = modifier.padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.web_lab_unavailable),
-            style = MaterialTheme.typography.titleLarge,
-        )
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Button(onClick = onRetry) {
-            Text(text = stringResource(R.string.web_lab_retry))
-        }
-    }
+    )
 }
 
 private class LifeLabWebViewClient(
