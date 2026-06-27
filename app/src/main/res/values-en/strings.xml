@@ -9,6 +9,11 @@
     <string name="nav_notifications">Messages</string>
     <string name="nav_profile">Profile</string>
     <string name="profile_title">Profile</string>
+    <string name="profile_subtitle">Manage preferences, messages, and lab access.</string>
+    <string name="profile_section_appearance">Appearance</string>
+    <string name="profile_section_language">Language</string>
+    <string name="profile_section_notifications">Notifications</string>
+    <string name="profile_section_task_preferences">Task preferences</string>
     <string name="profile_theme_mode">Theme mode</string>
     <string name="profile_theme_system">System</string>
     <string name="profile_theme_light">Light</string>
@@ -108,6 +113,7 @@
     <string name="tasks_message_restored">Task restored</string>
     <string name="tasks_message_error">Task action failed. Try again later.</string>
     <string name="discover_title">Discover</string>
+    <string name="discover_subtitle">Explore content, courses, and offers.</string>
     <string name="discover_loading">Loading discovery content…</string>
     <string name="discover_empty_title">No content in this category yet</string>
     <string name="discover_empty_body">Try another filter to keep exploring LifeLab ideas and offers.</string>
@@ -124,6 +130,7 @@
     <string name="discover_detail_by_author">By %1$s</string>
     <string name="discover_detail_course">%1$s · %2$s</string>
     <string name="search_title">Search</string>
+    <string name="search_subtitle">Find tasks, habits, and discovery content.</string>
     <string name="search_keyword_label">Keyword</string>
     <string name="search_action">Search</string>
     <string name="search_hot_keywords">Hot keywords</string>
@@ -167,8 +174,10 @@
     <string name="habits_message_missing">Habit was not found.</string>
     <string name="habits_message_reminder_updated">Reminder updated for %1$s.</string>
     <string name="notifications_title">Messages</string>
+    <string name="notifications_subtitle">Manage reminders, read states, and archived messages.</string>
     <string name="notifications_loading">Loading notifications</string>
     <string name="notifications_unavailable">Notifications unavailable</string>
+    <string name="notifications_settings_title">Message settings</string>
     <string name="notifications_in_app_messages">In-app messages</string>
     <string name="notifications_system_notifications">System notifications</string>
     <string name="notifications_system_integration">System notification integration</string>
@@ -185,6 +194,7 @@
     <string name="notifications_status_read">Read</string>
     <string name="notifications_status_archived">Archived</string>
     <string name="web_lab_title">Web Lab</string>
+    <string name="web_lab_subtitle">hufaei.github.io experiment page</string>
     <string name="web_lab_back">Back in web page</string>
     <string name="web_lab_refresh">Refresh</string>
     <string name="web_lab_unavailable">Web page unavailable</string>

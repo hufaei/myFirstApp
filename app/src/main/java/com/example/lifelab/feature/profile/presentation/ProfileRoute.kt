@@ -5,25 +5,25 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Science
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -50,6 +50,8 @@ import com.example.lifelab.core.datastore.DataStoreAppPreferencesRepository
 import com.example.lifelab.core.datastore.LanguageMode
 import com.example.lifelab.core.datastore.ThemeMode
 import com.example.lifelab.core.datastore.appPreferencesDataStore
+import com.example.lifelab.core.ui.components.LifeLabPrimaryActionRow
+import com.example.lifelab.core.ui.components.LifeLabScreenHeader
 import com.example.lifelab.feature.profile.domain.DefaultTaskFilter
 import com.example.lifelab.feature.profile.domain.ProfileOverview
 import com.example.lifelab.feature.profile.domain.UserPreference
@@ -102,10 +104,9 @@ fun ProfileScreen(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = stringResource(R.string.profile_title),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold,
+        LifeLabScreenHeader(
+            title = stringResource(R.string.profile_title),
+            subtitle = stringResource(R.string.profile_subtitle),
         )
 
         if (uiState.isLoading) {
@@ -118,9 +119,8 @@ fun ProfileScreen(
             appPreferences = uiState.appPreferences,
             onEvent = onEvent,
             onOpenNotifications = onOpenNotifications,
+            onOpenWebLab = onOpenWebLab,
         )
-        WebLabCard(onOpenWebLab = onOpenWebLab)
-        InterestsCard(tags = uiState.preference.contentInterestTags)
     }
 }
 
@@ -196,17 +196,22 @@ private fun PreferencesCard(
     appPreferences: AppPreferences,
     onEvent: (ProfileUiEvent) -> Unit,
     onOpenNotifications: () -> Unit,
+    onOpenWebLab: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        SettingsSectionCard(title = stringResource(R.string.profile_section_appearance)) {
             SettingGroup(title = stringResource(R.string.profile_theme_mode)) {
-                ChipColumn {
+                ChoiceChipFlow {
                     ThemeMode.entries.forEach { themeMode ->
                         FilterChip(
+                            modifier = Modifier.defaultMinSize(
+                                minWidth = SettingChipMinWidth,
+                                minHeight = SettingChipMinHeight,
+                            ),
                             selected = appPreferences.themeMode == themeMode,
                             onClick = {
                                 onEvent(ProfileUiEvent.ThemeModeSelected(themeMode))
@@ -214,7 +219,7 @@ private fun PreferencesCard(
                             label = {
                                 Text(
                                     text = themeMode.label(),
-                                    maxLines = 1,
+                                    maxLines = 2,
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             },
@@ -222,11 +227,17 @@ private fun PreferencesCard(
                     }
                 }
             }
+        }
 
+        SettingsSectionCard(title = stringResource(R.string.profile_section_language)) {
             SettingGroup(title = stringResource(R.string.profile_language_mode)) {
-                ChipColumn {
+                ChoiceChipFlow {
                     LanguageMode.entries.forEach { languageMode ->
                         FilterChip(
+                            modifier = Modifier.defaultMinSize(
+                                minWidth = SettingChipMinWidth,
+                                minHeight = SettingChipMinHeight,
+                            ),
                             selected = appPreferences.languageMode == languageMode,
                             onClick = {
                                 onEvent(ProfileUiEvent.LanguageModeSelected(languageMode))
@@ -234,7 +245,7 @@ private fun PreferencesCard(
                             label = {
                                 Text(
                                     text = languageMode.label(),
-                                    maxLines = 1,
+                                    maxLines = 2,
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             },
@@ -242,53 +253,38 @@ private fun PreferencesCard(
                     }
                 }
             }
+        }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.profile_notifications),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                    )
-                    Text(
-                        text = stringResource(R.string.profile_notifications_description),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Switch(
-                    checked = preference.notificationEnabled,
-                    onCheckedChange = {
-                        onEvent(ProfileUiEvent.NotificationEnabledChanged(it))
-                    },
-                )
-            }
+        SettingsSectionCard(title = stringResource(R.string.profile_section_notifications)) {
+            SettingSwitchRow(
+                title = stringResource(R.string.profile_notifications),
+                description = stringResource(R.string.profile_notifications_description),
+                checked = preference.notificationEnabled,
+                onCheckedChange = {
+                    onEvent(ProfileUiEvent.NotificationEnabledChanged(it))
+                },
+            )
 
             SettingInfoRow(
                 title = stringResource(R.string.profile_notification_settings),
                 description = stringResource(R.string.profile_notification_settings_description),
             )
-            Button(onClick = onOpenNotifications) {
-                Icon(
-                    imageVector = Icons.Filled.Notifications,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.profile_open_notifications))
-            }
+            LifeLabPrimaryActionRow(
+                primaryLabel = stringResource(R.string.profile_open_notifications),
+                onPrimaryClick = onOpenNotifications,
+                primaryIcon = Icons.Filled.Notifications,
+            )
+        }
 
+        SettingsSectionCard(title = stringResource(R.string.profile_section_task_preferences)) {
             SettingGroup(title = stringResource(R.string.profile_default_task_filter)) {
-                ChipColumn {
+                ChoiceChipFlow {
                     DefaultTaskFilter.entries.forEach { defaultTaskFilter ->
                         FilterChip(
+                            modifier = Modifier.defaultMinSize(
+                                minWidth = SettingChipMinWidth,
+                                minHeight = SettingChipMinHeight,
+                            ),
                             selected = preference.defaultTaskFilter == defaultTaskFilter,
                             onClick = {
                                 onEvent(
@@ -298,7 +294,7 @@ private fun PreferencesCard(
                             label = {
                                 Text(
                                     text = defaultTaskFilter.label(),
-                                    maxLines = 1,
+                                    maxLines = 2,
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             },
@@ -306,34 +302,53 @@ private fun PreferencesCard(
                     }
                 }
             }
+
+            SettingInfoRow(
+                title = stringResource(R.string.profile_interest_tags),
+                description = if (preference.contentInterestTags.isEmpty()) {
+                    stringResource(R.string.profile_interest_tags_empty)
+                } else {
+                    preference.contentInterestTags.joinToString(separator = ", ")
+                },
+            )
+        }
+
+        SettingsSectionCard(title = stringResource(R.string.profile_lab_title)) {
+            Text(
+                text = stringResource(R.string.profile_lab_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            LifeLabPrimaryActionRow(
+                primaryLabel = stringResource(R.string.profile_open_lab),
+                onPrimaryClick = onOpenWebLab,
+                primaryIcon = Icons.Filled.Science,
+            )
         }
     }
 }
 
 @Composable
-private fun InterestsCard(
-    tags: List<String>,
+private fun SettingsSectionCard(
+    title: String,
     modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+    ) {
         Column(
             modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Text(
-                text = stringResource(R.string.profile_interest_tags),
+                text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
             )
-            Text(
-                text = if (tags.isEmpty()) {
-                    stringResource(R.string.profile_interest_tags_empty)
-                } else {
-                    tags.joinToString(separator = ", ")
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            content()
         }
     }
 }
@@ -342,9 +357,10 @@ private fun InterestsCard(
 private fun SettingInfoRow(
     title: String,
     description: String,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text(
@@ -356,6 +372,30 @@ private fun SettingInfoRow(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun SettingSwitchRow(
+    title: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SettingInfoRow(
+            title = title,
+            description = description,
+            modifier = Modifier.weight(1f),
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
         )
     }
 }
@@ -375,9 +415,13 @@ private fun SettingGroup(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ChipColumn(content: @Composable () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun ChoiceChipFlow(content: @Composable () -> Unit) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         content()
     }
 }
@@ -421,35 +465,5 @@ private class ProfileViewModelFactory(
     }
 }
 
-@Composable
-private fun WebLabCard(
-    onOpenWebLab: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.profile_lab_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-            )
-            Text(
-                text = stringResource(R.string.profile_lab_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Button(onClick = onOpenWebLab) {
-                Icon(
-                    imageVector = Icons.Filled.Science,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.profile_open_lab))
-            }
-        }
-    }
-}
+private val SettingChipMinWidth = 112.dp
+private val SettingChipMinHeight = 40.dp

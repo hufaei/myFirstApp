@@ -9,6 +9,11 @@
     <string name="nav_notifications">消息</string>
     <string name="nav_profile">我的</string>
     <string name="profile_title">我的</string>
+    <string name="profile_subtitle">设置偏好、消息和实验室入口。</string>
+    <string name="profile_section_appearance">外观</string>
+    <string name="profile_section_language">语言</string>
+    <string name="profile_section_notifications">通知</string>
+    <string name="profile_section_task_preferences">任务偏好</string>
     <string name="profile_theme_mode">主题模式</string>
     <string name="profile_theme_system">跟随系统</string>
     <string name="profile_theme_light">浅色</string>
@@ -108,6 +113,7 @@
     <string name="tasks_message_restored">任务已恢复</string>
     <string name="tasks_message_error">任务操作失败，请稍后再试。</string>
     <string name="discover_title">发现</string>
+    <string name="discover_subtitle">继续探索内容、课程和权益。</string>
     <string name="discover_loading">正在加载发现内容…</string>
     <string name="discover_empty_title">该分类下暂无内容</string>
     <string name="discover_empty_body">切换筛选，继续探索 LifeLab 灵感和权益。</string>
@@ -124,6 +130,7 @@
     <string name="discover_detail_by_author">作者：%1$s</string>
     <string name="discover_detail_course">%1$s · %2$s</string>
     <string name="search_title">搜索</string>
+    <string name="search_subtitle">查找任务、习惯和发现内容。</string>
     <string name="search_keyword_label">关键词</string>
     <string name="search_action">搜索</string>
     <string name="search_hot_keywords">热门关键词</string>
@@ -167,8 +174,10 @@
     <string name="habits_message_missing">没有找到这个习惯。</string>
     <string name="habits_message_reminder_updated">%1$s的提醒已更新。</string>
     <string name="notifications_title">消息</string>
+    <string name="notifications_subtitle">管理提醒、已读和归档状态。</string>
     <string name="notifications_loading">正在加载消息</string>
     <string name="notifications_unavailable">消息暂时不可用</string>
+    <string name="notifications_settings_title">消息设置</string>
     <string name="notifications_in_app_messages">应用内消息</string>
     <string name="notifications_system_notifications">系统通知</string>
     <string name="notifications_system_integration">系统通知集成</string>
@@ -185,6 +194,7 @@
     <string name="notifications_status_read">已读</string>
     <string name="notifications_status_archived">已归档</string>
     <string name="web_lab_title">Web 实验室</string>
+    <string name="web_lab_subtitle">hufaei.github.io 实验页</string>
     <string name="web_lab_back">返回网页</string>
     <string name="web_lab_refresh">刷新</string>
     <string name="web_lab_unavailable">网页暂时不可用</string>
