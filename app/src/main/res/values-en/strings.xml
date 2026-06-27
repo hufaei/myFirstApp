@@ -56,7 +56,7 @@
     <string name="home_refreshing">Refreshing feed</string>
     <string name="home_daily_section">Today overview</string>
     <string name="home_daily_empty_title">No daily summary yet</string>
-    <string name="home_daily_empty_body">Create tasks or check in habits to see today's focus here.</string>
+    <string name="home_daily_empty_body">Create tasks or check in habits to see your daily focus here.</string>
     <string name="home_recommended">Recommended</string>
     <string name="home_no_recommendations">No recommendations yet</string>
     <string name="home_feed">Feed and discovery</string>
