@@ -10,6 +10,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY created_at_epoch_millis ASC")
     fun observeTasks(): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks ORDER BY created_at_epoch_millis ASC")
+    suspend fun getTasks(): List<TaskEntity>
+
     @Query("SELECT * FROM tasks WHERE id = :id")
     suspend fun getTask(id: String): TaskEntity?
 

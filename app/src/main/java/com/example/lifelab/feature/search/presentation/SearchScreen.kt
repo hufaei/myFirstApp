@@ -53,8 +53,8 @@ fun SearchScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(contentPadding),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             SearchInputSection(
@@ -128,7 +128,6 @@ private fun SearchInputSection(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         LifeLabScreenHeader(
             title = stringResource(R.string.search_title),
-            subtitle = stringResource(R.string.search_subtitle),
             onBack = onBack,
         )
         OutlinedTextField(
@@ -175,7 +174,7 @@ private fun PreSearchContent(
     onHistoryClick: (String) -> Unit,
     onClearHistoryClick: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         KeywordSection(
             title = stringResource(R.string.search_hot_keywords),
             keywords = hotKeywords,
@@ -258,8 +257,8 @@ private fun SearchResultRow(item: SearchResultItem) {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(12.dp),
         ) {
             Text(
                 text = item.type.label(),
@@ -270,11 +269,13 @@ private fun SearchResultRow(item: SearchResultItem) {
                 text = item.title,
                 style = MaterialTheme.typography.titleMedium,
             )
-            Text(
-                text = item.summary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (item.summary.isNotBlank()) {
+                Text(
+                    text = item.summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -313,6 +314,7 @@ private fun SearchFilter.label(): String =
         SearchFilter.OFFERS -> stringResource(R.string.search_filter_offers)
         SearchFilter.TASKS -> stringResource(R.string.search_filter_tasks)
         SearchFilter.HABITS -> stringResource(R.string.search_filter_habits)
+        SearchFilter.NOTIFICATIONS -> stringResource(R.string.search_filter_notifications)
     }
 
 @Composable
@@ -322,4 +324,5 @@ private fun SearchResultType.label(): String =
         SearchResultType.OFFER -> stringResource(R.string.search_type_offer)
         SearchResultType.TASK -> stringResource(R.string.search_type_task)
         SearchResultType.HABIT -> stringResource(R.string.search_type_habit)
+        SearchResultType.NOTIFICATION -> stringResource(R.string.search_type_notification)
     }

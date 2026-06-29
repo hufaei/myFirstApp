@@ -42,6 +42,7 @@ object AppModule {
             "lifelab.db",
         ).addMigrations(
             LifeLabDatabase.MIGRATION_1_2,
+            LifeLabDatabase.MIGRATION_2_3,
         ).build()
 
     @Provides
@@ -74,7 +75,19 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSearchRepository(database: LifeLabDatabase): SearchRepository =
-        RoomSearchRepository(database.searchDao())
+        RoomSearchRepository(
+            searchDao = database.searchDao(),
+            taskDao = database.taskDao(),
+            habitDao = database.habitDao(),
+            notificationDao = database.notificationDao(),
+            discoverDao = database.discoverDao(),
+            seedLocalData = {
+                RoomTaskRepository(database.taskDao()).seedIfEmpty()
+                RoomHabitRepository(database.habitDao()).seedIfEmpty()
+                RoomNotificationRepository(database.notificationDao()).seedIfEmpty()
+                RoomDiscoverRepository(database.discoverDao()).seedIfEmpty()
+            },
+        )
 
     @Provides
     @Singleton

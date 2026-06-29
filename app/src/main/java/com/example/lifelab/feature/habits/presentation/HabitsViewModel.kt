@@ -2,6 +2,7 @@ package com.example.lifelab.feature.habits.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.lifelab.core.notifications.HabitReminderNotificationScheduler
 import com.example.lifelab.core.media.PhotoAttachmentPolicy
 import com.example.lifelab.core.media.PhotoOwner
 import com.example.lifelab.core.media.PhotoRecord
@@ -11,6 +12,7 @@ import com.example.lifelab.feature.habits.data.InMemoryHabitRepository
 import com.example.lifelab.feature.habits.domain.model.Habit
 import com.example.lifelab.feature.habits.domain.model.HabitCheckInResult
 import com.example.lifelab.feature.habits.domain.model.HabitReminder
+import com.example.lifelab.feature.habits.domain.model.HabitReminderPriority
 import com.example.lifelab.feature.habits.domain.repository.HabitRepository
 import com.example.lifelab.feature.habits.domain.usecase.CalculateHabitStatsUseCase
 import com.example.lifelab.feature.habits.domain.usecase.CheckInHabitUseCase
@@ -32,6 +34,7 @@ class HabitsViewModel(
     private val calculateStats: CalculateHabitStatsUseCase = CalculateHabitStatsUseCase(),
     private val today: () -> LocalDate = { LocalDate.now() },
     private val photoRecordRepository: PhotoRecordRepository? = null,
+    private val reminderScheduler: HabitReminderNotificationScheduler? = null,
     private val nowMillis: () -> Long = { System.currentTimeMillis() },
 ) : ViewModel() {
 
@@ -39,11 +42,13 @@ class HabitsViewModel(
     constructor(
         repository: HabitRepository,
         photoRecordRepository: PhotoRecordRepository,
+        reminderScheduler: HabitReminderNotificationScheduler,
     ) : this(
         repository = repository,
         checkInHabit = CheckInHabitUseCase(repository),
         calculateStats = CalculateHabitStatsUseCase(),
         photoRecordRepository = photoRecordRepository,
+        reminderScheduler = reminderScheduler,
     )
 
     private val _uiState = MutableStateFlow(HabitsUiState())
@@ -60,8 +65,9 @@ class HabitsViewModel(
                     )
                 }
                 .collect { habits ->
+                    reminderScheduler?.rescheduleAll(habits)
                     _uiState.value = _uiState.value
-                        .forHabits(habits)
+                        .forHabits(habits.sortedForDisplay())
                         .copy(habitPhotos = loadHabitPhotos(habits))
                 }
         }
@@ -109,6 +115,17 @@ class HabitsViewModel(
         )
     }
 
+    fun updateReminderPriority(
+        habitId: String,
+        priority: HabitReminderPriority,
+    ) {
+        val habit = uiState.value.habits.firstOrNull { it.id == habitId } ?: return
+        updateReminder(
+            habitId = habitId,
+            reminder = habit.reminder.copy(priority = priority),
+        )
+    }
+
     fun attachHabitPhotos(
         habitId: String,
         localUris: List<String>,
@@ -144,6 +161,7 @@ class HabitsViewModel(
                 if (updatedHabit == null) {
                     HabitUiMessage.Missing
                 } else {
+                    reminderScheduler?.scheduleOrCancel(updatedHabit)
                     HabitUiMessage.ReminderUpdated(updatedHabit.name)
                 },
             )
@@ -223,3 +241,11 @@ class HabitsViewModel(
         val DefaultReminderTime: LocalTime = LocalTime.of(9, 0)
     }
 }
+
+private fun List<Habit>.sortedForDisplay(): List<Habit> =
+    sortedWith(
+        compareBy<Habit> { habit -> if (habit.reminder.enabled) 0 else 1 }
+            .thenBy { habit -> habit.reminder.priority.sortWeight }
+            .thenBy { habit -> habit.reminder.time?.toSecondOfDay() ?: Int.MAX_VALUE }
+            .thenBy { habit -> habit.name },
+    )

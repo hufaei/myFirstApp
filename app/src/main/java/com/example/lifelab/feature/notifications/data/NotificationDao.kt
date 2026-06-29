@@ -10,6 +10,9 @@ interface NotificationDao {
     @Query("SELECT * FROM notification_messages ORDER BY sort_order ASC")
     fun observeMessages(): Flow<List<NotificationMessageEntity>>
 
+    @Query("SELECT * FROM notification_messages ORDER BY sort_order ASC")
+    suspend fun getMessages(): List<NotificationMessageEntity>
+
     @Query("SELECT * FROM notification_messages WHERE id = :id")
     suspend fun getMessage(id: String): NotificationMessageEntity?
 

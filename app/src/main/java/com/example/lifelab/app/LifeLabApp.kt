@@ -27,6 +27,7 @@ import com.example.lifelab.core.datastore.DataStoreAppPreferencesRepository
 import com.example.lifelab.core.datastore.LanguageMode
 import com.example.lifelab.core.datastore.appPreferencesDataStore
 import com.example.lifelab.core.ui.theme.LifeLabTheme
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun LifeLabApp() {
@@ -34,15 +35,22 @@ fun LifeLabApp() {
     val preferencesRepository = remember(context.applicationContext) {
         DataStoreAppPreferencesRepository(context.applicationContext.appPreferencesDataStore)
     }
-    val appPreferences by preferencesRepository.appPreferences.collectAsStateWithLifecycle(
-        initialValue = AppPreferences(),
-    )
+    val appPreferences by remember(preferencesRepository) {
+        preferencesRepository.appPreferences.map<AppPreferences, AppPreferences?> { preferences ->
+            preferences
+        }
+    }.collectAsStateWithLifecycle(initialValue = null)
+    val resolvedPreferences = appPreferences ?: AppPreferences()
 
-    LaunchedEffect(appPreferences.languageMode) {
-        AppCompatDelegate.setApplicationLocales(appPreferences.languageMode.toLocaleList())
+    LaunchedEffect(appPreferences?.languageMode) {
+        val languageMode = appPreferences?.languageMode ?: return@LaunchedEffect
+        val targetLocales = languageMode.toLocaleList()
+        if (AppCompatDelegate.getApplicationLocales().toLanguageTags() != targetLocales.toLanguageTags()) {
+            AppCompatDelegate.setApplicationLocales(targetLocales)
+        }
     }
 
-    LifeLabTheme(themeMode = appPreferences.themeMode) {
+    LifeLabTheme(themeMode = resolvedPreferences.themeMode) {
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route ?: topLevelDestinations.first().route
@@ -75,6 +83,7 @@ fun LifeLabApp() {
                                     }
                                 },
                                 label = { Text(stringResource(destination.titleRes)) },
+                                alwaysShowLabel = false,
                                 icon = {
                                     Icon(
                                         imageVector = destination.icon,

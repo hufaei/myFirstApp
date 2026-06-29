@@ -58,6 +58,7 @@ class InMemorySearchRepository : SearchRepository {
             SearchFilter.OFFERS -> SearchResultType.OFFER
             SearchFilter.TASKS -> SearchResultType.TASK
             SearchFilter.HABITS -> SearchResultType.HABIT
+            SearchFilter.NOTIFICATIONS -> SearchResultType.NOTIFICATION
         }
 
     private fun SearchResultItem.matches(query: String): Boolean =

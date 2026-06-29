@@ -10,7 +10,7 @@ import com.example.lifelab.core.datastore.ThemeMode
 
 val LifeBlue = Color(0xFF89C2FF)
 val LifeMist = Color(0xFFE6F7FF)
-val LifeBlueStrong = Color(0xFF1F6FB8)
+val LifeBlueStrong = Color(0xFF0F5FA8)
 val LifeInk = Color(0xFF0D1B2A)
 val LifeNavy = Color(0xFF061524)
 val LifeNavySurface = Color(0xFF0D2033)
@@ -20,21 +20,21 @@ private val LifeLabLightColors = lightColorScheme(
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = LifeBlue,
     onPrimaryContainer = Color(0xFF05213D),
-    secondary = Color(0xFF4E6F8F),
+    secondary = Color(0xFF365E82),
     onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = LifeMist,
+    secondaryContainer = Color(0xFFD7F0FF),
     onSecondaryContainer = Color(0xFF123044),
     tertiary = Color(0xFF287C89),
     onTertiary = Color(0xFFFFFFFF),
     tertiaryContainer = Color(0xFFC9F2FA),
     onTertiaryContainer = Color(0xFF06343B),
-    background = Color(0xFFF7FBFF),
+    background = Color(0xFFF3FAFF),
     onBackground = LifeInk,
     surface = Color(0xFFFFFFFF),
     onSurface = LifeInk,
-    surfaceVariant = LifeMist,
-    onSurfaceVariant = Color(0xFF3E5266),
-    outline = Color(0xFF7890A8),
+    surfaceVariant = Color(0xFFDDF2FF),
+    onSurfaceVariant = Color(0xFF29445C),
+    outline = Color(0xFF5D7F9F),
 )
 
 private val LifeLabDarkColors = darkColorScheme(

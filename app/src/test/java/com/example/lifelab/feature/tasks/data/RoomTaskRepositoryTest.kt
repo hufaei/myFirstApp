@@ -61,6 +61,8 @@ class RoomTaskRepositoryTest {
 
         override fun observeTasks(): Flow<List<TaskEntity>> = entities
 
+        override suspend fun getTasks(): List<TaskEntity> = entities.value
+
         override suspend fun getTask(id: String): TaskEntity? =
             entities.value.firstOrNull { it.id == id }
 

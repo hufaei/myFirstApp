@@ -18,6 +18,7 @@ fun HabitsRoute(
         onCheckIn = viewModel::checkIn,
         onReminderEnabledChange = viewModel::setReminderEnabled,
         onReminderTimeChange = viewModel::updateReminderTime,
+        onReminderPriorityChange = viewModel::updateReminderPriority,
         onAttachPhotos = viewModel::attachHabitPhotos,
         onClearMessage = viewModel::clearMessage,
     )

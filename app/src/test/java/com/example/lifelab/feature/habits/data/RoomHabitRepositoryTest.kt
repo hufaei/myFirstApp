@@ -54,6 +54,8 @@ class RoomHabitRepositoryTest {
 
         override fun observeHabits(): Flow<List<HabitEntity>> = entities
 
+        override suspend fun getHabits(): List<HabitEntity> = entities.value
+
         override suspend fun getHabit(id: String): HabitEntity? =
             entities.value.firstOrNull { it.id == id }
 

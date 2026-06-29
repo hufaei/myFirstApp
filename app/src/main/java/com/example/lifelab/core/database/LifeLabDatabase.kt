@@ -32,7 +32,7 @@ import com.example.lifelab.feature.tasks.data.TaskEntity
         DiscoverContentEntity::class,
         PhotoRecordEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,
 )
 abstract class LifeLabDatabase : RoomDatabase() {
@@ -51,6 +51,14 @@ abstract class LifeLabDatabase : RoomDatabase() {
                 localizeDiscoverSeeds(database)
                 localizeSearchSeeds(database)
                 localizeNotificationSeeds(database)
+            }
+        }
+
+        val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "ALTER TABLE habits ADD COLUMN reminder_priority TEXT NOT NULL DEFAULT 'Normal'",
+                )
             }
         }
     }
