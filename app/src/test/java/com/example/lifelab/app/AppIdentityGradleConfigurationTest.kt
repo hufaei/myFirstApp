@@ -15,8 +15,8 @@ class AppIdentityGradleConfigurationTest {
         val properties = readRootProperties("gradle.properties")
 
         assertEquals("com.study.lifelab", properties["LIFELAB_APPLICATION_ID"])
-        assertEquals("2", properties["LIFELAB_VERSION_CODE"])
-        assertEquals("1.1.0", properties["LIFELAB_VERSION_NAME"])
+        assertEquals("3", properties["LIFELAB_VERSION_CODE"])
+        assertEquals("1.1.1", properties["LIFELAB_VERSION_NAME"])
     }
 
     @Test

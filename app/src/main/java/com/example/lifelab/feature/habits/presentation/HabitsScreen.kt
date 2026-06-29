@@ -1,7 +1,14 @@
 package com.example.lifelab.feature.habits.presentation
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -27,9 +35,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.example.lifelab.R
 import com.example.lifelab.core.media.PhotoRecord
 import com.example.lifelab.core.media.PhotoSource
@@ -38,6 +48,7 @@ import com.example.lifelab.core.ui.components.LifeLabPhotoStrip
 import com.example.lifelab.core.ui.components.LifeLabScreenHeader
 import com.example.lifelab.core.ui.components.LifeLabStateCard
 import com.example.lifelab.feature.habits.domain.model.Habit
+import com.example.lifelab.feature.habits.domain.model.HabitReminderPriority
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -48,6 +59,7 @@ fun HabitsScreen(
     onCheckIn: (String) -> Unit,
     onReminderEnabledChange: (String, Boolean) -> Unit,
     onReminderTimeChange: (String, LocalTime) -> Unit,
+    onReminderPriorityChange: (String, HabitReminderPriority) -> Unit,
     onAttachPhotos: (String, List<String>, PhotoSource) -> Unit,
     onClearMessage: () -> Unit,
     modifier: Modifier = Modifier,
@@ -56,8 +68,8 @@ fun HabitsScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(contentPadding),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             LifeLabScreenHeader(
@@ -112,6 +124,7 @@ fun HabitsScreen(
                     onCheckIn = onCheckIn,
                     onReminderEnabledChange = onReminderEnabledChange,
                     onReminderTimeChange = onReminderTimeChange,
+                    onReminderPriorityChange = onReminderPriorityChange,
                     onAttachPhotos = onAttachPhotos,
                 )
             }
@@ -191,10 +204,19 @@ private fun HabitCard(
     onCheckIn: (String) -> Unit,
     onReminderEnabledChange: (String, Boolean) -> Unit,
     onReminderTimeChange: (String, LocalTime) -> Unit,
+    onReminderPriorityChange: (String, HabitReminderPriority) -> Unit,
     onAttachPhotos: (String, List<String>, PhotoSource) -> Unit,
 ) {
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
     val reminderTime = habit.reminder.time
+    val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            onReminderEnabledChange(habit.id, true)
+        }
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -206,8 +228,8 @@ private fun HabitCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -269,14 +291,22 @@ private fun HabitCard(
                 reminderTimeLabel = reminderTime?.format(timeFormatter)
                     ?: stringResource(R.string.habits_no_time),
                 reminderTime = reminderTime,
+                priority = habit.reminder.priority,
                 onReminderEnabledChange = { enabled ->
-                    onReminderEnabledChange(habit.id, enabled)
+                    if (enabled && context.needsNotificationPermission()) {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        onReminderEnabledChange(habit.id, enabled)
+                    }
                 },
                 onReminderTimeChange = {
                     onReminderTimeChange(
                         habit.id,
                         reminderTime?.plusMinutes(30) ?: LocalTime.of(9, 0),
                     )
+                },
+                onReminderPriorityChange = { priority ->
+                    onReminderPriorityChange(habit.id, priority)
                 },
             )
 
@@ -308,13 +338,16 @@ private fun HabitUiMessage.text(): String =
 private fun Habit.isCheckedInOn(date: java.time.LocalDate): Boolean =
     lastCheckInDate == date || date in checkInDates
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ReminderControls(
     reminderEnabled: Boolean,
     reminderTimeLabel: String,
     reminderTime: LocalTime?,
+    priority: HabitReminderPriority,
     onReminderEnabledChange: (Boolean) -> Unit,
     onReminderTimeChange: () -> Unit,
+    onReminderPriorityChange: (HabitReminderPriority) -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -323,8 +356,8 @@ private fun ReminderControls(
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -361,6 +394,33 @@ private fun ReminderControls(
                     },
                 )
             }
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                HabitReminderPriority.entries.forEach { option ->
+                    FilterChip(
+                        selected = priority == option,
+                        onClick = { onReminderPriorityChange(option) },
+                        label = { Text(option.label()) },
+                    )
+                }
+            }
         }
     }
 }
+
+@Composable
+private fun HabitReminderPriority.label(): String =
+    when (this) {
+        HabitReminderPriority.High -> stringResource(R.string.habits_priority_high)
+        HabitReminderPriority.Normal -> stringResource(R.string.habits_priority_normal)
+        HabitReminderPriority.Low -> stringResource(R.string.habits_priority_low)
+    }
+
+private fun android.content.Context.needsNotificationPermission(): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) != PackageManager.PERMISSION_GRANTED

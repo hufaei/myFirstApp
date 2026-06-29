@@ -7,6 +7,7 @@ import com.example.lifelab.feature.habits.data.InMemoryHabitRepository
 import com.example.lifelab.feature.habits.domain.model.Habit
 import com.example.lifelab.feature.habits.domain.model.HabitFrequency
 import com.example.lifelab.feature.habits.domain.model.HabitReminder
+import com.example.lifelab.feature.habits.domain.model.HabitReminderPriority
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.test.Test
@@ -98,6 +99,57 @@ class HabitsViewModelTest {
         assertEquals(1, state.stats.checkedInToday)
         assertEquals(HabitUiMessage.AlreadyCheckedIn("喝水"), state.message)
     }
+
+    @Test
+    fun habitsAreSortedByReminderPriorityThenTime() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "later-normal",
+                    reminder = HabitReminder(
+                        enabled = true,
+                        time = LocalTime.of(18, 0),
+                        priority = HabitReminderPriority.Normal,
+                    ),
+                ),
+                sampleHabit(
+                    id = "off-high",
+                    reminder = HabitReminder(
+                        enabled = false,
+                        time = LocalTime.of(8, 0),
+                        priority = HabitReminderPriority.High,
+                    ),
+                ),
+                sampleHabit(
+                    id = "urgent",
+                    reminder = HabitReminder(
+                        enabled = true,
+                        time = LocalTime.of(12, 0),
+                        priority = HabitReminderPriority.High,
+                    ),
+                ),
+                sampleHabit(
+                    id = "early-normal",
+                    reminder = HabitReminder(
+                        enabled = true,
+                        time = LocalTime.of(8, 0),
+                        priority = HabitReminderPriority.Normal,
+                    ),
+                ),
+            ),
+        )
+
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+        )
+
+        assertEquals(
+            listOf("urgent", "early-normal", "later-normal", "off-high"),
+            viewModel.uiState.value.habits.map { it.id },
+        )
+    }
+
 
     @Test
     fun reminderUpdateChangesTargetHabitReminderAndActiveReminderCount() = runTest {

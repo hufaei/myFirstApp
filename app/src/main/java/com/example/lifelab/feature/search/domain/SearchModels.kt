@@ -6,6 +6,7 @@ enum class SearchFilter {
     OFFERS,
     TASKS,
     HABITS,
+    NOTIFICATIONS,
 }
 
 enum class SearchResultType {
@@ -13,6 +14,7 @@ enum class SearchResultType {
     OFFER,
     TASK,
     HABIT,
+    NOTIFICATION,
 }
 
 data class SearchResultItem(

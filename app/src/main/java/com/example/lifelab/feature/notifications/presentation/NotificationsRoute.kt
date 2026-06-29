@@ -90,8 +90,8 @@ private fun LoadingContent(
         modifier = modifier
             .fillMaxSize()
             .padding(contentPadding)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         NotificationsHeader(onBack = onBack)
         LifeLabStateCard(title = stringResource(R.string.notifications_loading))
@@ -121,8 +121,8 @@ private fun ErrorContent(
         modifier = modifier
             .fillMaxSize()
             .padding(contentPadding)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         NotificationsHeader(onBack = onBack)
         LifeLabStateCard(
@@ -147,15 +147,14 @@ private fun NotificationsContent(
             .fillMaxSize()
             .padding(contentPadding)
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         NotificationsHeader(onBack = onBack)
 
         uiState.settings?.let { settings ->
             SettingsContent(
                 settings = settings,
-                systemIntegration = uiState.systemIntegration,
                 onEvent = onEvent,
             )
         }
@@ -179,7 +178,6 @@ private fun NotificationsContent(
 @Composable
 private fun SettingsContent(
     settings: NotificationSettings,
-    systemIntegration: SystemNotificationIntegrationUiState,
     onEvent: (NotificationsUiEvent) -> Unit,
 ) {
     Card(
@@ -187,8 +185,8 @@ private fun SettingsContent(
         shape = RoundedCornerShape(8.dp),
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
                 text = stringResource(R.string.notifications_settings_title),
@@ -200,23 +198,8 @@ private fun SettingsContent(
                 checked = settings.inAppMessagesEnabled,
                 onCheckedChange = { onEvent(NotificationsUiEvent.SetInAppMessagesEnabled(it)) },
             )
-            SettingRow(
-                label = stringResource(R.string.notifications_system_notifications),
-                checked = settings.systemNotificationsEnabled,
-                onCheckedChange = { onEvent(NotificationsUiEvent.SetSystemNotificationsEnabled(it)) },
-            )
             Text(
-                text = stringResource(R.string.notifications_system_integration),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = stringResource(
-                    if (systemIntegration.enabled) {
-                        R.string.notifications_system_enabled
-                    } else {
-                        R.string.notifications_system_disabled
-                    },
-                ),
+                text = stringResource(R.string.notifications_habit_reminders_note),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -270,8 +253,8 @@ private fun MessageContent(
         shape = RoundedCornerShape(8.dp),
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
                 text = message.title,

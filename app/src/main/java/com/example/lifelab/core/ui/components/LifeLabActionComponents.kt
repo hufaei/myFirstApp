@@ -144,4 +144,4 @@ private fun String?.isWideActionLabel(): Boolean {
     return weightedLength > 22
 }
 
-private val ActionMinHeight = 48.dp
+private val ActionMinHeight = 44.dp

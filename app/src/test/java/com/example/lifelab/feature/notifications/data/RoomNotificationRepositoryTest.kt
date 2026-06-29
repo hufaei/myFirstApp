@@ -73,6 +73,8 @@ class RoomNotificationRepositoryTest {
 
         override fun observeMessages(): Flow<List<NotificationMessageEntity>> = messageEntities
 
+        override suspend fun getMessages(): List<NotificationMessageEntity> = messageEntities.value
+
         override suspend fun getMessage(id: String): NotificationMessageEntity? =
             messageEntities.value.firstOrNull { it.id == id }
 

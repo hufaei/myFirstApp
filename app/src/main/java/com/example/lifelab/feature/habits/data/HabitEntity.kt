@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import com.example.lifelab.feature.habits.domain.model.Habit
 import com.example.lifelab.feature.habits.domain.model.HabitFrequency
 import com.example.lifelab.feature.habits.domain.model.HabitReminder
+import com.example.lifelab.feature.habits.domain.model.HabitReminderPriority
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -18,6 +19,7 @@ data class HabitEntity(
     @ColumnInfo(name = "last_check_in_date") val lastCheckInDate: String?,
     @ColumnInfo(name = "reminder_enabled") val reminderEnabled: Boolean,
     @ColumnInfo(name = "reminder_time_second_of_day") val reminderTimeSecondOfDay: Int?,
+    @ColumnInfo(name = "reminder_priority") val reminderPriority: String,
     @ColumnInfo(name = "check_in_dates") val checkInDates: String,
 )
 
@@ -31,6 +33,7 @@ fun HabitEntity.toDomain(): Habit =
         reminder = HabitReminder(
             enabled = reminderEnabled,
             time = reminderTimeSecondOfDay?.let { LocalTime.ofSecondOfDay(it.toLong()) },
+            priority = reminderPriority.toHabitReminderPriority(),
         ),
         checkInDates = decodeDates(checkInDates),
     )
@@ -44,6 +47,7 @@ fun Habit.toEntity(): HabitEntity =
         lastCheckInDate = lastCheckInDate?.toString(),
         reminderEnabled = reminder.enabled,
         reminderTimeSecondOfDay = reminder.time?.toSecondOfDay(),
+        reminderPriority = reminder.priority.name,
         checkInDates = encodeDates(checkInDates),
     )
 
@@ -58,3 +62,7 @@ private fun decodeDates(encoded: String): Set<LocalDate> =
     } else {
         encoded.split(DATE_SEPARATOR).map(LocalDate::parse).toSet()
     }
+
+private fun String.toHabitReminderPriority(): HabitReminderPriority =
+    enumValues<HabitReminderPriority>().firstOrNull { priority -> priority.name == this }
+        ?: HabitReminderPriority.Normal
