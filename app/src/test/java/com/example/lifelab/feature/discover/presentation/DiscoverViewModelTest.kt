@@ -10,10 +10,12 @@ import com.example.lifelab.feature.discover.domain.LoadDiscoverContentUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DiscoverViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()

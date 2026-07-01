@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.lifelab.R
@@ -48,6 +50,9 @@ fun NotificationsRoute(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) {
+        viewModel.onEvent(NotificationsUiEvent.RefreshSystemNotificationPermission)
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.onEvent(NotificationsUiEvent.RefreshSystemNotificationPermission)
     }
 
@@ -401,6 +406,9 @@ private fun AndroidNotificationPermissionStatus.label(): String = when (this) {
     }
     AndroidNotificationPermissionStatus.Blocked -> {
         stringResource(R.string.notifications_android_permission_blocked)
+    }
+    AndroidNotificationPermissionStatus.DisabledInSystemSettings -> {
+        stringResource(R.string.notifications_android_permission_system_disabled)
     }
 }
 

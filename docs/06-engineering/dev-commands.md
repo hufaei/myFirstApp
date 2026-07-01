@@ -51,7 +51,7 @@ Android 工程中常用的定向单元测试命令：
 ./gradlew :app:lintDebug --no-daemon
 ```
 
-PR workflow 只执行上述 unit test 和 lint，不构建 APK。手动运行 workflow 或推送 `v*` tag 时，CI 会检查 release signing secrets，解码 release keystore，并执行：
+PR workflow 只执行上述 unit test 和 lint，不构建 APK。推送 `v*` tag 时，CI 会检查 release signing secrets，解码 release keystore，并执行：
 
 ```bash
 ./gradlew :app:assembleRelease --no-daemon \

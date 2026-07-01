@@ -43,3 +43,14 @@
 | Habit create/edit | `019f1c49-d08b-7b00-8162-44591498a56a` | `/Users/jingting.li/.codex/worktrees/24b7/myFirstApp` | `feat: add habit create and edit flow` | Owns habit editor behavior and habit tests |
 | Search/discovery details | `019f1c4a-1590-74d3-9077-2c131bd42cc0` | `/Users/jingting.li/.codex/worktrees/ad62/myFirstApp` | `feat: add search and discovery details` | Owns local result/content detail states |
 | Visual polish | `019f1c4a-627d-7253-971d-bee54be5329e` | `/Users/jingting.li/.codex/worktrees/345d/myFirstApp` | `style: polish lifelab productivity surfaces` | Owns theme, shared components, and screen layout polish |
+
+## v1.2 Release Acceptance
+
+- Review thread: `019f1c5b-244f-77c2-b352-84f62ce3e971`
+- Critical review finding addressed: release APK workflow now gates signing, `assembleRelease`, and artifact upload on `refs/tags/v*`; `workflow_dispatch` can no longer package APKs before a release tag exists.
+- Important review findings addressed: notification status now checks both Android 13 runtime permission and system-level app notification blocking, and notification-related screens refresh permission state on lifecycle resume.
+- Minor review finding addressed: Discover detail content can scroll on constrained screens.
+- Verification on 2026-07-01:
+  - `git diff --check`: passed
+  - `./gradlew :app:testDebugUnitTest`: passed
+  - `./gradlew :app:lintDebug`: passed

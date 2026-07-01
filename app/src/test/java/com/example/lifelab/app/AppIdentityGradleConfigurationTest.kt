@@ -15,8 +15,8 @@ class AppIdentityGradleConfigurationTest {
         val properties = readRootProperties("gradle.properties")
 
         assertEquals("com.study.lifelab", properties["LIFELAB_APPLICATION_ID"])
-        assertEquals("3", properties["LIFELAB_VERSION_CODE"])
-        assertEquals("1.1.1", properties["LIFELAB_VERSION_NAME"])
+        assertEquals("4", properties["LIFELAB_VERSION_CODE"])
+        assertEquals("1.2.0", properties["LIFELAB_VERSION_NAME"])
     }
 
     @Test
@@ -74,8 +74,12 @@ class AppIdentityGradleConfigurationTest {
 
         assertTrue(workflow.contains("pull_request:"), "Android CI must keep a pull request trigger.")
         assertTrue(
+            workflow.contains("if: startsWith(github.ref, 'refs/tags/v')"),
+            "APK assembly must stay gated to v* tags.",
+        )
+        assertFalse(
             workflow.contains("github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')"),
-            "APK assembly must stay gated to manual workflow dispatch or v* tags.",
+            "Manual workflow dispatch must not package APKs before a release tag exists.",
         )
         assertFalse(
             workflow.contains(":app:assembleDebug"),

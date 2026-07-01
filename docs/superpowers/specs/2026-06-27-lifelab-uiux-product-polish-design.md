@@ -161,7 +161,7 @@ Before tag/release:
 - Version code and version name are intentionally bumped for this user-visible UI/UX release.
 - A `v*` tag is created from merged `main`.
 - GitHub Release is created from the tag.
-- Release APK workflow runs only from the tag/manual release path and requires signing secrets.
+- Release APK workflow runs only from the tag release path and requires signing secrets.
 
 ## Out Of Scope
 
@@ -172,4 +172,3 @@ Before tag/release:
 - Adding bottom navigation items.
 - Reworking app package id or release signing design.
 - Full visual screenshot automation, unless a device/emulator is available.
-

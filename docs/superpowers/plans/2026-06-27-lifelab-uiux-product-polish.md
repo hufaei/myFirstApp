@@ -310,11 +310,11 @@ If local Android SDK is missing, run:
 ```powershell
 git diff --check
 rg -n "LIFELAB_VERSION_CODE=2|LIFELAB_VERSION_NAME=1.1.0" gradle.properties
-rg -n "if: github.event_name == 'workflow_dispatch' \\|\\| startsWith\\(github.ref, 'refs/tags/v'\\)" .github/workflows/android-ci.yml
+rg -n "if: startsWith\\(github.ref, 'refs/tags/v'\\)" .github/workflows/android-ci.yml
 rg -n "pull_request:|workflow_dispatch:|tags:|assembleRelease|upload-artifact" .github/workflows/android-ci.yml
 ```
 
-Expected workflow behavior: PR path runs unit tests and lint only; release signing, `assembleRelease`, and APK upload are guarded by `workflow_dispatch` or `refs/tags/v*`.
+Expected workflow behavior: PR path runs unit tests and lint only; release signing, `assembleRelease`, and APK upload are guarded by `refs/tags/v*`.
 
 - [ ] **Step 6: Commit**
 

@@ -23,7 +23,9 @@ data class SystemNotificationIntegrationUiState(
 ) {
     val habitReminderDeliveryStatus: HabitReminderDeliveryStatus
         get() = when (androidPermissionStatus) {
-            AndroidNotificationPermissionStatus.Blocked -> HabitReminderDeliveryStatus.BlockedByAndroidPermission
+            AndroidNotificationPermissionStatus.Blocked,
+            AndroidNotificationPermissionStatus.DisabledInSystemSettings,
+            -> HabitReminderDeliveryStatus.BlockedByAndroidPermission
             AndroidNotificationPermissionStatus.Granted,
             AndroidNotificationPermissionStatus.NotRequired,
             -> HabitReminderDeliveryStatus.ControlledFromHabits

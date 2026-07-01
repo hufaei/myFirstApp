@@ -205,6 +205,7 @@
     <string name="notifications_android_permission_not_required">This Android version does not require a separate notification permission.</string>
     <string name="notifications_android_permission_granted">Allowed. Your phone can show LifeLab notifications.</string>
     <string name="notifications_android_permission_blocked">Not allowed. Scheduled habit reminders stay saved, but your phone will not show them.</string>
+    <string name="notifications_android_permission_system_disabled">System notifications are turned off. Scheduled habit reminders stay saved, but your phone will not show them.</string>
     <string name="notifications_habit_reminders_controlled_from_habits">Reminder time and priority are controlled from Habits.</string>
     <string name="notifications_habit_reminders_blocked_by_permission">Reminders can still be scheduled from Habits, but Android permission is blocking delivery.</string>
     <string name="notifications_request_permission">Allow notifications</string>

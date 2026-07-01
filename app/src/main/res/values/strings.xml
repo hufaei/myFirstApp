@@ -205,6 +205,7 @@
     <string name="notifications_android_permission_not_required">当前系统版本不需要单独授予通知权限。</string>
     <string name="notifications_android_permission_granted">已允许，手机可以显示 LifeLab 通知。</string>
     <string name="notifications_android_permission_blocked">未允许。已安排的习惯提醒会保留，但手机不会显示通知。</string>
+    <string name="notifications_android_permission_system_disabled">系统通知开关已关闭。已安排的习惯提醒会保留，但手机不会显示通知。</string>
     <string name="notifications_habit_reminders_controlled_from_habits">提醒时间和优先级在习惯页设置。</string>
     <string name="notifications_habit_reminders_blocked_by_permission">提醒仍可在习惯页安排，但 Android 权限正在阻止通知送达。</string>
     <string name="notifications_request_permission">允许通知</string>

@@ -83,7 +83,7 @@ Windows PowerShell 可使用：
 ./gradlew :app:lintDebug --no-daemon
 ```
 
-手动运行 `Android CI` workflow，或推送 `v*` tag 时，workflow 会：
+推送 `v*` tag 时，workflow 会：
 
 1. 检查四个 `ANDROID_RELEASE_*` secrets 是否存在，缺失时失败并输出缺失项。
 2. 将 `ANDROID_RELEASE_KEYSTORE_BASE64` 解码到 runner 临时目录。
@@ -99,7 +99,7 @@ git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
 
-也可以在 GitHub Actions 页面选择 `Android CI` 后手动运行 workflow，用于生成一次 release APK artifact。
+不要在未打 tag 的分支上手动运行 release APK 打包；`workflow_dispatch` 只用于复跑测试/lint。需要 APK artifact 时，先创建并推送 `v*` tag。
 
 ## 5. 发版前检查
 

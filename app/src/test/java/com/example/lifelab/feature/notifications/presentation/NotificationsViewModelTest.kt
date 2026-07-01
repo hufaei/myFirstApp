@@ -17,12 +17,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class NotificationsViewModelTest {
 
     @get:Rule
@@ -175,6 +177,20 @@ class NotificationsViewModelTest {
             state.systemIntegration.habitReminderDeliveryStatus,
         )
         assertTrue(state.systemIntegration.habitReminderDeliveryBlocked)
+    }
+
+    @Test
+    fun systemDisabledNotificationsBlockDeliveryWithoutRuntimePermissionPrompt() {
+        val integration = SystemNotificationIntegrationUiState(
+            androidPermissionStatus = AndroidNotificationPermissionStatus.DisabledInSystemSettings,
+        )
+
+        assertEquals(
+            HabitReminderDeliveryStatus.BlockedByAndroidPermission,
+            integration.habitReminderDeliveryStatus,
+        )
+        assertTrue(integration.habitReminderDeliveryBlocked)
+        assertFalse(integration.canRequestAndroidNotificationPermission)
     }
 
     @Test

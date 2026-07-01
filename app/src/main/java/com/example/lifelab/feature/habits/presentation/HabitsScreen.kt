@@ -46,11 +46,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.lifelab.R
 import com.example.lifelab.core.media.PhotoRecord
 import com.example.lifelab.core.media.PhotoSource
 import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus
 import com.example.lifelab.core.notifications.androidNotificationPermissionStatus
+import com.example.lifelab.core.notifications.canPostNotifications
 import com.example.lifelab.core.ui.components.LifeLabMessageBanner
 import com.example.lifelab.core.ui.components.LifeLabPhotoStrip
 import com.example.lifelab.core.ui.components.LifeLabScreenHeader
@@ -101,8 +104,11 @@ fun HabitsScreen(
         pendingReminderHabitId = null
         pendingEditorReminderEnable = false
     }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        androidPermissionStatus = context.androidNotificationPermissionStatus()
+    }
     val hasBlockedActiveReminder = state.habits.any { habit -> habit.reminder.enabled } &&
-        androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked
+        !androidPermissionStatus.canPostNotifications
 
     LazyColumn(
         modifier = modifier
@@ -390,7 +396,7 @@ private fun HabitCard(
                 reminderTime = reminderTime,
                 priority = habit.reminder.priority,
                 reminderDeliveryBlocked = habit.reminder.enabled &&
-                    androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked,
+                    !androidPermissionStatus.canPostNotifications,
                 onReminderEnabledChange = { enabled ->
                     if (enabled && androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked) {
                         onRequestNotificationPermission()
@@ -484,7 +490,7 @@ private fun HabitEditorCard(
                 reminderTime = editor.reminderTime,
                 priority = editor.reminderPriority,
                 reminderDeliveryBlocked = editor.reminderEnabled &&
-                    androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked,
+                    !androidPermissionStatus.canPostNotifications,
                 onReminderEnabledChange = { enabled ->
                     if (enabled && androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked) {
                         onRequestNotificationPermission()

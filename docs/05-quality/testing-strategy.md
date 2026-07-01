@@ -8,7 +8,7 @@ LifeLab 的测试保护稳定产品行为，而不是保护每一种历史实现
 - Room、DataStore 和媒体存储策略等本地优先数据契约稳定
 - ViewModel 对加载、空态、错误、重试、筛选、提交等 UI 状态流转有覆盖
 - Manifest、应用身份、种子数据本地化、发布签名和版本配置等静态约束可被自动检查
-- PR 质量门只运行测试和 lint，发布 APK 构建只在 tag/manual release 路径运行
+- PR 质量门只运行测试和 lint，发布 APK 构建只在 `v*` tag 路径运行
 
 ## 2. 测试质量原则
 
@@ -28,7 +28,7 @@ LifeLab 的测试保护稳定产品行为，而不是保护每一种历史实现
 - `AppIdentityGradleConfigurationTest`
 - `AndroidManifestConfigurationTest`
 - `SeedDataLocalizationTest`
-- 发布工作流静态检查，确保 `assembleRelease`、签名 secret 校验和 APK artifact 上传只在 `workflow_dispatch` 或 `refs/tags/v*` 下运行
+- 发布工作流静态检查，确保 `assembleRelease`、签名 secret 校验和 APK artifact 上传只在 `refs/tags/v*` 下运行
 
 ### Data And Storage
 

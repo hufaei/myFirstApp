@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -12,10 +13,12 @@ enum class AndroidNotificationPermissionStatus {
     NotRequired,
     Granted,
     Blocked,
+    DisabledInSystemSettings,
 }
 
 val AndroidNotificationPermissionStatus.canPostNotifications: Boolean
-    get() = this != AndroidNotificationPermissionStatus.Blocked
+    get() = this == AndroidNotificationPermissionStatus.NotRequired ||
+        this == AndroidNotificationPermissionStatus.Granted
 
 class AndroidNotificationPermissionStatusReader {
     private val context: Context?
@@ -39,15 +42,18 @@ class AndroidNotificationPermissionStatusReader {
 }
 
 fun Context.androidNotificationPermissionStatus(): AndroidNotificationPermissionStatus =
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-        AndroidNotificationPermissionStatus.NotRequired
-    } else if (
+    if (
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
         ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
+        ) != PackageManager.PERMISSION_GRANTED
     ) {
-        AndroidNotificationPermissionStatus.Granted
-    } else {
         AndroidNotificationPermissionStatus.Blocked
+    } else if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+        AndroidNotificationPermissionStatus.DisabledInSystemSettings
+    } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        AndroidNotificationPermissionStatus.NotRequired
+    } else {
+        AndroidNotificationPermissionStatus.Granted
     }
