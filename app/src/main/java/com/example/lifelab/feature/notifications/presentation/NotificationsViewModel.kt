@@ -7,6 +7,7 @@ import com.example.lifelab.core.common.AppResult
 import com.example.lifelab.core.datastore.AppPreferences
 import com.example.lifelab.core.datastore.AppPreferencesRepository
 import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatusReader
+import com.example.lifelab.core.notifications.NotificationSelfTestResult
 import com.example.lifelab.core.notifications.NotificationSelfTestScheduler
 import com.example.lifelab.feature.notifications.domain.ChangeMessageStatusUseCase
 import com.example.lifelab.feature.notifications.domain.NotificationRepository
@@ -154,21 +155,21 @@ class NotificationsViewModel @Inject constructor(
     }
 
     private fun sendImmediateTestNotification() {
-        notificationSelfTestScheduler.showTestNotification()
+        val testResult = notificationSelfTestScheduler.showTestNotification()
         _uiState.update {
             it.copy(
                 errorMessage = null,
-                systemTestMessage = "测试通知已发送",
+                systemTestMessage = testResult.toUiMessage(),
             )
         }
     }
 
     private fun scheduleOneMinuteTestReminder() {
-        notificationSelfTestScheduler.scheduleTestReminderOneMinuteFromNow()
+        val testResult = notificationSelfTestScheduler.scheduleTestReminderOneMinuteFromNow()
         _uiState.update {
             it.copy(
                 errorMessage = null,
-                systemTestMessage = "已安排 1 分钟后测试提醒",
+                systemTestMessage = testResult.toUiMessage(),
             )
         }
     }
@@ -181,8 +182,14 @@ class NotificationsViewModel @Inject constructor(
 }
 
 private object NoOpNotificationSelfTestScheduler : NotificationSelfTestScheduler() {
-    override fun showTestNotification() = Unit
-    override fun scheduleTestReminderOneMinuteFromNow() = Unit
+    override fun showTestNotification(): NotificationSelfTestResult = NotificationSelfTestResult.Sent
+    override fun scheduleTestReminderOneMinuteFromNow(): NotificationSelfTestResult = NotificationSelfTestResult.Scheduled
 }
 
 private fun AppError.displayMessage(): String = message
+
+private fun NotificationSelfTestResult.toUiMessage(): NotificationSelfTestMessage = when (this) {
+    NotificationSelfTestResult.Sent -> NotificationSelfTestMessage.ImmediateSent
+    NotificationSelfTestResult.Scheduled -> NotificationSelfTestMessage.OneMinuteScheduled
+    NotificationSelfTestResult.Blocked -> NotificationSelfTestMessage.BlockedByAndroidNotifications
+}

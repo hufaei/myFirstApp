@@ -22,6 +22,12 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
+enum class NotificationSelfTestResult {
+    Sent,
+    Scheduled,
+    Blocked,
+}
+
 open class NotificationSelfTestScheduler {
     private val scheduler: HabitReminderNotificationScheduler?
 
@@ -34,13 +40,11 @@ open class NotificationSelfTestScheduler {
         scheduler = null
     }
 
-    open fun showTestNotification() {
+    open fun showTestNotification(): NotificationSelfTestResult =
         requireNotNull(scheduler).showTestNotification()
-    }
 
-    open fun scheduleTestReminderOneMinuteFromNow() {
+    open fun scheduleTestReminderOneMinuteFromNow(): NotificationSelfTestResult =
         requireNotNull(scheduler).scheduleTestReminderOneMinuteFromNow()
-    }
 }
 
 @Singleton
@@ -93,20 +97,28 @@ class HabitReminderNotificationScheduler @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    fun showTestNotification() {
+    fun showTestNotification(): NotificationSelfTestResult {
         if (!context.androidNotificationPermissionStatus().canPostNotifications) {
-            return
+            return NotificationSelfTestResult.Blocked
         }
-        ensureChannels()
-        showNotification(
-            notificationId = TEST_NOTIFICATION_ID.hashCode(),
-            priority = HabitReminderPriority.High,
-            title = context.getString(R.string.habit_reminder_test_notification_title),
-            body = context.getString(R.string.habit_reminder_test_notification_body),
-        )
+        return try {
+            ensureChannels()
+            showNotification(
+                notificationId = TEST_NOTIFICATION_ID.hashCode(),
+                priority = HabitReminderPriority.High,
+                title = context.getString(R.string.habit_reminder_test_notification_title),
+                body = context.getString(R.string.habit_reminder_test_notification_body),
+            )
+            NotificationSelfTestResult.Sent
+        } catch (_: SecurityException) {
+            NotificationSelfTestResult.Blocked
+        }
     }
 
-    fun scheduleTestReminderOneMinuteFromNow() {
+    fun scheduleTestReminderOneMinuteFromNow(): NotificationSelfTestResult {
+        if (!context.androidNotificationPermissionStatus().canPostNotifications) {
+            return NotificationSelfTestResult.Blocked
+        }
         val reminderTime = LocalTime.now().plusMinutes(1)
         schedule(
             habitId = TEST_REMINDER_ID,
@@ -117,6 +129,7 @@ class HabitReminderNotificationScheduler @Inject constructor(
             alarmClockEnabled = false,
             rescheduleAfterDelivery = false,
         )
+        return NotificationSelfTestResult.Scheduled
     }
 
     @SuppressLint("MissingPermission")

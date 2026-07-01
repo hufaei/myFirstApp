@@ -10,7 +10,7 @@ data class NotificationsUiState(
     val settings: NotificationSettings? = null,
     val systemIntegration: SystemNotificationIntegrationUiState = SystemNotificationIntegrationUiState(),
     val errorMessage: String? = null,
-    val systemTestMessage: String? = null,
+    val systemTestMessage: NotificationSelfTestMessage? = null,
 ) {
     val isEmpty: Boolean
         get() = !isLoading && errorMessage == null && (
@@ -42,6 +42,12 @@ data class SystemNotificationIntegrationUiState(
 enum class HabitReminderDeliveryStatus {
     ControlledFromHabits,
     BlockedByAndroidPermission,
+}
+
+enum class NotificationSelfTestMessage {
+    ImmediateSent,
+    OneMinuteScheduled,
+    BlockedByAndroidNotifications,
 }
 
 sealed interface NotificationsUiEvent {

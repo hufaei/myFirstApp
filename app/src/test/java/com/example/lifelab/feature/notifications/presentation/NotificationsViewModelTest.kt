@@ -6,6 +6,7 @@ import com.example.lifelab.core.datastore.AppPreferences
 import com.example.lifelab.core.datastore.InMemoryAppPreferencesRepository
 import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus
 import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatusReader
+import com.example.lifelab.core.notifications.NotificationSelfTestResult
 import com.example.lifelab.core.notifications.NotificationSelfTestScheduler
 import com.example.lifelab.core.testing.MainDispatcherRule
 import com.example.lifelab.feature.notifications.data.InMemoryNotificationRepository
@@ -139,7 +140,29 @@ class NotificationsViewModelTest {
 
         assertEquals(1, scheduler.immediateTestNotificationCount)
         assertEquals(0, scheduler.scheduledTestReminderCount)
-        assertEquals("测试通知已发送", viewModel.uiState.value.systemTestMessage)
+        assertEquals(NotificationSelfTestMessage.ImmediateSent, viewModel.uiState.value.systemTestMessage)
+    }
+
+    @Test
+    fun immediateSelfTestEventShowsBlockedMessageWhenNotificationCannotPost() = runTest {
+        val scheduler = FakeNotificationSelfTestScheduler(
+            immediateResult = NotificationSelfTestResult.Blocked,
+        )
+        val viewModel = NotificationsViewModel(
+            repository = InMemoryNotificationRepository(),
+            notificationSelfTestScheduler = scheduler,
+        )
+        advanceUntilIdle()
+
+        viewModel.onEvent(NotificationsUiEvent.SendImmediateTestNotification)
+        advanceUntilIdle()
+
+        assertEquals(1, scheduler.immediateTestNotificationCount)
+        assertEquals(0, scheduler.scheduledTestReminderCount)
+        assertEquals(
+            NotificationSelfTestMessage.BlockedByAndroidNotifications,
+            viewModel.uiState.value.systemTestMessage,
+        )
     }
 
     @Test
@@ -156,7 +179,29 @@ class NotificationsViewModelTest {
 
         assertEquals(0, scheduler.immediateTestNotificationCount)
         assertEquals(1, scheduler.scheduledTestReminderCount)
-        assertEquals("已安排 1 分钟后测试提醒", viewModel.uiState.value.systemTestMessage)
+        assertEquals(NotificationSelfTestMessage.OneMinuteScheduled, viewModel.uiState.value.systemTestMessage)
+    }
+
+    @Test
+    fun scheduledSelfTestEventShowsBlockedMessageWhenNotificationCannotPost() = runTest {
+        val scheduler = FakeNotificationSelfTestScheduler(
+            scheduledResult = NotificationSelfTestResult.Blocked,
+        )
+        val viewModel = NotificationsViewModel(
+            repository = InMemoryNotificationRepository(),
+            notificationSelfTestScheduler = scheduler,
+        )
+        advanceUntilIdle()
+
+        viewModel.onEvent(NotificationsUiEvent.ScheduleOneMinuteTestReminder)
+        advanceUntilIdle()
+
+        assertEquals(0, scheduler.immediateTestNotificationCount)
+        assertEquals(1, scheduler.scheduledTestReminderCount)
+        assertEquals(
+            NotificationSelfTestMessage.BlockedByAndroidNotifications,
+            viewModel.uiState.value.systemTestMessage,
+        )
     }
 
     @Test
@@ -337,17 +382,22 @@ private class DeferredSettingsNotificationRepository : NotificationRepository {
     }
 }
 
-private class FakeNotificationSelfTestScheduler : NotificationSelfTestScheduler() {
+private class FakeNotificationSelfTestScheduler(
+    private val immediateResult: NotificationSelfTestResult = NotificationSelfTestResult.Sent,
+    private val scheduledResult: NotificationSelfTestResult = NotificationSelfTestResult.Scheduled,
+) : NotificationSelfTestScheduler() {
     var immediateTestNotificationCount = 0
         private set
     var scheduledTestReminderCount = 0
         private set
 
-    override fun showTestNotification() {
+    override fun showTestNotification(): NotificationSelfTestResult {
         immediateTestNotificationCount += 1
+        return immediateResult
     }
 
-    override fun scheduleTestReminderOneMinuteFromNow() {
+    override fun scheduleTestReminderOneMinuteFromNow(): NotificationSelfTestResult {
         scheduledTestReminderCount += 1
+        return scheduledResult
     }
 }

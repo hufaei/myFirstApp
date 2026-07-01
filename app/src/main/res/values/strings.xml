@@ -213,9 +213,12 @@
     <string name="notifications_global_in_app_disabled">个人页的应用内消息偏好已关闭，因此消息列表会暂停显示。</string>
     <string name="notifications_habit_reminders_note">习惯提醒不在这里开关；请到习惯卡片设置时间和优先级。</string>
     <string name="notifications_self_test_title">通知自检</string>
-    <string name="notifications_self_test_guidance">小米/HyperOS 若未弹出，请确认系统通知允许；高优先级习惯可开启闹钟模式。</string>
+    <string name="notifications_self_test_guidance">小米/HyperOS：若提醒不响，请允许通知；有相关选项时允许自启动/后台活动，并将 LifeLab 电池策略设为无限制。闹钟模式是独立选项，不会绕过这些限制。</string>
     <string name="notifications_self_test_send_now">发送测试通知</string>
     <string name="notifications_self_test_schedule_one_minute">1 分钟后测试提醒</string>
+    <string name="notifications_self_test_message_sent">测试通知已发送</string>
+    <string name="notifications_self_test_message_scheduled">已安排 1 分钟后测试提醒</string>
+    <string name="notifications_self_test_message_blocked">通知权限或系统通知开关未开启，无法发送测试通知。</string>
     <string name="notifications_empty_active">暂无活跃消息</string>
     <string name="notifications_empty_disabled">应用内消息已关闭</string>
     <string name="notifications_category_value">分类：%1$s</string>

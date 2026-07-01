@@ -202,7 +202,7 @@ private fun NotificationsContent(
 private fun SettingsContent(
     settings: NotificationSettings,
     systemIntegration: SystemNotificationIntegrationUiState,
-    systemTestMessage: String?,
+    systemTestMessage: NotificationSelfTestMessage?,
     onEvent: (NotificationsUiEvent) -> Unit,
     onRequestAndroidNotificationPermission: () -> Unit,
 ) {
@@ -294,7 +294,7 @@ private fun SystemIntegrationContent(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SystemSelfTestContent(
-    systemTestMessage: String?,
+    systemTestMessage: NotificationSelfTestMessage?,
     onSendImmediateTestNotification: () -> Unit,
     onScheduleOneMinuteTestReminder: () -> Unit,
 ) {
@@ -329,7 +329,7 @@ private fun SystemSelfTestContent(
             }
             systemTestMessage?.let { message ->
                 Text(
-                    text = message,
+                    text = message.text(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -477,5 +477,18 @@ private fun HabitReminderDeliveryStatus.body(): String = when (this) {
     }
     HabitReminderDeliveryStatus.BlockedByAndroidPermission -> {
         stringResource(R.string.notifications_habit_reminders_blocked_by_permission)
+    }
+}
+
+@Composable
+private fun NotificationSelfTestMessage.text(): String = when (this) {
+    NotificationSelfTestMessage.ImmediateSent -> {
+        stringResource(R.string.notifications_self_test_message_sent)
+    }
+    NotificationSelfTestMessage.OneMinuteScheduled -> {
+        stringResource(R.string.notifications_self_test_message_scheduled)
+    }
+    NotificationSelfTestMessage.BlockedByAndroidNotifications -> {
+        stringResource(R.string.notifications_self_test_message_blocked)
     }
 }

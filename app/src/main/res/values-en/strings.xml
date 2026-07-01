@@ -213,9 +213,12 @@
     <string name="notifications_global_in_app_disabled">The in-app message preference is off in Profile, so the message list is paused.</string>
     <string name="notifications_habit_reminders_note">Habit reminders are not switched here; set time and priority on habit cards.</string>
     <string name="notifications_self_test_title">Notification self-test</string>
-    <string name="notifications_self_test_guidance">Xiaomi/HyperOS: if nothing appears, allow system notifications; high-priority habits can use alarm mode.</string>
+    <string name="notifications_self_test_guidance">Xiaomi/HyperOS: if reminders do not fire, allow notifications, allow autostart/background activity when available, and set LifeLab battery saver to No restrictions. Alarm mode is separate and does not bypass these settings.</string>
     <string name="notifications_self_test_send_now">Send test notification</string>
     <string name="notifications_self_test_schedule_one_minute">Test reminder in 1 minute</string>
+    <string name="notifications_self_test_message_sent">Test notification sent.</string>
+    <string name="notifications_self_test_message_scheduled">Test reminder scheduled for 1 minute from now.</string>
+    <string name="notifications_self_test_message_blocked">Notifications are blocked by Android permission or system settings, so the test could not be sent.</string>
     <string name="notifications_empty_active">No active notifications</string>
     <string name="notifications_empty_disabled">In-app messages are disabled</string>
     <string name="notifications_category_value">Category: %1$s</string>
