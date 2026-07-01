@@ -29,11 +29,13 @@ class SeedDataLocalizationTest {
         val database = readMainText("java/com/example/lifelab/core/database/LifeLabDatabase.kt")
         val module = readMainText("java/com/example/lifelab/app/di/AppModule.kt")
 
-        assertTrue(database.contains("version = 3"), "Room version must include seed localization and reminder migrations.")
+        assertTrue(database.contains("version = 4"), "Room version must include seed localization and reminder migrations.")
         assertTrue(database.contains("MIGRATION_1_2"), "Seed data localization migration must stay registered in the database.")
         assertTrue(database.contains("MIGRATION_2_3"), "Reminder priority migration must stay registered in the database.")
+        assertTrue(database.contains("MIGRATION_3_4"), "Reminder alarm mode migration must stay registered in the database.")
         assertTrue(module.contains("LifeLabDatabase.MIGRATION_1_2"), "Room builder must register the localization migration.")
         assertTrue(module.contains("LifeLabDatabase.MIGRATION_2_3"), "Room builder must register the reminder priority migration.")
+        assertTrue(module.contains("LifeLabDatabase.MIGRATION_3_4"), "Room builder must register the reminder alarm mode migration.")
     }
 
     @Test

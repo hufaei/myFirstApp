@@ -48,6 +48,7 @@ data class HabitEditorState(
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = DefaultHabitReminderTime,
     val reminderPriority: HabitReminderPriority = HabitReminderPriority.Normal,
+    val reminderAlarmClockEnabled: Boolean = false,
 ) {
     val canSave: Boolean
         get() = name.isNotBlank()

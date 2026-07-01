@@ -101,11 +101,12 @@ class HabitsViewModelTest {
     }
 
     @Test
-    fun habitsAreSortedByReminderPriorityThenTime() = runTest {
+    fun habitsAreSortedByReminderEnabledTimeThenNameWithoutPriorityWeight() = runTest {
         val repository = InMemoryHabitRepository(
             initialHabits = listOf(
                 sampleHabit(
                     id = "later-normal",
+                    name = "Later normal",
                     reminder = HabitReminder(
                         enabled = true,
                         time = LocalTime.of(18, 0),
@@ -114,6 +115,7 @@ class HabitsViewModelTest {
                 ),
                 sampleHabit(
                     id = "off-high",
+                    name = "Off high",
                     reminder = HabitReminder(
                         enabled = false,
                         time = LocalTime.of(8, 0),
@@ -122,6 +124,7 @@ class HabitsViewModelTest {
                 ),
                 sampleHabit(
                     id = "urgent",
+                    name = "Urgent",
                     reminder = HabitReminder(
                         enabled = true,
                         time = LocalTime.of(12, 0),
@@ -130,6 +133,7 @@ class HabitsViewModelTest {
                 ),
                 sampleHabit(
                     id = "early-normal",
+                    name = "Early normal",
                     reminder = HabitReminder(
                         enabled = true,
                         time = LocalTime.of(8, 0),
@@ -145,11 +149,43 @@ class HabitsViewModelTest {
         )
 
         assertEquals(
-            listOf("urgent", "early-normal", "later-normal", "off-high"),
+            listOf("early-normal", "urgent", "later-normal", "off-high"),
             viewModel.uiState.value.habits.map { it.id },
         )
     }
 
+    @Test
+    fun changingPriorityAwayFromHighClearsAlarmClockMode() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "hydrate",
+                    reminder = HabitReminder(
+                        enabled = true,
+                        time = LocalTime.of(9, 0),
+                        priority = HabitReminderPriority.High,
+                        alarmClockEnabled = true,
+                    ),
+                ),
+            ),
+        )
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+        )
+
+        viewModel.updateReminderPriority("hydrate", HabitReminderPriority.Normal)
+
+        assertEquals(
+            HabitReminder(
+                enabled = true,
+                time = LocalTime.of(9, 0),
+                priority = HabitReminderPriority.Normal,
+                alarmClockEnabled = false,
+            ),
+            viewModel.uiState.value.habits.single().reminder,
+        )
+    }
 
     @Test
     fun reminderUpdateChangesTargetHabitReminderAndActiveReminderCount() = runTest {
@@ -203,6 +239,7 @@ class HabitsViewModelTest {
         viewModel.setEditorReminderEnabled(true)
         viewModel.updateEditorReminderTime(LocalTime.of(7, 30))
         viewModel.updateEditorReminderPriority(HabitReminderPriority.High)
+        viewModel.setEditorAlarmClockEnabled(true)
         viewModel.saveEditor()
 
         val state = viewModel.uiState.value
@@ -213,6 +250,7 @@ class HabitsViewModelTest {
                 enabled = true,
                 time = LocalTime.of(7, 30),
                 priority = HabitReminderPriority.High,
+                alarmClockEnabled = true,
             ),
             created.reminder,
         )

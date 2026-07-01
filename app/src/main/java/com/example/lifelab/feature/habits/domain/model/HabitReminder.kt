@@ -6,6 +6,7 @@ data class HabitReminder(
     val enabled: Boolean,
     val time: LocalTime?,
     val priority: HabitReminderPriority = HabitReminderPriority.Normal,
+    val alarmClockEnabled: Boolean = false,
 )
 
 enum class HabitReminderPriority(

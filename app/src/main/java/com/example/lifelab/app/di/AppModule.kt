@@ -43,6 +43,7 @@ object AppModule {
         ).addMigrations(
             LifeLabDatabase.MIGRATION_1_2,
             LifeLabDatabase.MIGRATION_2_3,
+            LifeLabDatabase.MIGRATION_3_4,
         ).build()
 
     @Provides

@@ -123,7 +123,23 @@ class HabitsViewModel(
         val habit = uiState.value.habits.firstOrNull { it.id == habitId } ?: return
         updateReminder(
             habitId = habitId,
-            reminder = habit.reminder.copy(priority = priority),
+            reminder = habit.reminder.copy(
+                priority = priority,
+                alarmClockEnabled = habit.reminder.alarmClockEnabled && priority == HabitReminderPriority.High,
+            ),
+        )
+    }
+
+    fun setReminderAlarmClockEnabled(
+        habitId: String,
+        enabled: Boolean,
+    ) {
+        val habit = uiState.value.habits.firstOrNull { it.id == habitId } ?: return
+        updateReminder(
+            habitId = habitId,
+            reminder = habit.reminder.copy(
+                alarmClockEnabled = enabled && habit.reminder.priority == HabitReminderPriority.High,
+            ),
         )
     }
 
@@ -149,6 +165,8 @@ class HabitsViewModel(
                 reminderEnabled = habit.reminder.enabled,
                 reminderTime = habit.reminder.time ?: DefaultHabitReminderTime,
                 reminderPriority = habit.reminder.priority,
+                reminderAlarmClockEnabled = habit.reminder.alarmClockEnabled &&
+                    habit.reminder.priority == HabitReminderPriority.High,
             ),
             message = null,
         )
@@ -166,12 +184,22 @@ class HabitsViewModel(
         updateEditor { editor -> editor.copy(reminderTime = time) }
     }
 
-    fun increaseEditorReminderTime() {
-        updateEditor { editor -> editor.copy(reminderTime = editor.reminderTime.plusMinutes(30)) }
+    fun updateEditorReminderPriority(priority: HabitReminderPriority) {
+        updateEditor { editor ->
+            editor.copy(
+                reminderPriority = priority,
+                reminderAlarmClockEnabled = editor.reminderAlarmClockEnabled &&
+                    priority == HabitReminderPriority.High,
+            )
+        }
     }
 
-    fun updateEditorReminderPriority(priority: HabitReminderPriority) {
-        updateEditor { editor -> editor.copy(reminderPriority = priority) }
+    fun setEditorAlarmClockEnabled(enabled: Boolean) {
+        updateEditor { editor ->
+            editor.copy(
+                reminderAlarmClockEnabled = enabled && editor.reminderPriority == HabitReminderPriority.High,
+            )
+        }
     }
 
     fun dismissEditor() {
@@ -279,6 +307,7 @@ class HabitsViewModel(
             enabled = reminderEnabled,
             time = if (reminderEnabled) reminderTime else null,
             priority = reminderPriority,
+            alarmClockEnabled = reminderAlarmClockEnabled && reminderPriority == HabitReminderPriority.High,
         )
 
     private fun buildHabitId(name: String): String {
@@ -383,7 +412,6 @@ private fun String.toHabitIdSlug(): String {
 private fun List<Habit>.sortedForDisplay(): List<Habit> =
     sortedWith(
         compareBy<Habit> { habit -> if (habit.reminder.enabled) 0 else 1 }
-            .thenBy { habit -> habit.reminder.priority.sortWeight }
             .thenBy { habit -> habit.reminder.time?.toSecondOfDay() ?: Int.MAX_VALUE }
             .thenBy { habit -> habit.name },
     )

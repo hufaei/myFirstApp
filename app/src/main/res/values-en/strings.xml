@@ -37,9 +37,11 @@
     <string name="profile_open_lab">Open lab</string>
     <string name="profile_open_notifications">Open messages</string>
     <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
     <string name="common_dismiss">Dismiss</string>
     <string name="common_refresh">Refresh</string>
     <string name="common_retry">Retry</string>
+    <string name="common_save">Save</string>
     <string name="home_title">Today</string>
     <string name="home_subtitle">Today in LifeLab</string>
     <string name="home_action_search">Search</string>
@@ -172,12 +174,13 @@
     <string name="habits_check_in">Check in</string>
     <string name="habits_reminder">Reminder</string>
     <string name="habits_no_time">No time set</string>
-    <string name="habits_set_default_time">Set 09:00</string>
-    <string name="habits_add_30_minutes">+30 min</string>
+    <string name="habits_choose_reminder_time">Choose reminder time</string>
     <string name="habits_reminder_permission_blocked_title">Reminder notifications are blocked</string>
     <string name="habits_reminder_permission_blocked_body">Enabled habit reminders keep their time settings, but Android will not show notifications right now.</string>
     <string name="habits_reminder_permission_action">Allow notifications</string>
     <string name="habits_reminder_delivery_blocked">Android notification permission is off, so this reminder cannot be delivered yet.</string>
+    <string name="habits_alarm_clock_enabled">Alarm mode</string>
+    <string name="habits_alarm_clock_enabled_body">High-priority reminders can use a more prominent system alarm reminder.</string>
     <string name="habits_editor_create_title">New habit</string>
     <string name="habits_editor_edit_title">Edit habit</string>
     <string name="habits_editor_name">Habit name</string>

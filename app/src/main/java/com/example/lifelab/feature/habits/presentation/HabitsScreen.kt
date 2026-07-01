@@ -3,15 +3,20 @@ package com.example.lifelab.feature.habits.presentation
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,10 +26,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -34,6 +41,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,14 +81,16 @@ fun HabitsScreen(
     onStartEdit: (String) -> Unit,
     onUpdateEditorName: (String) -> Unit,
     onEditorReminderEnabledChange: (Boolean) -> Unit,
-    onIncreaseEditorReminderTime: () -> Unit,
+    onEditorReminderTimeChange: (LocalTime) -> Unit,
     onEditorReminderPriorityChange: (HabitReminderPriority) -> Unit,
+    onEditorAlarmClockEnabledChange: (Boolean) -> Unit,
     onSaveEditor: () -> Unit,
     onDismissEditor: () -> Unit,
     onCheckIn: (String) -> Unit,
     onReminderEnabledChange: (String, Boolean) -> Unit,
     onReminderTimeChange: (String, LocalTime) -> Unit,
     onReminderPriorityChange: (String, HabitReminderPriority) -> Unit,
+    onReminderAlarmClockEnabledChange: (String, Boolean) -> Unit,
     onAttachPhotos: (String, List<String>, PhotoSource) -> Unit,
     onClearMessage: () -> Unit,
     modifier: Modifier = Modifier,
@@ -163,8 +175,9 @@ fun HabitsScreen(
                     editor = editor,
                     onUpdateName = onUpdateEditorName,
                     onReminderEnabledChange = onEditorReminderEnabledChange,
-                    onIncreaseReminderTime = onIncreaseEditorReminderTime,
+                    onReminderTimeChange = onEditorReminderTimeChange,
                     onReminderPriorityChange = onEditorReminderPriorityChange,
+                    onAlarmClockEnabledChange = onEditorAlarmClockEnabledChange,
                     androidPermissionStatus = androidPermissionStatus,
                     onRequestNotificationPermission = {
                         pendingEditorReminderEnable = true
@@ -215,6 +228,7 @@ fun HabitsScreen(
                     onReminderEnabledChange = onReminderEnabledChange,
                     onReminderTimeChange = onReminderTimeChange,
                     onReminderPriorityChange = onReminderPriorityChange,
+                    onReminderAlarmClockEnabledChange = onReminderAlarmClockEnabledChange,
                     onAttachPhotos = onAttachPhotos,
                     androidPermissionStatus = androidPermissionStatus,
                     onRequestNotificationPermission = {
@@ -302,126 +316,141 @@ private fun HabitCard(
     onReminderEnabledChange: (String, Boolean) -> Unit,
     onReminderTimeChange: (String, LocalTime) -> Unit,
     onReminderPriorityChange: (String, HabitReminderPriority) -> Unit,
+    onReminderAlarmClockEnabledChange: (String, Boolean) -> Unit,
     onAttachPhotos: (String, List<String>, PhotoSource) -> Unit,
     androidPermissionStatus: AndroidNotificationPermissionStatus,
     onRequestNotificationPermission: () -> Unit,
 ) {
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
     val reminderTime = habit.reminder.time
+    val priorityAccentColor = priorityAccentColor(habit.reminder.priority)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = priorityContainerColor(habit.reminder.priority),
         ),
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                .height(IntrinsicSize.Min),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.Top,
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(4.dp)
+                    .background(priorityAccentColor),
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.Top,
                 ) {
-                    Text(
-                        text = habit.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = habit.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = stringResource(R.string.habits_current_streak, habit.streakCount),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            text = if (isCheckedInToday) {
+                                stringResource(R.string.habits_checked_today)
+                            } else {
+                                stringResource(R.string.habits_not_checked_today)
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (isCheckedInToday) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                        )
+                    }
+                }
+
+                FilledTonalButton(
+                    onClick = { onCheckIn(habit.id) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isCheckedInToday,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = stringResource(R.string.habits_current_streak, habit.streakCount),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = if (isCheckedInToday) {
+                        if (isCheckedInToday) {
                             stringResource(R.string.habits_checked_today)
                         } else {
-                            stringResource(R.string.habits_not_checked_today)
-                        },
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isCheckedInToday) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            stringResource(R.string.habits_check_in)
                         },
                     )
                 }
-            }
+                OutlinedButton(
+                    onClick = { onStartEdit(habit.id) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.habits_edit))
+                }
 
-            FilledTonalButton(
-                onClick = { onCheckIn(habit.id) },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isCheckedInToday,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
+                ReminderControls(
+                    reminderEnabled = habit.reminder.enabled,
+                    reminderTimeLabel = reminderTime?.format(timeFormatter)
+                        ?: stringResource(R.string.habits_no_time),
+                    reminderTime = reminderTime,
+                    priority = habit.reminder.priority,
+                    alarmClockEnabled = habit.reminder.alarmClockEnabled,
+                    reminderDeliveryBlocked = habit.reminder.enabled &&
+                        !androidPermissionStatus.canPostNotifications,
+                    onReminderEnabledChange = { enabled ->
+                        if (enabled && androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked) {
+                            onRequestNotificationPermission()
+                        } else {
+                            onReminderEnabledChange(habit.id, enabled)
+                        }
+                    },
+                    onReminderTimeChange = { time ->
+                        onReminderTimeChange(habit.id, time)
+                    },
+                    onReminderPriorityChange = { priority ->
+                        onReminderPriorityChange(habit.id, priority)
+                    },
+                    onAlarmClockEnabledChange = { enabled ->
+                        onReminderAlarmClockEnabledChange(habit.id, enabled)
+                    },
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    if (isCheckedInToday) {
-                        stringResource(R.string.habits_checked_today)
-                    } else {
-                        stringResource(R.string.habits_check_in)
+
+                LifeLabPhotoStrip(
+                    owner = habitPhotoOwner(habit.id),
+                    photos = photos,
+                    onAttachPhotos = { localUris, source ->
+                        onAttachPhotos(habit.id, localUris, source)
                     },
                 )
             }
-            OutlinedButton(
-                onClick = { onStartEdit(habit.id) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.habits_edit))
-            }
-
-            ReminderControls(
-                reminderEnabled = habit.reminder.enabled,
-                reminderTimeLabel = reminderTime?.format(timeFormatter)
-                    ?: stringResource(R.string.habits_no_time),
-                reminderTime = reminderTime,
-                priority = habit.reminder.priority,
-                reminderDeliveryBlocked = habit.reminder.enabled &&
-                    !androidPermissionStatus.canPostNotifications,
-                onReminderEnabledChange = { enabled ->
-                    if (enabled && androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked) {
-                        onRequestNotificationPermission()
-                    } else {
-                        onReminderEnabledChange(habit.id, enabled)
-                    }
-                },
-                onReminderTimeChange = {
-                    onReminderTimeChange(
-                        habit.id,
-                        reminderTime?.plusMinutes(30) ?: LocalTime.of(9, 0),
-                    )
-                },
-                onReminderPriorityChange = { priority ->
-                    onReminderPriorityChange(habit.id, priority)
-                },
-            )
-
-            LifeLabPhotoStrip(
-                owner = habitPhotoOwner(habit.id),
-                photos = photos,
-                onAttachPhotos = { localUris, source ->
-                    onAttachPhotos(habit.id, localUris, source)
-                },
-            )
         }
     }
 }
@@ -449,8 +478,9 @@ private fun HabitEditorCard(
     editor: HabitEditorState,
     onUpdateName: (String) -> Unit,
     onReminderEnabledChange: (Boolean) -> Unit,
-    onIncreaseReminderTime: () -> Unit,
+    onReminderTimeChange: (LocalTime) -> Unit,
     onReminderPriorityChange: (HabitReminderPriority) -> Unit,
+    onAlarmClockEnabledChange: (Boolean) -> Unit,
     androidPermissionStatus: AndroidNotificationPermissionStatus,
     onRequestNotificationPermission: () -> Unit,
     onSave: () -> Unit,
@@ -489,6 +519,7 @@ private fun HabitEditorCard(
                 reminderTimeLabel = editor.reminderTime.format(timeFormatter),
                 reminderTime = editor.reminderTime,
                 priority = editor.reminderPriority,
+                alarmClockEnabled = editor.reminderAlarmClockEnabled,
                 reminderDeliveryBlocked = editor.reminderEnabled &&
                     !androidPermissionStatus.canPostNotifications,
                 onReminderEnabledChange = { enabled ->
@@ -498,8 +529,9 @@ private fun HabitEditorCard(
                         onReminderEnabledChange(enabled)
                     }
                 },
-                onReminderTimeChange = onIncreaseReminderTime,
+                onReminderTimeChange = onReminderTimeChange,
                 onReminderPriorityChange = onReminderPriorityChange,
+                onAlarmClockEnabledChange = onAlarmClockEnabledChange,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -530,11 +562,15 @@ private fun ReminderControls(
     reminderTimeLabel: String,
     reminderTime: LocalTime?,
     priority: HabitReminderPriority,
+    alarmClockEnabled: Boolean,
     reminderDeliveryBlocked: Boolean,
     onReminderEnabledChange: (Boolean) -> Unit,
-    onReminderTimeChange: () -> Unit,
+    onReminderTimeChange: (LocalTime) -> Unit,
     onReminderPriorityChange: (HabitReminderPriority) -> Unit,
+    onAlarmClockEnabledChange: (Boolean) -> Unit,
 ) {
+    var showTimePicker by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -571,16 +607,10 @@ private fun ReminderControls(
             )
         }
         OutlinedButton(
-            onClick = onReminderTimeChange,
+            onClick = { showTimePicker = true },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(
-                if (reminderTime == null) {
-                    stringResource(R.string.habits_set_default_time)
-                } else {
-                    stringResource(R.string.habits_add_30_minutes)
-                },
-            )
+            Text(stringResource(R.string.habits_choose_reminder_time))
         }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -594,8 +624,96 @@ private fun ReminderControls(
                 )
             }
         }
+        if (priority == HabitReminderPriority.High) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.habits_alarm_clock_enabled),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                    Text(
+                        text = stringResource(R.string.habits_alarm_clock_enabled_body),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = alarmClockEnabled,
+                    onCheckedChange = onAlarmClockEnabledChange,
+                )
+            }
+        }
+    }
+
+    if (showTimePicker) {
+        ReminderTimePickerDialog(
+            initialTime = reminderTime ?: DefaultHabitReminderTime,
+            onDismiss = { showTimePicker = false },
+            onConfirm = { selectedTime ->
+                showTimePicker = false
+                onReminderTimeChange(selectedTime)
+            },
+        )
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReminderTimePickerDialog(
+    initialTime: LocalTime,
+    onDismiss: () -> Unit,
+    onConfirm: (LocalTime) -> Unit,
+) {
+    val timePickerState = rememberTimePickerState(
+        initialHour = initialTime.hour,
+        initialMinute = initialTime.minute,
+        is24Hour = true,
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(LocalTime.of(timePickerState.hour, timePickerState.minute))
+                },
+            ) {
+                Text(stringResource(R.string.common_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.common_cancel))
+            }
+        },
+        text = {
+            TimePicker(state = timePickerState)
+        },
+    )
+}
+
+@Composable
+private fun priorityAccentColor(priority: HabitReminderPriority) =
+    when (priority) {
+        HabitReminderPriority.High -> MaterialTheme.colorScheme.primary
+        HabitReminderPriority.Normal -> MaterialTheme.colorScheme.primary.copy(alpha = 0.70f)
+        HabitReminderPriority.Low -> MaterialTheme.colorScheme.primary.copy(alpha = 0.36f)
+    }
+
+@Composable
+private fun priorityContainerColor(priority: HabitReminderPriority) =
+    when (priority) {
+        HabitReminderPriority.High -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.24f)
+        HabitReminderPriority.Normal -> MaterialTheme.colorScheme.surface
+        HabitReminderPriority.Low -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f)
+    }
 
 @Composable
 private fun HabitReminderPriority.label(): String =

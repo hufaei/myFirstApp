@@ -29,7 +29,12 @@ class RoomHabitRepositoryTest {
                 frequency = HabitFrequency.Daily,
                 streakCount = 1,
                 lastCheckInDate = checkInDate,
-                reminder = HabitReminder(enabled = true, time = LocalTime.of(9, 0)),
+                reminder = HabitReminder(
+                    enabled = true,
+                    time = LocalTime.of(9, 0),
+                    priority = HabitReminderPriority.High,
+                    alarmClockEnabled = true,
+                ),
                 checkInDates = setOf(checkInDate),
             ),
         )

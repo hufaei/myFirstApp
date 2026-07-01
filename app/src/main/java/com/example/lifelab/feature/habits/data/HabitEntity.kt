@@ -20,11 +20,13 @@ data class HabitEntity(
     @ColumnInfo(name = "reminder_enabled") val reminderEnabled: Boolean,
     @ColumnInfo(name = "reminder_time_second_of_day") val reminderTimeSecondOfDay: Int?,
     @ColumnInfo(name = "reminder_priority") val reminderPriority: String,
+    @ColumnInfo(name = "reminder_alarm_clock_enabled") val reminderAlarmClockEnabled: Boolean,
     @ColumnInfo(name = "check_in_dates") val checkInDates: String,
 )
 
-fun HabitEntity.toDomain(): Habit =
-    Habit(
+fun HabitEntity.toDomain(): Habit {
+    val priority = reminderPriority.toHabitReminderPriority()
+    return Habit(
         id = id,
         name = name,
         frequency = HabitFrequency.valueOf(frequency),
@@ -33,10 +35,12 @@ fun HabitEntity.toDomain(): Habit =
         reminder = HabitReminder(
             enabled = reminderEnabled,
             time = reminderTimeSecondOfDay?.let { LocalTime.ofSecondOfDay(it.toLong()) },
-            priority = reminderPriority.toHabitReminderPriority(),
+            priority = priority,
+            alarmClockEnabled = reminderAlarmClockEnabled && priority == HabitReminderPriority.High,
         ),
         checkInDates = decodeDates(checkInDates),
     )
+}
 
 fun Habit.toEntity(): HabitEntity =
     HabitEntity(
@@ -48,6 +52,7 @@ fun Habit.toEntity(): HabitEntity =
         reminderEnabled = reminder.enabled,
         reminderTimeSecondOfDay = reminder.time?.toSecondOfDay(),
         reminderPriority = reminder.priority.name,
+        reminderAlarmClockEnabled = reminder.alarmClockEnabled && reminder.priority == HabitReminderPriority.High,
         checkInDates = encodeDates(checkInDates),
     )
 

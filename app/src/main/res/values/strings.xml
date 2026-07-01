@@ -37,9 +37,11 @@
     <string name="profile_open_lab">打开实验室</string>
     <string name="profile_open_notifications">查看消息</string>
     <string name="common_back">返回</string>
+    <string name="common_cancel">取消</string>
     <string name="common_dismiss">知道了</string>
     <string name="common_refresh">刷新</string>
     <string name="common_retry">重试</string>
+    <string name="common_save">保存</string>
     <string name="home_title">今天</string>
     <string name="home_subtitle">LifeLab 今日</string>
     <string name="home_action_search">搜索</string>
@@ -172,12 +174,13 @@
     <string name="habits_check_in">打卡</string>
     <string name="habits_reminder">提醒</string>
     <string name="habits_no_time">未设置时间</string>
-    <string name="habits_set_default_time">设为 09:00</string>
-    <string name="habits_add_30_minutes">+30 分钟</string>
+    <string name="habits_choose_reminder_time">选择提醒时间</string>
     <string name="habits_reminder_permission_blocked_title">提醒通知被系统权限阻止</string>
     <string name="habits_reminder_permission_blocked_body">已开启的习惯提醒会继续保留时间设置，但 Android 当前不会显示通知。</string>
     <string name="habits_reminder_permission_action">允许通知</string>
     <string name="habits_reminder_delivery_blocked">Android 通知权限未开启，此提醒暂时无法送达。</string>
+    <string name="habits_alarm_clock_enabled">闹钟模式</string>
+    <string name="habits_alarm_clock_enabled_body">高优先级提醒可用更醒目的系统闹钟提醒。</string>
     <string name="habits_editor_create_title">新建习惯</string>
     <string name="habits_editor_edit_title">编辑习惯</string>
     <string name="habits_editor_name">习惯名称</string>
