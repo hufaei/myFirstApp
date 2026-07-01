@@ -26,9 +26,9 @@ fun SearchRoute(
         onHistoryClick = viewModel::selectHistoryQuery,
         onClearHistoryClick = viewModel::clearHistory,
         onRetryClick = viewModel::retry,
-        onResultClick = viewModel::selectResult,
-        onResultDetailDismiss = viewModel::clearSelectedResult,
-        onOpenResultDestination = onOpenResultDestination,
+        onResultClick = { item ->
+            onOpenResultDestination(item.type)
+        },
         onBack = onBack,
     )
 }

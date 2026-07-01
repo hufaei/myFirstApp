@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -48,18 +47,10 @@ fun SearchScreen(
     onHistoryClick: (String) -> Unit,
     onClearHistoryClick: () -> Unit,
     onRetryClick: () -> Unit,
-    onResultClick: (String) -> Unit,
-    onResultDetailDismiss: () -> Unit,
-    onOpenResultDestination: (SearchResultType) -> Unit,
+    onResultClick: (SearchResultItem) -> Unit,
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val headerBack = if (uiState.selectedResultDetail != null) {
-        onResultDetailDismiss
-    } else {
-        onBack
-    }
-
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -72,7 +63,7 @@ fun SearchScreen(
                 query = uiState.query,
                 onQueryChanged = onQueryChanged,
                 onSubmitQuery = onSubmitQuery,
-                onBack = headerBack,
+                onBack = onBack,
             )
         }
 
@@ -81,16 +72,6 @@ fun SearchScreen(
                 selectedFilter = uiState.selectedFilter,
                 onFilterSelected = onFilterSelected,
             )
-        }
-
-        uiState.selectedResultDetail?.let { detail ->
-            item {
-                SearchResultDetailCard(
-                    detail = detail,
-                    onDismiss = onResultDetailDismiss,
-                    onOpenDestination = onOpenResultDestination,
-                )
-            }
         }
 
         when (val resultContent = uiState.resultContent) {
@@ -273,53 +254,9 @@ private fun HistorySection(
 }
 
 @Composable
-private fun SearchResultDetailCard(
-    detail: SearchResultDetail,
-    onDismiss: () -> Unit,
-    onOpenDestination: (SearchResultType) -> Unit,
-) {
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(14.dp),
-        ) {
-            Text(
-                text = detail.type.label(),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            Text(
-                text = detail.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            if (detail.summary.isNotBlank()) {
-                Text(
-                    text = detail.summary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            }
-            LifeLabPrimaryActionRow(
-                primaryLabel = stringResource(R.string.search_detail_open_related),
-                onPrimaryClick = { onOpenDestination(detail.type) },
-                secondaryLabel = stringResource(R.string.common_dismiss),
-                onSecondaryClick = onDismiss,
-            )
-        }
-    }
-}
-
-@Composable
 private fun SearchResultRow(
     item: SearchResultItem,
-    onClick: (String) -> Unit,
+    onClick: (SearchResultItem) -> Unit,
 ) {
     Card(
         shape = MaterialTheme.shapes.small,
@@ -328,7 +265,7 @@ private fun SearchResultRow(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(item.id) },
+            .clickable { onClick(item) },
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp),

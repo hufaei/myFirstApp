@@ -153,7 +153,6 @@
     <string name="search_type_task">Task</string>
     <string name="search_type_habit">Habit</string>
     <string name="search_type_notification">Notification</string>
-    <string name="search_detail_open_related">Open related page</string>
     <string name="habits_title">Habits</string>
     <string name="habits_subtitle">Check-ins, reminders, and photo notes.</string>
     <string name="habits_new">New</string>

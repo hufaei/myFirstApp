@@ -38,10 +38,7 @@ class SearchViewModel @Inject constructor(
 
     fun onQueryChanged(query: String) {
         _uiState.update {
-            it.copy(
-                query = query,
-                selectedResultDetail = null,
-            )
+            it.copy(query = query)
         }
     }
 
@@ -59,7 +56,6 @@ class SearchViewModel @Inject constructor(
             it.copy(
                 query = trimmedQuery,
                 lastSubmittedQuery = trimmedQuery,
-                selectedResultDetail = null,
             )
         }
         search(trimmedQuery, uiState.value.selectedFilter, shouldRecordHistory = true)
@@ -68,28 +64,12 @@ class SearchViewModel @Inject constructor(
     fun selectFilter(filter: SearchFilter) {
         val lastSubmittedQuery = uiState.value.lastSubmittedQuery
         _uiState.update {
-            it.copy(
-                selectedFilter = filter,
-                selectedResultDetail = null,
-            )
+            it.copy(selectedFilter = filter)
         }
 
         if (!lastSubmittedQuery.isNullOrBlank()) {
             search(lastSubmittedQuery, filter, shouldRecordHistory = false)
         }
-    }
-
-    fun selectResult(resultId: String) {
-        val content = uiState.value.resultContent as? SearchResultContent.Content ?: return
-        val selectedResult = content.items.firstOrNull { item -> item.id == resultId } ?: return
-
-        _uiState.update {
-            it.copy(selectedResultDetail = selectedResult.toDetail())
-        }
-    }
-
-    fun clearSelectedResult() {
-        _uiState.update { it.copy(selectedResultDetail = null) }
     }
 
     fun selectHotKeyword(keyword: String) {
@@ -125,7 +105,6 @@ class SearchViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     resultContent = SearchResultContent.Loading,
-                    selectedResultDetail = null,
                 )
             }
 
@@ -158,12 +137,4 @@ class SearchViewModel @Inject constructor(
             SearchResultContent.Content(this)
         }
     }
-
-    private fun SearchResultItem.toDetail(): SearchResultDetail =
-        SearchResultDetail(
-            id = id,
-            title = title,
-            summary = summary,
-            type = type,
-        )
 }
