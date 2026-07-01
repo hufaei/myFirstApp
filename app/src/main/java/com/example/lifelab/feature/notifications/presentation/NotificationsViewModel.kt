@@ -6,6 +6,7 @@ import com.example.lifelab.core.common.AppError
 import com.example.lifelab.core.common.AppResult
 import com.example.lifelab.core.datastore.AppPreferences
 import com.example.lifelab.core.datastore.AppPreferencesRepository
+import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatusReader
 import com.example.lifelab.feature.notifications.domain.ChangeMessageStatusUseCase
 import com.example.lifelab.feature.notifications.domain.NotificationRepository
 import com.example.lifelab.feature.notifications.domain.NotificationSettings
@@ -25,6 +26,10 @@ import kotlinx.coroutines.launch
 class NotificationsViewModel @Inject constructor(
     private val repository: NotificationRepository,
     private val appPreferencesRepository: AppPreferencesRepository? = null,
+    private val notificationPermissionStatusReader: AndroidNotificationPermissionStatusReader =
+        AndroidNotificationPermissionStatusReader(
+            com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus.NotRequired,
+        ),
 ) : ViewModel() {
 
     private val changeMessageStatus = ChangeMessageStatusUseCase(repository)
@@ -32,6 +37,7 @@ class NotificationsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(NotificationsUiState())
     val uiState: StateFlow<NotificationsUiState> = _uiState.asStateFlow()
     private var latestSettings: NotificationSettings? = null
+    private var latestAppNotificationPreferenceEnabled: Boolean = true
 
     init {
         observeRepository()
@@ -46,10 +52,7 @@ class NotificationsViewModel @Inject constructor(
                 inAppMessagesEnabled = event.enabled,
                 systemNotificationsEnabled = latestSettings?.systemNotificationsEnabled ?: false,
             )
-            is NotificationsUiEvent.SetSystemNotificationsEnabled -> updateSettings(
-                inAppMessagesEnabled = latestSettings?.inAppMessagesEnabled ?: true,
-                systemNotificationsEnabled = event.enabled,
-            )
+            NotificationsUiEvent.RefreshSystemNotificationPermission -> refreshSystemIntegrationState()
             NotificationsUiEvent.RetryRefresh -> refresh()
         }
     }
@@ -58,9 +61,9 @@ class NotificationsViewModel @Inject constructor(
         viewModelScope.launch {
             val appPreferences = appPreferencesRepository?.appPreferences ?: flowOf(AppPreferences())
             combine(repository.messages, repository.settings, appPreferences) { messages, settings, preferences ->
+                latestAppNotificationPreferenceEnabled = preferences.notificationEnabled
                 val effectiveSettings = settings.copy(
                     inAppMessagesEnabled = settings.inAppMessagesEnabled && preferences.notificationEnabled,
-                    systemNotificationsEnabled = settings.systemNotificationsEnabled && preferences.notificationEnabled,
                 )
                 val visibleMessages = if (effectiveSettings.inAppMessagesEnabled) {
                     messages.filterNot { it.status == NotificationStatus.Archived }
@@ -76,7 +79,7 @@ class NotificationsViewModel @Inject constructor(
                         isLoading = false,
                         messages = visibleMessages,
                         settings = effectiveSettings,
-                        systemIntegration = effectiveSettings.toSystemIntegrationUiState(),
+                        systemIntegration = toSystemIntegrationUiState(),
                     )
                 }
             }
@@ -124,9 +127,13 @@ class NotificationsViewModel @Inject constructor(
                 is AppResult.Success -> {
                     latestSettings = result.value
                     _uiState.update {
+                        val effectiveSettings = result.value.copy(
+                            inAppMessagesEnabled = result.value.inAppMessagesEnabled &&
+                                latestAppNotificationPreferenceEnabled,
+                        )
                         it.copy(
-                            settings = result.value,
-                            systemIntegration = result.value.toSystemIntegrationUiState(),
+                            settings = effectiveSettings,
+                            systemIntegration = toSystemIntegrationUiState(),
                             errorMessage = null,
                         )
                     }
@@ -135,16 +142,18 @@ class NotificationsViewModel @Inject constructor(
             }
         }
     }
-}
 
-private fun NotificationSettings.toSystemIntegrationUiState(): SystemNotificationIntegrationUiState =
-    SystemNotificationIntegrationUiState(
-        enabled = systemNotificationsEnabled,
-        statusLabel = if (systemNotificationsEnabled) {
-            "系统通知已开启"
-        } else {
-            "系统通知已关闭"
-        },
-    )
+    private fun refreshSystemIntegrationState() {
+        _uiState.update { current ->
+            current.copy(systemIntegration = toSystemIntegrationUiState())
+        }
+    }
+
+    private fun toSystemIntegrationUiState(): SystemNotificationIntegrationUiState =
+        SystemNotificationIntegrationUiState(
+            appNotificationPreferenceEnabled = latestAppNotificationPreferenceEnabled,
+            androidPermissionStatus = notificationPermissionStatusReader.currentStatus(),
+        )
+}
 
 private fun AppError.displayMessage(): String = message

@@ -1,5 +1,8 @@
 package com.example.lifelab.feature.notifications.presentation
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.lifelab.R
+import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus
 import com.example.lifelab.core.ui.components.LifeLabScreenHeader
 import com.example.lifelab.core.ui.components.LifeLabStateCard
 import com.example.lifelab.feature.notifications.domain.NotificationMessage
@@ -40,11 +44,19 @@ fun NotificationsRoute(
     viewModel: NotificationsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) {
+        viewModel.onEvent(NotificationsUiEvent.RefreshSystemNotificationPermission)
+    }
 
     NotificationsScreen(
         contentPadding = contentPadding,
         uiState = uiState,
         onEvent = viewModel::onEvent,
+        onRequestAndroidNotificationPermission = {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        },
         onBack = onBack,
     )
 }
@@ -54,6 +66,7 @@ fun NotificationsScreen(
     contentPadding: PaddingValues,
     uiState: NotificationsUiState,
     onEvent: (NotificationsUiEvent) -> Unit,
+    onRequestAndroidNotificationPermission: () -> Unit,
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -74,6 +87,7 @@ fun NotificationsScreen(
             contentPadding = contentPadding,
             uiState = uiState,
             onEvent = onEvent,
+            onRequestAndroidNotificationPermission = onRequestAndroidNotificationPermission,
             onBack = onBack,
             modifier = modifier,
         )
@@ -139,6 +153,7 @@ private fun NotificationsContent(
     contentPadding: PaddingValues,
     uiState: NotificationsUiState,
     onEvent: (NotificationsUiEvent) -> Unit,
+    onRequestAndroidNotificationPermission: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -155,7 +170,9 @@ private fun NotificationsContent(
         uiState.settings?.let { settings ->
             SettingsContent(
                 settings = settings,
+                systemIntegration = uiState.systemIntegration,
                 onEvent = onEvent,
+                onRequestAndroidNotificationPermission = onRequestAndroidNotificationPermission,
             )
         }
 
@@ -178,7 +195,9 @@ private fun NotificationsContent(
 @Composable
 private fun SettingsContent(
     settings: NotificationSettings,
+    systemIntegration: SystemNotificationIntegrationUiState,
     onEvent: (NotificationsUiEvent) -> Unit,
+    onRequestAndroidNotificationPermission: () -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -198,12 +217,77 @@ private fun SettingsContent(
                 checked = settings.inAppMessagesEnabled,
                 onCheckedChange = { onEvent(NotificationsUiEvent.SetInAppMessagesEnabled(it)) },
             )
+            if (!systemIntegration.appNotificationPreferenceEnabled) {
+                Text(
+                    text = stringResource(R.string.notifications_global_in_app_disabled),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Text(
                 text = stringResource(R.string.notifications_habit_reminders_note),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+    SystemIntegrationContent(
+        systemIntegration = systemIntegration,
+        onRequestAndroidNotificationPermission = onRequestAndroidNotificationPermission,
+    )
+}
+
+@Composable
+private fun SystemIntegrationContent(
+    systemIntegration: SystemNotificationIntegrationUiState,
+    onRequestAndroidNotificationPermission: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.notifications_system_integration),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            StatusText(
+                label = stringResource(R.string.notifications_habit_reminders_title),
+                body = systemIntegration.habitReminderDeliveryStatus.body(),
+            )
+            StatusText(
+                label = stringResource(R.string.notifications_android_permission_title),
+                body = systemIntegration.androidPermissionStatus.label(),
+            )
+            if (systemIntegration.canRequestAndroidNotificationPermission) {
+                TextButton(onClick = onRequestAndroidNotificationPermission) {
+                    Text(text = stringResource(R.string.notifications_request_permission))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusText(
+    label: String,
+    body: String,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -302,4 +386,27 @@ private fun NotificationStatus.label(): String = when (this) {
     NotificationStatus.Unread -> stringResource(R.string.notifications_status_unread)
     NotificationStatus.Read -> stringResource(R.string.notifications_status_read)
     NotificationStatus.Archived -> stringResource(R.string.notifications_status_archived)
+}
+
+@Composable
+private fun AndroidNotificationPermissionStatus.label(): String = when (this) {
+    AndroidNotificationPermissionStatus.NotRequired -> {
+        stringResource(R.string.notifications_android_permission_not_required)
+    }
+    AndroidNotificationPermissionStatus.Granted -> {
+        stringResource(R.string.notifications_android_permission_granted)
+    }
+    AndroidNotificationPermissionStatus.Blocked -> {
+        stringResource(R.string.notifications_android_permission_blocked)
+    }
+}
+
+@Composable
+private fun HabitReminderDeliveryStatus.body(): String = when (this) {
+    HabitReminderDeliveryStatus.ControlledFromHabits -> {
+        stringResource(R.string.notifications_habit_reminders_controlled_from_habits)
+    }
+    HabitReminderDeliveryStatus.BlockedByAndroidPermission -> {
+        stringResource(R.string.notifications_habit_reminders_blocked_by_permission)
+    }
 }

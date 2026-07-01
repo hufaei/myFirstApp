@@ -4,6 +4,8 @@ import com.example.lifelab.core.common.AppError
 import com.example.lifelab.core.common.AppResult
 import com.example.lifelab.core.datastore.AppPreferences
 import com.example.lifelab.core.datastore.InMemoryAppPreferencesRepository
+import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus
+import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatusReader
 import com.example.lifelab.core.testing.MainDispatcherRule
 import com.example.lifelab.feature.notifications.data.InMemoryNotificationRepository
 import com.example.lifelab.feature.notifications.domain.NotificationMessage
@@ -39,7 +41,14 @@ class NotificationsViewModelTest {
         val settings = assertNotNull(state.settings)
         assertTrue(settings.inAppMessagesEnabled)
         assertFalse(settings.systemNotificationsEnabled)
-        assertEquals("系统通知已关闭", state.systemIntegration.statusLabel)
+        assertEquals(
+            AndroidNotificationPermissionStatus.NotRequired,
+            state.systemIntegration.androidPermissionStatus,
+        )
+        assertEquals(
+            HabitReminderDeliveryStatus.ControlledFromHabits,
+            state.systemIntegration.habitReminderDeliveryStatus,
+        )
         assertEquals(null, state.errorMessage)
     }
 
@@ -67,30 +76,39 @@ class NotificationsViewModelTest {
     }
 
     @Test
-    fun togglingSettingsUpdatesStateAndSystemPlaceholderStatus() = runTest {
-        val viewModel = NotificationsViewModel(InMemoryNotificationRepository())
+    fun togglingInAppMessagesUpdatesStateAndPreservesAndroidPermissionStatus() = runTest {
+        val viewModel = NotificationsViewModel(
+            repository = InMemoryNotificationRepository(),
+            notificationPermissionStatusReader = AndroidNotificationPermissionStatusReader(
+                AndroidNotificationPermissionStatus.Granted,
+            ),
+        )
         advanceUntilIdle()
 
         viewModel.onEvent(NotificationsUiEvent.SetInAppMessagesEnabled(false))
-        viewModel.onEvent(NotificationsUiEvent.SetSystemNotificationsEnabled(true))
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
         val settings = assertNotNull(state.settings)
         assertFalse(settings.inAppMessagesEnabled)
-        assertTrue(settings.systemNotificationsEnabled)
-        assertTrue(state.systemIntegration.enabled)
-        assertEquals("系统通知已开启", state.systemIntegration.statusLabel)
+        assertEquals(
+            AndroidNotificationPermissionStatus.Granted,
+            state.systemIntegration.androidPermissionStatus,
+        )
     }
 
     @Test
-    fun backToBackSettingEventsPreserveBothChangesBeforeSettingsFlowEmits() = runTest {
+    fun settingEventPreservesSystemIntegrationBeforeSettingsFlowEmits() = runTest {
         val repository = DeferredSettingsNotificationRepository()
-        val viewModel = NotificationsViewModel(repository)
+        val viewModel = NotificationsViewModel(
+            repository = repository,
+            notificationPermissionStatusReader = AndroidNotificationPermissionStatusReader(
+                AndroidNotificationPermissionStatus.Granted,
+            ),
+        )
         advanceUntilIdle()
 
         viewModel.onEvent(NotificationsUiEvent.SetInAppMessagesEnabled(false))
-        viewModel.onEvent(NotificationsUiEvent.SetSystemNotificationsEnabled(true))
         advanceUntilIdle()
 
         repository.emitPendingSettings()
@@ -98,7 +116,10 @@ class NotificationsViewModelTest {
 
         val settings = assertNotNull(viewModel.uiState.value.settings)
         assertFalse(settings.inAppMessagesEnabled)
-        assertTrue(settings.systemNotificationsEnabled)
+        assertEquals(
+            AndroidNotificationPermissionStatus.Granted,
+            viewModel.uiState.value.systemIntegration.androidPermissionStatus,
+        )
     }
 
     @Test
@@ -127,13 +148,16 @@ class NotificationsViewModelTest {
     }
 
     @Test
-    fun globalNotificationPreferenceDisablesVisibleMessages() = runTest {
+    fun globalNotificationPreferenceDisablesVisibleMessagesWhilePreservingBlockedPermissionState() = runTest {
         val preferencesRepository = InMemoryAppPreferencesRepository(
             AppPreferences(notificationEnabled = false),
         )
         val viewModel = NotificationsViewModel(
             repository = InMemoryNotificationRepository(),
             appPreferencesRepository = preferencesRepository,
+            notificationPermissionStatusReader = AndroidNotificationPermissionStatusReader(
+                AndroidNotificationPermissionStatus.Blocked,
+            ),
         )
 
         advanceUntilIdle()
@@ -142,6 +166,15 @@ class NotificationsViewModelTest {
         assertTrue(state.isEmpty)
         assertEquals(emptyList(), state.messages)
         assertFalse(assertNotNull(state.settings).inAppMessagesEnabled)
+        assertEquals(
+            AndroidNotificationPermissionStatus.Blocked,
+            state.systemIntegration.androidPermissionStatus,
+        )
+        assertEquals(
+            HabitReminderDeliveryStatus.BlockedByAndroidPermission,
+            state.systemIntegration.habitReminderDeliveryStatus,
+        )
+        assertTrue(state.systemIntegration.habitReminderDeliveryBlocked)
     }
 
     @Test

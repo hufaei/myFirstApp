@@ -1,5 +1,6 @@
 package com.example.lifelab.feature.notifications.presentation
 
+import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus
 import com.example.lifelab.feature.notifications.domain.NotificationMessage
 import com.example.lifelab.feature.notifications.domain.NotificationSettings
 
@@ -17,14 +18,33 @@ data class NotificationsUiState(
 }
 
 data class SystemNotificationIntegrationUiState(
-    val enabled: Boolean = false,
-    val statusLabel: String = "系统通知已关闭",
-)
+    val appNotificationPreferenceEnabled: Boolean = true,
+    val androidPermissionStatus: AndroidNotificationPermissionStatus = AndroidNotificationPermissionStatus.NotRequired,
+) {
+    val habitReminderDeliveryStatus: HabitReminderDeliveryStatus
+        get() = when (androidPermissionStatus) {
+            AndroidNotificationPermissionStatus.Blocked -> HabitReminderDeliveryStatus.BlockedByAndroidPermission
+            AndroidNotificationPermissionStatus.Granted,
+            AndroidNotificationPermissionStatus.NotRequired,
+            -> HabitReminderDeliveryStatus.ControlledFromHabits
+        }
+
+    val habitReminderDeliveryBlocked: Boolean
+        get() = habitReminderDeliveryStatus == HabitReminderDeliveryStatus.BlockedByAndroidPermission
+
+    val canRequestAndroidNotificationPermission: Boolean
+        get() = androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked
+}
+
+enum class HabitReminderDeliveryStatus {
+    ControlledFromHabits,
+    BlockedByAndroidPermission,
+}
 
 sealed interface NotificationsUiEvent {
     data class MarkRead(val messageId: String) : NotificationsUiEvent
     data class Archive(val messageId: String) : NotificationsUiEvent
     data class SetInAppMessagesEnabled(val enabled: Boolean) : NotificationsUiEvent
-    data class SetSystemNotificationsEnabled(val enabled: Boolean) : NotificationsUiEvent
+    data object RefreshSystemNotificationPermission : NotificationsUiEvent
     data object RetryRefresh : NotificationsUiEvent
 }

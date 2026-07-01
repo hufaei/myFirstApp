@@ -1,6 +1,5 @@
 package com.example.lifelab.core.notifications
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -8,11 +7,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.example.lifelab.R
 import com.example.lifelab.app.MainActivity
 import com.example.lifelab.feature.habits.domain.model.Habit
@@ -77,7 +74,7 @@ class HabitReminderNotificationScheduler @Inject constructor(
         habitName: String,
         priority: HabitReminderPriority,
     ) {
-        if (!canPostNotifications()) {
+        if (!context.androidNotificationPermissionStatus().canPostNotifications) {
             return
         }
         ensureChannels()
@@ -160,13 +157,6 @@ class HabitReminderNotificationScheduler @Inject constructor(
         }
         return next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
-
-    private fun canPostNotifications(): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS,
-            ) == PackageManager.PERMISSION_GRANTED
 
     private fun ensureChannels() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {

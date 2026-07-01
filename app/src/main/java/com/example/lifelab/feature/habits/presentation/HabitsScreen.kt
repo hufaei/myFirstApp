@@ -1,8 +1,6 @@
 package com.example.lifelab.feature.habits.presentation
 
 import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -32,17 +30,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.example.lifelab.R
 import com.example.lifelab.core.media.PhotoRecord
 import com.example.lifelab.core.media.PhotoSource
+import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus
+import com.example.lifelab.core.notifications.androidNotificationPermissionStatus
 import com.example.lifelab.core.ui.components.LifeLabMessageBanner
 import com.example.lifelab.core.ui.components.LifeLabPhotoStrip
 import com.example.lifelab.core.ui.components.LifeLabScreenHeader
@@ -64,6 +66,25 @@ fun HabitsScreen(
     onClearMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+    var androidPermissionStatus by remember {
+        mutableStateOf(context.androidNotificationPermissionStatus())
+    }
+    var pendingReminderHabitId by remember { mutableStateOf<String?>(null) }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        androidPermissionStatus = context.androidNotificationPermissionStatus()
+        if (granted) {
+            pendingReminderHabitId?.let { habitId ->
+                onReminderEnabledChange(habitId, true)
+            }
+        }
+        pendingReminderHabitId = null
+    }
+    val hasBlockedActiveReminder = state.habits.any { habit -> habit.reminder.enabled } &&
+        androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -83,6 +104,19 @@ fun HabitsScreen(
                 LifeLabMessageBanner(
                     message = message.text(),
                     onDismiss = onClearMessage,
+                )
+            }
+        }
+
+        if (hasBlockedActiveReminder) {
+            item {
+                LifeLabStateCard(
+                    title = stringResource(R.string.habits_reminder_permission_blocked_title),
+                    body = stringResource(R.string.habits_reminder_permission_blocked_body),
+                    actionLabel = stringResource(R.string.habits_reminder_permission_action),
+                    onAction = {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    },
                 )
             }
         }
@@ -126,6 +160,11 @@ fun HabitsScreen(
                     onReminderTimeChange = onReminderTimeChange,
                     onReminderPriorityChange = onReminderPriorityChange,
                     onAttachPhotos = onAttachPhotos,
+                    androidPermissionStatus = androidPermissionStatus,
+                    onRequestNotificationPermission = {
+                        pendingReminderHabitId = habit.id
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    },
                 )
             }
         }
@@ -206,17 +245,11 @@ private fun HabitCard(
     onReminderTimeChange: (String, LocalTime) -> Unit,
     onReminderPriorityChange: (String, HabitReminderPriority) -> Unit,
     onAttachPhotos: (String, List<String>, PhotoSource) -> Unit,
+    androidPermissionStatus: AndroidNotificationPermissionStatus,
+    onRequestNotificationPermission: () -> Unit,
 ) {
     val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
     val reminderTime = habit.reminder.time
-    val context = LocalContext.current
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        if (granted) {
-            onReminderEnabledChange(habit.id, true)
-        }
-    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -292,9 +325,11 @@ private fun HabitCard(
                     ?: stringResource(R.string.habits_no_time),
                 reminderTime = reminderTime,
                 priority = habit.reminder.priority,
+                reminderDeliveryBlocked = habit.reminder.enabled &&
+                    androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked,
                 onReminderEnabledChange = { enabled ->
-                    if (enabled && context.needsNotificationPermission()) {
-                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    if (enabled && androidPermissionStatus == AndroidNotificationPermissionStatus.Blocked) {
+                        onRequestNotificationPermission()
                     } else {
                         onReminderEnabledChange(habit.id, enabled)
                     }
@@ -345,6 +380,7 @@ private fun ReminderControls(
     reminderTimeLabel: String,
     reminderTime: LocalTime?,
     priority: HabitReminderPriority,
+    reminderDeliveryBlocked: Boolean,
     onReminderEnabledChange: (Boolean) -> Unit,
     onReminderTimeChange: () -> Unit,
     onReminderPriorityChange: (HabitReminderPriority) -> Unit,
@@ -382,6 +418,13 @@ private fun ReminderControls(
                     onCheckedChange = onReminderEnabledChange,
                 )
             }
+            if (reminderDeliveryBlocked) {
+                Text(
+                    text = stringResource(R.string.habits_reminder_delivery_blocked),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
             OutlinedButton(
                 onClick = onReminderTimeChange,
                 modifier = Modifier.fillMaxWidth(),
@@ -417,10 +460,3 @@ private fun HabitReminderPriority.label(): String =
         HabitReminderPriority.Normal -> stringResource(R.string.habits_priority_normal)
         HabitReminderPriority.Low -> stringResource(R.string.habits_priority_low)
     }
-
-private fun android.content.Context.needsNotificationPermission(): Boolean =
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) != PackageManager.PERMISSION_GRANTED
