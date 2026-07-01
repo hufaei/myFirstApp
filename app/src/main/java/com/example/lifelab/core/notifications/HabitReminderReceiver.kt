@@ -32,12 +32,15 @@ class HabitReminderReceiver : BroadcastReceiver() {
             habitName = habitName,
             priority = priority,
         )
-        scheduler.scheduleNextDay(
-            habitId = habitId,
-            habitName = habitName,
-            reminderTime = reminderTime,
-            priority = priority,
-        )
+        if (intent.getBooleanExtra(EXTRA_RESCHEDULE_AFTER_DELIVERY, true)) {
+            scheduler.scheduleNextDay(
+                habitId = habitId,
+                habitName = habitName,
+                reminderTime = reminderTime,
+                priority = priority,
+                alarmClockEnabled = intent.getBooleanExtra(EXTRA_ALARM_CLOCK_ENABLED, false),
+            )
+        }
     }
 
     companion object {
@@ -45,6 +48,8 @@ class HabitReminderReceiver : BroadcastReceiver() {
         const val EXTRA_HABIT_NAME = "habit_name"
         const val EXTRA_REMINDER_SECOND_OF_DAY = "reminder_second_of_day"
         const val EXTRA_PRIORITY = "priority"
+        const val EXTRA_ALARM_CLOCK_ENABLED = "alarm_clock_enabled"
+        const val EXTRA_RESCHEDULE_AFTER_DELIVERY = "reschedule_after_delivery"
     }
 }
 

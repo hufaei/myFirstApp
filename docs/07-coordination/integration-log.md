@@ -54,3 +54,8 @@
   - `git diff --check`: passed
   - `./gradlew :app:testDebugUnitTest`: passed
   - `./gradlew :app:lintDebug`: passed
+
+## v1.2.1 Release Prep
+
+- v1.2.1 restores the blue brand palette, tightens dense screens, opens search results directly, and adds reminder self-test tools for Android/Xiaomi notification debugging.
+- Release rule: do not start APK packaging until `chore: release lifelab v1.2.1` is reviewed and tag `v1.2.1` exists.

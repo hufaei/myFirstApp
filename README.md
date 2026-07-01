@@ -2,7 +2,7 @@
 
 LifeLab 是一个面向学习的原生 Android 综合案例项目。它的目标不是做一个单一业务很深的产品，而是用一个结构清晰、标准接近正式团队项目的示例，系统覆盖 Kotlin 与 Android 开发中的高频概念、常见模块边界和工程实践。
 
-当前仓库已建立 Android `app` module 主体骨架，包含 Compose 宿主、根导航、基础包边界、平台测试基线和 7 个最小正式功能模块。v1.2.0 集成了通知权限状态提示、习惯创建与编辑、搜索/发现详情页和一轮视觉整理；各模块仍保持本地优先的学习 demo 形态，后续再按切片引入更多 Room、DataStore、网络和系统能力。
+当前仓库已建立 Android `app` module 主体骨架，包含 Compose 宿主、根导航、基础包边界、平台测试基线和 7 个最小正式功能模块。v1.2.1 restores the blue brand palette, tightens dense screens, opens search results directly, and adds reminder self-test tools for Android/Xiaomi notification debugging. 各模块仍保持本地优先的学习 demo 形态，后续再按切片引入更多 Room、DataStore、网络和系统能力。
 
 ## 项目目标
 
@@ -58,7 +58,7 @@ GitHub Actions 的日常 PR 只运行 `:app:testDebugUnitTest` 和 `:app:lintDeb
 
 稳定升级链路约束见 [Release Signing](docs/06-engineering/release-signing.md)：首次从 `com.example.lifelab` 切到 `com.study.lifelab` 会被 Android 视为新应用，不能覆盖旧包；之后只要 `applicationId`、release 签名保持一致且 `versionCode` 递增，同一渠道 APK 就可以覆盖升级。
 
-v1.2.0 的本地发版规则是：先完成 review、测试和 `chore: release lifelab v1.2.0` 提交，再创建 `v1.2.0` tag；只有 release commit 和 tag 都存在后，才启动 APK 打包或 GitHub Actions tag workflow。
+v1.2.1 的本地发版规则是：先完成 review、测试和 `chore: release lifelab v1.2.1` 提交，再创建 `v1.2.1` tag；只有 release commit 和 tag 都存在后，才启动 APK 打包或 GitHub Actions tag workflow。
 
 ## 文档入口
 
@@ -78,4 +78,4 @@ v1.2.0 的本地发版规则是：先完成 review、测试和 `chore: release l
 
 ## 当前阶段
 
-当前处于 `v1.2 Quality Release` 阶段：平台基线、首批功能模块和 v1.2 体验修复已经合并。下一步重点是在稳定签名链路下发布 APK，并按后续切片逐步补足更真实的持久化、网络和设备级验证。
+当前处于 `v1.2.1 Release Prep` 阶段：平台基线、首批功能模块和 v1.2 体验修复已经合并。下一步重点是在稳定签名链路下发布 APK，并按后续切片逐步补足更真实的持久化、网络和设备级验证。

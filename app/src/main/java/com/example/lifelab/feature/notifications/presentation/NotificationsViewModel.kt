@@ -7,6 +7,7 @@ import com.example.lifelab.core.common.AppResult
 import com.example.lifelab.core.datastore.AppPreferences
 import com.example.lifelab.core.datastore.AppPreferencesRepository
 import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatusReader
+import com.example.lifelab.core.notifications.NotificationSelfTestScheduler
 import com.example.lifelab.feature.notifications.domain.ChangeMessageStatusUseCase
 import com.example.lifelab.feature.notifications.domain.NotificationRepository
 import com.example.lifelab.feature.notifications.domain.NotificationSettings
@@ -30,6 +31,7 @@ class NotificationsViewModel @Inject constructor(
         AndroidNotificationPermissionStatusReader(
             com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus.NotRequired,
         ),
+    private val notificationSelfTestScheduler: NotificationSelfTestScheduler = NoOpNotificationSelfTestScheduler,
 ) : ViewModel() {
 
     private val changeMessageStatus = ChangeMessageStatusUseCase(repository)
@@ -52,6 +54,8 @@ class NotificationsViewModel @Inject constructor(
                 inAppMessagesEnabled = event.enabled,
                 systemNotificationsEnabled = latestSettings?.systemNotificationsEnabled ?: false,
             )
+            NotificationsUiEvent.SendImmediateTestNotification -> sendImmediateTestNotification()
+            NotificationsUiEvent.ScheduleOneMinuteTestReminder -> scheduleOneMinuteTestReminder()
             NotificationsUiEvent.RefreshSystemNotificationPermission -> refreshSystemIntegrationState()
             NotificationsUiEvent.RetryRefresh -> refresh()
         }
@@ -149,11 +153,36 @@ class NotificationsViewModel @Inject constructor(
         }
     }
 
+    private fun sendImmediateTestNotification() {
+        notificationSelfTestScheduler.showTestNotification()
+        _uiState.update {
+            it.copy(
+                errorMessage = null,
+                systemTestMessage = "测试通知已发送",
+            )
+        }
+    }
+
+    private fun scheduleOneMinuteTestReminder() {
+        notificationSelfTestScheduler.scheduleTestReminderOneMinuteFromNow()
+        _uiState.update {
+            it.copy(
+                errorMessage = null,
+                systemTestMessage = "已安排 1 分钟后测试提醒",
+            )
+        }
+    }
+
     private fun toSystemIntegrationUiState(): SystemNotificationIntegrationUiState =
         SystemNotificationIntegrationUiState(
             appNotificationPreferenceEnabled = latestAppNotificationPreferenceEnabled,
             androidPermissionStatus = notificationPermissionStatusReader.currentStatus(),
         )
+}
+
+private object NoOpNotificationSelfTestScheduler : NotificationSelfTestScheduler() {
+    override fun showTestNotification() = Unit
+    override fun scheduleTestReminderOneMinuteFromNow() = Unit
 }
 
 private fun AppError.displayMessage(): String = message

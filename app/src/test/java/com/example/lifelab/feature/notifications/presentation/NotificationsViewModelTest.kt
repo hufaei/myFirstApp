@@ -6,6 +6,7 @@ import com.example.lifelab.core.datastore.AppPreferences
 import com.example.lifelab.core.datastore.InMemoryAppPreferencesRepository
 import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatus
 import com.example.lifelab.core.notifications.AndroidNotificationPermissionStatusReader
+import com.example.lifelab.core.notifications.NotificationSelfTestScheduler
 import com.example.lifelab.core.testing.MainDispatcherRule
 import com.example.lifelab.feature.notifications.data.InMemoryNotificationRepository
 import com.example.lifelab.feature.notifications.domain.NotificationMessage
@@ -122,6 +123,40 @@ class NotificationsViewModelTest {
             AndroidNotificationPermissionStatus.Granted,
             viewModel.uiState.value.systemIntegration.androidPermissionStatus,
         )
+    }
+
+    @Test
+    fun immediateSelfTestEventShowsTestNotificationAndStatusMessage() = runTest {
+        val scheduler = FakeNotificationSelfTestScheduler()
+        val viewModel = NotificationsViewModel(
+            repository = InMemoryNotificationRepository(),
+            notificationSelfTestScheduler = scheduler,
+        )
+        advanceUntilIdle()
+
+        viewModel.onEvent(NotificationsUiEvent.SendImmediateTestNotification)
+        advanceUntilIdle()
+
+        assertEquals(1, scheduler.immediateTestNotificationCount)
+        assertEquals(0, scheduler.scheduledTestReminderCount)
+        assertEquals("测试通知已发送", viewModel.uiState.value.systemTestMessage)
+    }
+
+    @Test
+    fun scheduledSelfTestEventSchedulesOneMinuteReminderAndStatusMessage() = runTest {
+        val scheduler = FakeNotificationSelfTestScheduler()
+        val viewModel = NotificationsViewModel(
+            repository = InMemoryNotificationRepository(),
+            notificationSelfTestScheduler = scheduler,
+        )
+        advanceUntilIdle()
+
+        viewModel.onEvent(NotificationsUiEvent.ScheduleOneMinuteTestReminder)
+        advanceUntilIdle()
+
+        assertEquals(0, scheduler.immediateTestNotificationCount)
+        assertEquals(1, scheduler.scheduledTestReminderCount)
+        assertEquals("已安排 1 分钟后测试提醒", viewModel.uiState.value.systemTestMessage)
     }
 
     @Test
@@ -299,5 +334,20 @@ private class DeferredSettingsNotificationRepository : NotificationRepository {
 
     fun emitPendingSettings() {
         settingsState.value = pendingSettings
+    }
+}
+
+private class FakeNotificationSelfTestScheduler : NotificationSelfTestScheduler() {
+    var immediateTestNotificationCount = 0
+        private set
+    var scheduledTestReminderCount = 0
+        private set
+
+    override fun showTestNotification() {
+        immediateTestNotificationCount += 1
+    }
+
+    override fun scheduleTestReminderOneMinuteFromNow() {
+        scheduledTestReminderCount += 1
     }
 }

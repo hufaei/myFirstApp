@@ -212,6 +212,10 @@
     <string name="notifications_request_permission">允许通知</string>
     <string name="notifications_global_in_app_disabled">个人页的应用内消息偏好已关闭，因此消息列表会暂停显示。</string>
     <string name="notifications_habit_reminders_note">习惯提醒不在这里开关；请到习惯卡片设置时间和优先级。</string>
+    <string name="notifications_self_test_title">通知自检</string>
+    <string name="notifications_self_test_guidance">小米/HyperOS 若未弹出，请确认系统通知允许；高优先级习惯可开启闹钟模式。</string>
+    <string name="notifications_self_test_send_now">发送测试通知</string>
+    <string name="notifications_self_test_schedule_one_minute">1 分钟后测试提醒</string>
     <string name="notifications_empty_active">暂无活跃消息</string>
     <string name="notifications_empty_disabled">应用内消息已关闭</string>
     <string name="notifications_category_value">分类：%1$s</string>
@@ -228,6 +232,9 @@
     <string name="habit_reminder_channel_description">习惯打卡提醒。</string>
     <string name="habit_reminder_notification_title">%1$s</string>
     <string name="habit_reminder_notification_body">到时间了，完成一次打卡。</string>
+    <string name="habit_reminder_test_notification_title">LifeLab 测试通知</string>
+    <string name="habit_reminder_test_notification_body">如果看到这条，通知权限和渠道可以正常显示。</string>
+    <string name="habit_reminder_test_scheduled_title">LifeLab 测试提醒</string>
     <string name="web_lab_title">Web 实验室</string>
     <string name="web_lab_subtitle">hufaei.github.io 实验页</string>
     <string name="web_lab_back">返回网页</string>

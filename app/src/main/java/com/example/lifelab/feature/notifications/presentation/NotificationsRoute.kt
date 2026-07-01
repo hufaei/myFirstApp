@@ -176,6 +176,7 @@ private fun NotificationsContent(
             SettingsContent(
                 settings = settings,
                 systemIntegration = uiState.systemIntegration,
+                systemTestMessage = uiState.systemTestMessage,
                 onEvent = onEvent,
                 onRequestAndroidNotificationPermission = onRequestAndroidNotificationPermission,
             )
@@ -201,6 +202,7 @@ private fun NotificationsContent(
 private fun SettingsContent(
     settings: NotificationSettings,
     systemIntegration: SystemNotificationIntegrationUiState,
+    systemTestMessage: String?,
     onEvent: (NotificationsUiEvent) -> Unit,
     onRequestAndroidNotificationPermission: () -> Unit,
 ) {
@@ -243,6 +245,15 @@ private fun SettingsContent(
         systemIntegration = systemIntegration,
         onRequestAndroidNotificationPermission = onRequestAndroidNotificationPermission,
     )
+    SystemSelfTestContent(
+        systemTestMessage = systemTestMessage,
+        onSendImmediateTestNotification = {
+            onEvent(NotificationsUiEvent.SendImmediateTestNotification)
+        },
+        onScheduleOneMinuteTestReminder = {
+            onEvent(NotificationsUiEvent.ScheduleOneMinuteTestReminder)
+        },
+    )
 }
 
 @Composable
@@ -275,6 +286,53 @@ private fun SystemIntegrationContent(
                 TextButton(onClick = onRequestAndroidNotificationPermission) {
                     Text(text = stringResource(R.string.notifications_request_permission))
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SystemSelfTestContent(
+    systemTestMessage: String?,
+    onSendImmediateTestNotification: () -> Unit,
+    onScheduleOneMinuteTestReminder: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.notifications_self_test_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = stringResource(R.string.notifications_self_test_guidance),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TextButton(onClick = onSendImmediateTestNotification) {
+                    Text(text = stringResource(R.string.notifications_self_test_send_now))
+                }
+                TextButton(onClick = onScheduleOneMinuteTestReminder) {
+                    Text(text = stringResource(R.string.notifications_self_test_schedule_one_minute))
+                }
+            }
+            systemTestMessage?.let { message ->
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
         }
     }

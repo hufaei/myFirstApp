@@ -22,6 +22,27 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
+open class NotificationSelfTestScheduler {
+    private val scheduler: HabitReminderNotificationScheduler?
+
+    @Inject
+    constructor(scheduler: HabitReminderNotificationScheduler) {
+        this.scheduler = scheduler
+    }
+
+    protected constructor() {
+        scheduler = null
+    }
+
+    open fun showTestNotification() {
+        requireNotNull(scheduler).showTestNotification()
+    }
+
+    open fun scheduleTestReminderOneMinuteFromNow() {
+        requireNotNull(scheduler).scheduleTestReminderOneMinuteFromNow()
+    }
+}
+
 @Singleton
 class HabitReminderNotificationScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -37,6 +58,7 @@ class HabitReminderNotificationScheduler @Inject constructor(
                 reminderTime = reminderTime,
                 priority = habit.reminder.priority,
                 triggerAtMillis = nextTriggerAtMillis(reminderTime),
+                alarmClockEnabled = habit.reminder.alarmClockEnabled,
             )
         } else {
             cancel(habit.id)
@@ -52,6 +74,7 @@ class HabitReminderNotificationScheduler @Inject constructor(
         habitName: String,
         reminderTime: LocalTime,
         priority: HabitReminderPriority,
+        alarmClockEnabled: Boolean,
     ) {
         schedule(
             habitId = habitId,
@@ -59,12 +82,40 @@ class HabitReminderNotificationScheduler @Inject constructor(
             reminderTime = reminderTime,
             priority = priority,
             triggerAtMillis = nextTriggerAtMillis(reminderTime, minimumDelay = Duration.ofHours(12)),
+            alarmClockEnabled = alarmClockEnabled,
         )
     }
 
     fun cancel(habitId: String) {
         alarmManager.cancel(
             existingReminderPendingIntent(habitId) ?: return,
+        )
+    }
+
+    @SuppressLint("MissingPermission")
+    fun showTestNotification() {
+        if (!context.androidNotificationPermissionStatus().canPostNotifications) {
+            return
+        }
+        ensureChannels()
+        showNotification(
+            notificationId = TEST_NOTIFICATION_ID.hashCode(),
+            priority = HabitReminderPriority.High,
+            title = context.getString(R.string.habit_reminder_test_notification_title),
+            body = context.getString(R.string.habit_reminder_test_notification_body),
+        )
+    }
+
+    fun scheduleTestReminderOneMinuteFromNow() {
+        val reminderTime = LocalTime.now().plusMinutes(1)
+        schedule(
+            habitId = TEST_REMINDER_ID,
+            habitName = context.getString(R.string.habit_reminder_test_scheduled_title),
+            reminderTime = reminderTime,
+            priority = HabitReminderPriority.High,
+            triggerAtMillis = System.currentTimeMillis() + Duration.ofMinutes(1).toMillis(),
+            alarmClockEnabled = false,
+            rescheduleAfterDelivery = false,
         )
     }
 
@@ -78,22 +129,31 @@ class HabitReminderNotificationScheduler @Inject constructor(
             return
         }
         ensureChannels()
-        val openAppIntent = Intent(context, MainActivity::class.java)
-        val openAppPendingIntent = PendingIntent.getActivity(
-            context,
-            habitId.hashCode(),
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        showNotification(
+            notificationId = habitId.hashCode(),
+            priority = priority,
+            title = context.getString(R.string.habit_reminder_notification_title, habitName),
+            body = context.getString(R.string.habit_reminder_notification_body),
         )
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun showNotification(
+        notificationId: Int,
+        priority: HabitReminderPriority,
+        title: String,
+        body: String,
+    ) {
         val notification = NotificationCompat.Builder(context, priority.channelId)
             .setSmallIcon(R.drawable.ic_stat_lifelab)
-            .setContentTitle(context.getString(R.string.habit_reminder_notification_title, habitName))
-            .setContentText(context.getString(R.string.habit_reminder_notification_body))
-            .setContentIntent(openAppPendingIntent)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setContentIntent(openAppPendingIntent(notificationId))
             .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setPriority(priority.notificationCompatPriority)
             .build()
-        NotificationManagerCompat.from(context).notify(habitId.hashCode(), notification)
+        NotificationManagerCompat.from(context).notify(notificationId, notification)
     }
 
     private fun schedule(
@@ -102,19 +162,32 @@ class HabitReminderNotificationScheduler @Inject constructor(
         reminderTime: LocalTime,
         priority: HabitReminderPriority,
         triggerAtMillis: Long,
+        alarmClockEnabled: Boolean,
+        rescheduleAfterDelivery: Boolean = true,
     ) {
         ensureChannels()
-        alarmManager.setAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAtMillis,
-            reminderPendingIntent(
-                habitId = habitId,
-                flags = PendingIntent.FLAG_UPDATE_CURRENT,
-                habitName = habitName,
-                reminderTime = reminderTime,
-                priority = priority,
-            ),
+        val reminderPendingIntent = reminderPendingIntent(
+            habitId = habitId,
+            flags = PendingIntent.FLAG_UPDATE_CURRENT,
+            habitName = habitName,
+            reminderTime = reminderTime,
+            priority = priority,
+            alarmClockEnabled = alarmClockEnabled,
+            rescheduleAfterDelivery = rescheduleAfterDelivery,
         )
+        if (alarmClockEnabled) {
+            val alarmInfo = AlarmManager.AlarmClockInfo(
+                triggerAtMillis,
+                openAppPendingIntent(habitId.hashCode()),
+            )
+            alarmManager.setAlarmClock(alarmInfo, reminderPendingIntent)
+        } else {
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                reminderPendingIntent,
+            )
+        }
     }
 
     private fun reminderPendingIntent(
@@ -123,12 +196,16 @@ class HabitReminderNotificationScheduler @Inject constructor(
         habitName: String = "",
         reminderTime: LocalTime = LocalTime.MIDNIGHT,
         priority: HabitReminderPriority = HabitReminderPriority.Normal,
+        alarmClockEnabled: Boolean = false,
+        rescheduleAfterDelivery: Boolean = true,
     ): PendingIntent {
         val intent = Intent(context, HabitReminderReceiver::class.java)
             .putExtra(HabitReminderReceiver.EXTRA_HABIT_ID, habitId)
             .putExtra(HabitReminderReceiver.EXTRA_HABIT_NAME, habitName)
             .putExtra(HabitReminderReceiver.EXTRA_REMINDER_SECOND_OF_DAY, reminderTime.toSecondOfDay())
             .putExtra(HabitReminderReceiver.EXTRA_PRIORITY, priority.name)
+            .putExtra(HabitReminderReceiver.EXTRA_ALARM_CLOCK_ENABLED, alarmClockEnabled)
+            .putExtra(HabitReminderReceiver.EXTRA_RESCHEDULE_AFTER_DELIVERY, rescheduleAfterDelivery)
         return PendingIntent.getBroadcast(
             context,
             habitId.hashCode(),
@@ -144,6 +221,14 @@ class HabitReminderNotificationScheduler @Inject constructor(
             Intent(context, HabitReminderReceiver::class.java)
                 .putExtra(HabitReminderReceiver.EXTRA_HABIT_ID, habitId),
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+    private fun openAppPendingIntent(requestCode: Int): PendingIntent =
+        PendingIntent.getActivity(
+            context,
+            requestCode,
+            Intent(context, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
     private fun nextTriggerAtMillis(
@@ -173,6 +258,11 @@ class HabitReminderNotificationScheduler @Inject constructor(
             }
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private companion object {
+        const val TEST_NOTIFICATION_ID = "lifelab_test_notification"
+        const val TEST_REMINDER_ID = "lifelab_test_reminder"
     }
 }
 

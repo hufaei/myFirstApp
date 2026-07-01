@@ -212,6 +212,10 @@
     <string name="notifications_request_permission">Allow notifications</string>
     <string name="notifications_global_in_app_disabled">The in-app message preference is off in Profile, so the message list is paused.</string>
     <string name="notifications_habit_reminders_note">Habit reminders are not switched here; set time and priority on habit cards.</string>
+    <string name="notifications_self_test_title">Notification self-test</string>
+    <string name="notifications_self_test_guidance">Xiaomi/HyperOS: if nothing appears, allow system notifications; high-priority habits can use alarm mode.</string>
+    <string name="notifications_self_test_send_now">Send test notification</string>
+    <string name="notifications_self_test_schedule_one_minute">Test reminder in 1 minute</string>
     <string name="notifications_empty_active">No active notifications</string>
     <string name="notifications_empty_disabled">In-app messages are disabled</string>
     <string name="notifications_category_value">Category: %1$s</string>
@@ -228,6 +232,9 @@
     <string name="habit_reminder_channel_description">Habit check-in reminders.</string>
     <string name="habit_reminder_notification_title">%1$s</string>
     <string name="habit_reminder_notification_body">Time to complete one check-in.</string>
+    <string name="habit_reminder_test_notification_title">LifeLab test notification</string>
+    <string name="habit_reminder_test_notification_body">If you can see this, notification permission and channels are working.</string>
+    <string name="habit_reminder_test_scheduled_title">LifeLab test reminder</string>
     <string name="web_lab_title">Web Lab</string>
     <string name="web_lab_subtitle">hufaei.github.io experiment page</string>
     <string name="web_lab_back">Back in web page</string>

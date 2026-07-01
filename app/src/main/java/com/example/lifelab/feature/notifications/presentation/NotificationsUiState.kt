@@ -10,6 +10,7 @@ data class NotificationsUiState(
     val settings: NotificationSettings? = null,
     val systemIntegration: SystemNotificationIntegrationUiState = SystemNotificationIntegrationUiState(),
     val errorMessage: String? = null,
+    val systemTestMessage: String? = null,
 ) {
     val isEmpty: Boolean
         get() = !isLoading && errorMessage == null && (
@@ -47,6 +48,8 @@ sealed interface NotificationsUiEvent {
     data class MarkRead(val messageId: String) : NotificationsUiEvent
     data class Archive(val messageId: String) : NotificationsUiEvent
     data class SetInAppMessagesEnabled(val enabled: Boolean) : NotificationsUiEvent
+    data object SendImmediateTestNotification : NotificationsUiEvent
+    data object ScheduleOneMinuteTestReminder : NotificationsUiEvent
     data object RefreshSystemNotificationPermission : NotificationsUiEvent
     data object RetryRefresh : NotificationsUiEvent
 }
