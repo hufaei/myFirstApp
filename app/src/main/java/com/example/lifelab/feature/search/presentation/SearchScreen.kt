@@ -46,9 +46,18 @@ fun SearchScreen(
     onHistoryClick: (String) -> Unit,
     onClearHistoryClick: () -> Unit,
     onRetryClick: () -> Unit,
+    onResultClick: (String) -> Unit,
+    onResultDetailDismiss: () -> Unit,
+    onOpenResultDestination: (SearchResultType) -> Unit,
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val headerBack = if (uiState.selectedResultDetail != null) {
+        onResultDetailDismiss
+    } else {
+        onBack
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -61,7 +70,7 @@ fun SearchScreen(
                 query = uiState.query,
                 onQueryChanged = onQueryChanged,
                 onSubmitQuery = onSubmitQuery,
-                onBack = onBack,
+                onBack = headerBack,
             )
         }
 
@@ -70,6 +79,16 @@ fun SearchScreen(
                 selectedFilter = uiState.selectedFilter,
                 onFilterSelected = onFilterSelected,
             )
+        }
+
+        uiState.selectedResultDetail?.let { detail ->
+            item {
+                SearchResultDetailCard(
+                    detail = detail,
+                    onDismiss = onResultDetailDismiss,
+                    onOpenDestination = onOpenResultDestination,
+                )
+            }
         }
 
         when (val resultContent = uiState.resultContent) {
@@ -96,7 +115,10 @@ fun SearchScreen(
                     items = resultContent.items,
                     key = SearchResultItem::id,
                 ) { item ->
-                    SearchResultRow(item = item)
+                    SearchResultRow(
+                        item = item,
+                        onClick = onResultClick,
+                    )
                 }
             }
 
@@ -248,13 +270,62 @@ private fun HistorySection(
 }
 
 @Composable
-private fun SearchResultRow(item: SearchResultItem) {
+private fun SearchResultDetailCard(
+    detail: SearchResultDetail,
+    onDismiss: () -> Unit,
+    onOpenDestination: (SearchResultType) -> Unit,
+) {
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(14.dp),
+        ) {
+            Text(
+                text = detail.type.label(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Text(
+                text = detail.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            if (detail.summary.isNotBlank()) {
+                Text(
+                    text = detail.summary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+            LifeLabPrimaryActionRow(
+                primaryLabel = stringResource(R.string.search_detail_open_related),
+                onPrimaryClick = { onOpenDestination(detail.type) },
+                secondaryLabel = stringResource(R.string.common_dismiss),
+                onSecondaryClick = onDismiss,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchResultRow(
+    item: SearchResultItem,
+    onClick: (String) -> Unit,
+) {
     Card(
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick(item.id) },
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp),

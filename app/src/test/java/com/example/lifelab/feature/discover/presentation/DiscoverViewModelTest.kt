@@ -91,6 +91,21 @@ class DiscoverViewModelTest {
         )
     }
 
+    @Test
+    fun `content selection event opens local detail state`() = runTest {
+        val viewModel = DiscoverViewModel(useCaseWith(discoverContentFixture()))
+        advanceUntilIdle()
+
+        viewModel.onEvent(DiscoverUiEvent.ContentSelected("course-1"))
+
+        val detail = viewModel.uiState.value.selectedContentDetail
+        assertEquals("course-1", detail?.id)
+        assertEquals("深度工作冲刺", detail?.title)
+        assertEquals("一门保护注意力的紧凑课程。", detail?.summary)
+        assertEquals(DiscoverContentKind.Course, detail?.kind)
+        assertEquals(DiscoverCategory.Courses, detail?.category)
+    }
+
     private fun useCaseWith(content: List<DiscoverContent>): LoadDiscoverContentUseCase =
         LoadDiscoverContentUseCase(FakeDiscoverRepository(content))
 

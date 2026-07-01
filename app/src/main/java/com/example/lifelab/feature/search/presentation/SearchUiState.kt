@@ -2,6 +2,7 @@ package com.example.lifelab.feature.search.presentation
 
 import com.example.lifelab.feature.search.domain.SearchFilter
 import com.example.lifelab.feature.search.domain.SearchResultItem
+import com.example.lifelab.feature.search.domain.SearchResultType
 
 data class SearchUiState(
     val query: String = "",
@@ -10,6 +11,14 @@ data class SearchUiState(
     val hotKeywords: List<String> = emptyList(),
     val lastSubmittedQuery: String? = null,
     val resultContent: SearchResultContent = SearchResultContent.Idle,
+    val selectedResultDetail: SearchResultDetail? = null,
+)
+
+data class SearchResultDetail(
+    val id: String,
+    val title: String,
+    val summary: String,
+    val type: SearchResultType,
 )
 
 sealed interface SearchResultContent {

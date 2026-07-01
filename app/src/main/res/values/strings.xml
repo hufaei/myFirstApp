@@ -129,6 +129,8 @@
     <string name="discover_type_membership">会员</string>
     <string name="discover_detail_by_author">作者：%1$s</string>
     <string name="discover_detail_course">%1$s · %2$s</string>
+    <string name="discover_detail_category">分类：%1$s</string>
+    <string name="discover_detail_back_to_list">返回列表</string>
     <string name="search_title">搜索</string>
     <string name="search_subtitle">查找本地内容。</string>
     <string name="search_keyword_label">关键词</string>
@@ -152,6 +154,7 @@
     <string name="search_type_task">任务</string>
     <string name="search_type_habit">习惯</string>
     <string name="search_type_notification">通知</string>
+    <string name="search_detail_open_related">打开相关页面</string>
     <string name="habits_title">习惯</string>
     <string name="habits_subtitle">打卡、提醒、照片记录。</string>
     <string name="habits_new">新建</string>

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.lifelab.R
+import com.example.lifelab.feature.search.domain.SearchResultType
 
 data class LifeLabDestination(
     val route: String,
@@ -25,6 +26,15 @@ object LifeLabRoutes {
     const val NOTIFICATIONS = "notifications"
     const val PROFILE = "profile"
     const val WEB_LAB = "web_lab"
+
+    fun relatedRouteFor(type: SearchResultType): String =
+        when (type) {
+            SearchResultType.ARTICLE,
+            SearchResultType.OFFER -> DISCOVER
+            SearchResultType.TASK -> TASKS
+            SearchResultType.HABIT -> HABITS
+            SearchResultType.NOTIFICATION -> NOTIFICATIONS
+        }
 }
 
 val topLevelDestinations = listOf(

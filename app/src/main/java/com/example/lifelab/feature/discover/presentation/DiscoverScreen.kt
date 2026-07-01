@@ -1,5 +1,6 @@
 package com.example.lifelab.feature.discover.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.lifelab.R
+import com.example.lifelab.core.ui.components.LifeLabPrimaryActionRow
 import com.example.lifelab.core.ui.components.LifeLabScreenHeader
 import com.example.lifelab.core.ui.components.LifeLabStateCard
 import com.example.lifelab.feature.discover.domain.DiscoverCategory
@@ -35,6 +38,13 @@ fun DiscoverScreen(
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val selectedDetail = uiState.selectedContentDetail
+    val headerBack = if (selectedDetail != null) {
+        { onEvent(DiscoverUiEvent.DetailDismissed) }
+    } else {
+        onBack
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -45,19 +55,29 @@ fun DiscoverScreen(
         LifeLabScreenHeader(
             title = stringResource(R.string.discover_title),
             subtitle = stringResource(R.string.discover_subtitle),
-            onBack = onBack,
+            onBack = headerBack,
         )
-        CategoryFilters(
-            selectedCategory = uiState.selectedCategory,
-            onCategorySelected = { category ->
-                onEvent(DiscoverUiEvent.CategorySelected(category))
-            },
-        )
-        DiscoverContentState(
-            listState = uiState.listState,
-            onRetry = { onEvent(DiscoverUiEvent.RetrySelected) },
-            modifier = Modifier.weight(1f),
-        )
+        if (selectedDetail == null) {
+            CategoryFilters(
+                selectedCategory = uiState.selectedCategory,
+                onCategorySelected = { category ->
+                    onEvent(DiscoverUiEvent.CategorySelected(category))
+                },
+            )
+            DiscoverContentState(
+                listState = uiState.listState,
+                onRetry = { onEvent(DiscoverUiEvent.RetrySelected) },
+                onContentSelected = { contentId ->
+                    onEvent(DiscoverUiEvent.ContentSelected(contentId))
+                },
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            DiscoverContentDetailCard(
+                detail = selectedDetail,
+                onBackToList = { onEvent(DiscoverUiEvent.DetailDismissed) },
+            )
+        }
     }
 }
 
@@ -85,6 +105,7 @@ private fun CategoryFilters(
 private fun DiscoverContentState(
     listState: DiscoverListState,
     onRetry: () -> Unit,
+    onContentSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (listState) {
@@ -97,6 +118,7 @@ private fun DiscoverContentState(
         )
         is DiscoverListState.Content -> ContentList(
             items = listState.items,
+            onContentSelected = onContentSelected,
             modifier = modifier,
         )
     }
@@ -137,6 +159,7 @@ private fun ErrorState(
 @Composable
 private fun ContentList(
     items: List<DiscoverContent>,
+    onContentSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -148,7 +171,10 @@ private fun ContentList(
             items = items,
             key = { content -> content.id },
         ) { content ->
-            DiscoverContentCard(content)
+            DiscoverContentCard(
+                content = content,
+                onContentSelected = onContentSelected,
+            )
         }
     }
 }
@@ -156,10 +182,13 @@ private fun ContentList(
 @Composable
 private fun DiscoverContentCard(
     content: DiscoverContent,
+    onContentSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onContentSelected(content.id) },
         shape = RoundedCornerShape(8.dp),
     ) {
         Column(
@@ -200,6 +229,67 @@ private fun DiscoverContentCard(
     }
 }
 
+@Composable
+private fun DiscoverContentDetailCard(
+    detail: DiscoverContentDetail,
+    onBackToList: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = detail.kind.label(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Text(
+                text = detail.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Text(
+                text = detail.summary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Text(
+                text = stringResource(
+                    R.string.discover_detail_category,
+                    detail.category.label(),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            if (detail.metadata.isNotBlank()) {
+                Text(
+                    text = detail.metadata,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+            Text(
+                text = detail.tag,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            LifeLabPrimaryActionRow(
+                primaryLabel = stringResource(R.string.discover_detail_back_to_list),
+                onPrimaryClick = onBackToList,
+            )
+        }
+    }
+}
+
 private val discoverCategoryOptions = listOf(
     DiscoverCategory.All,
     DiscoverCategory.Articles,
@@ -234,4 +324,13 @@ private fun DiscoverContent.detailLabel(): String =
         is DiscoverContent.Course -> stringResource(R.string.discover_detail_course, instructor, duration)
         is DiscoverContent.Offer.Product -> priceLabel
         is DiscoverContent.Offer.Membership -> priceLabel
+    }
+
+@Composable
+private fun DiscoverContentKind.label(): String =
+    when (this) {
+        DiscoverContentKind.Article -> stringResource(R.string.discover_type_article)
+        DiscoverContentKind.Course -> stringResource(R.string.discover_type_course)
+        DiscoverContentKind.Product -> stringResource(R.string.discover_type_product)
+        DiscoverContentKind.Membership -> stringResource(R.string.discover_type_membership)
     }

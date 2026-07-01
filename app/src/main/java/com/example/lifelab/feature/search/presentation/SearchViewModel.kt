@@ -37,7 +37,12 @@ class SearchViewModel @Inject constructor(
     }
 
     fun onQueryChanged(query: String) {
-        _uiState.update { it.copy(query = query) }
+        _uiState.update {
+            it.copy(
+                query = query,
+                selectedResultDetail = null,
+            )
+        }
     }
 
     fun submitCurrentQuery() {
@@ -54,6 +59,7 @@ class SearchViewModel @Inject constructor(
             it.copy(
                 query = trimmedQuery,
                 lastSubmittedQuery = trimmedQuery,
+                selectedResultDetail = null,
             )
         }
         search(trimmedQuery, uiState.value.selectedFilter, shouldRecordHistory = true)
@@ -61,11 +67,29 @@ class SearchViewModel @Inject constructor(
 
     fun selectFilter(filter: SearchFilter) {
         val lastSubmittedQuery = uiState.value.lastSubmittedQuery
-        _uiState.update { it.copy(selectedFilter = filter) }
+        _uiState.update {
+            it.copy(
+                selectedFilter = filter,
+                selectedResultDetail = null,
+            )
+        }
 
         if (!lastSubmittedQuery.isNullOrBlank()) {
             search(lastSubmittedQuery, filter, shouldRecordHistory = false)
         }
+    }
+
+    fun selectResult(resultId: String) {
+        val content = uiState.value.resultContent as? SearchResultContent.Content ?: return
+        val selectedResult = content.items.firstOrNull { item -> item.id == resultId } ?: return
+
+        _uiState.update {
+            it.copy(selectedResultDetail = selectedResult.toDetail())
+        }
+    }
+
+    fun clearSelectedResult() {
+        _uiState.update { it.copy(selectedResultDetail = null) }
     }
 
     fun selectHotKeyword(keyword: String) {
@@ -98,7 +122,12 @@ class SearchViewModel @Inject constructor(
                 repository.recordHistory(query)
             }
 
-            _uiState.update { it.copy(resultContent = SearchResultContent.Loading) }
+            _uiState.update {
+                it.copy(
+                    resultContent = SearchResultContent.Loading,
+                    selectedResultDetail = null,
+                )
+            }
 
             when (val result = repository.search(query, filter)) {
                 is AppResult.Success -> {
@@ -129,4 +158,12 @@ class SearchViewModel @Inject constructor(
             SearchResultContent.Content(this)
         }
     }
+
+    private fun SearchResultItem.toDetail(): SearchResultDetail =
+        SearchResultDetail(
+            id = id,
+            title = title,
+            summary = summary,
+            type = type,
+        )
 }

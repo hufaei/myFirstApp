@@ -129,6 +129,8 @@
     <string name="discover_type_membership">Membership</string>
     <string name="discover_detail_by_author">By %1$s</string>
     <string name="discover_detail_course">%1$s · %2$s</string>
+    <string name="discover_detail_category">Category: %1$s</string>
+    <string name="discover_detail_back_to_list">Back to list</string>
     <string name="search_title">Search</string>
     <string name="search_subtitle">Find local content.</string>
     <string name="search_keyword_label">Keyword</string>
@@ -152,6 +154,7 @@
     <string name="search_type_task">Task</string>
     <string name="search_type_habit">Habit</string>
     <string name="search_type_notification">Notification</string>
+    <string name="search_detail_open_related">Open related page</string>
     <string name="habits_title">Habits</string>
     <string name="habits_subtitle">Check-ins, reminders, and photo notes.</string>
     <string name="habits_new">New</string>

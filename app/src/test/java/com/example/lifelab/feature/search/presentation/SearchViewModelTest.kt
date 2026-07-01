@@ -61,6 +61,27 @@ class SearchViewModelTest {
     }
 
     @Test
+    fun selectingResultOpensLocalDetailState() = runTest {
+        val result = searchResult(
+            id = "article-1",
+            title = "Deep Work",
+            type = SearchResultType.ARTICLE,
+        )
+        val viewModel = SearchViewModel(
+            FakeSearchRepository(searchResults = mapOf("deep work" to listOf(result))),
+        )
+
+        viewModel.submitQuery("deep work")
+        viewModel.selectResult("article-1")
+
+        val detail = viewModel.uiState.value.selectedResultDetail
+        assertEquals("article-1", detail?.id)
+        assertEquals("Deep Work", detail?.title)
+        assertEquals("Useful summary", detail?.summary)
+        assertEquals(SearchResultType.ARTICLE, detail?.type)
+    }
+
+    @Test
     fun blankSubmitDoesNotRecordHistoryOrSearch() = runTest {
         val repository = FakeSearchRepository()
         val viewModel = SearchViewModel(repository)

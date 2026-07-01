@@ -55,6 +55,9 @@ fun LifeLabNavHost(
             SearchRoute(
                 contentPadding = contentPadding,
                 onBack = { navController.popBackStack() },
+                onOpenResultDestination = { type ->
+                    navController.navigateSingleTop(LifeLabRoutes.relatedRouteFor(type))
+                },
             )
         }
         composable(LifeLabRoutes.NOTIFICATIONS) {

@@ -5,11 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.lifelab.feature.search.domain.SearchResultType
 
 @Composable
 fun SearchRoute(
     contentPadding: PaddingValues,
     onBack: () -> Unit = {},
+    onOpenResultDestination: (SearchResultType) -> Unit = {},
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -24,6 +26,9 @@ fun SearchRoute(
         onHistoryClick = viewModel::selectHistoryQuery,
         onClearHistoryClick = viewModel::clearHistory,
         onRetryClick = viewModel::retry,
+        onResultClick = viewModel::selectResult,
+        onResultDetailDismiss = viewModel::clearSelectedResult,
+        onOpenResultDestination = onOpenResultDestination,
         onBack = onBack,
     )
 }
