@@ -29,3 +29,17 @@
 - ViewModel tests should use `com.example.lifelab.core.testing.MainDispatcherRule`.
 - Shared dependencies are maintained on `codex/platform-baseline-architecture`.
 - Feature modules should keep implementation under their own `feature/<module>` package unless the main controller approves a shared contract change.
+
+## v1.2 Quality Release Threads
+
+- Controller branch: `codex/v1.2-polish`
+- Base commit: `468606d` (`docs: plan lifelab v1.2 quality release`)
+- Release rule: do not start APK packaging until release commit and tag `v1.2.0` both exist.
+- Test policy: add only concise core tests; avoid broad UI tests and tests centered on `not have`, `not exist`, or `not visible` behavior.
+
+| Workstream | Thread ID | Worktree | Expected Commit Theme | Controller Note |
+|---|---|---|---|---|
+| Notification reliability | `019f1c49-9942-7e30-a9ae-a2a7d5601160` | `/Users/jingting.li/.codex/worktrees/548c/myFirstApp` | `fix: clarify notification permission state` | Owns truthful notification settings and permission-blocked state |
+| Habit create/edit | `019f1c49-d08b-7b00-8162-44591498a56a` | `/Users/jingting.li/.codex/worktrees/24b7/myFirstApp` | `feat: add habit create and edit flow` | Owns habit editor behavior and habit tests |
+| Search/discovery details | `019f1c4a-1590-74d3-9077-2c131bd42cc0` | `/Users/jingting.li/.codex/worktrees/ad62/myFirstApp` | `feat: add search and discovery details` | Owns local result/content detail states |
+| Visual polish | `019f1c4a-627d-7253-971d-bee54be5329e` | `/Users/jingting.li/.codex/worktrees/345d/myFirstApp` | `style: polish lifelab productivity surfaces` | Owns theme, shared components, and screen layout polish |
