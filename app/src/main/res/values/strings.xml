@@ -154,6 +154,8 @@
     <string name="search_type_notification">通知</string>
     <string name="habits_title">习惯</string>
     <string name="habits_subtitle">打卡、提醒、照片记录。</string>
+    <string name="habits_new">新建</string>
+    <string name="habits_edit">编辑</string>
     <string name="habits_loading">正在加载习惯</string>
     <string name="habits_loading_body">你的打卡状态和连续天数会显示在这里。</string>
     <string name="habits_empty">还没有习惯。</string>
@@ -175,6 +177,11 @@
     <string name="habits_reminder_permission_blocked_body">已开启的习惯提醒会继续保留时间设置，但 Android 当前不会显示通知。</string>
     <string name="habits_reminder_permission_action">允许通知</string>
     <string name="habits_reminder_delivery_blocked">Android 通知权限未开启，此提醒暂时无法送达。</string>
+    <string name="habits_editor_create_title">新建习惯</string>
+    <string name="habits_editor_edit_title">编辑习惯</string>
+    <string name="habits_editor_name">习惯名称</string>
+    <string name="habits_editor_save">保存习惯</string>
+    <string name="habits_editor_cancel">取消</string>
     <string name="habits_priority_high">高</string>
     <string name="habits_priority_normal">中</string>
     <string name="habits_priority_low">低</string>
@@ -182,6 +189,7 @@
     <string name="habits_message_already_checked_in">%1$s今天已经打过卡。</string>
     <string name="habits_message_missing">没有找到这个习惯。</string>
     <string name="habits_message_reminder_updated">%1$s的提醒已更新。</string>
+    <string name="habits_message_saved">%1$s已保存。</string>
     <string name="notifications_title">消息</string>
     <string name="notifications_subtitle">应用内消息、习惯提醒和 Android 权限。</string>
     <string name="notifications_loading">正在加载消息</string>

@@ -21,12 +21,17 @@ class InMemoryHabitRepository(
         habits.value.firstOrNull { it.id == habitId }
 
     override suspend fun saveHabit(updatedHabit: Habit): Habit {
+        val savedHabit = updatedHabit.withDerivedStreak()
         val currentHabits = habits.value
-        habits.value = currentHabits.map { existingHabit ->
-            if (existingHabit.id == updatedHabit.id) updatedHabit else existingHabit
+        habits.value = if (currentHabits.any { habit -> habit.id == savedHabit.id }) {
+            currentHabits.map { existingHabit ->
+                if (existingHabit.id == savedHabit.id) savedHabit else existingHabit
+            }
+        } else {
+            currentHabits + savedHabit
         }
 
-        return updatedHabit
+        return savedHabit
     }
 
     override suspend fun updateReminder(
@@ -35,13 +40,7 @@ class InMemoryHabitRepository(
     ): Habit? {
         val currentHabits = habits.value
         val targetHabit = currentHabits.firstOrNull { it.id == habitId } ?: return null
-        val updatedHabit = targetHabit.copy(reminder = reminder)
-
-        habits.value = currentHabits.map { habit ->
-            if (habit.id == habitId) updatedHabit else habit
-        }
-
-        return updatedHabit
+        return saveHabit(targetHabit.copy(reminder = reminder))
     }
 
     private fun Habit.withDerivedStreak(): Habit {

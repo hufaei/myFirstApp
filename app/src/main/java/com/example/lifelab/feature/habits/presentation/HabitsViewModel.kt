@@ -11,6 +11,7 @@ import com.example.lifelab.core.media.PhotoSource
 import com.example.lifelab.feature.habits.data.InMemoryHabitRepository
 import com.example.lifelab.feature.habits.domain.model.Habit
 import com.example.lifelab.feature.habits.domain.model.HabitCheckInResult
+import com.example.lifelab.feature.habits.domain.model.HabitFrequency
 import com.example.lifelab.feature.habits.domain.model.HabitReminder
 import com.example.lifelab.feature.habits.domain.model.HabitReminderPriority
 import com.example.lifelab.feature.habits.domain.repository.HabitRepository
@@ -98,7 +99,7 @@ class HabitsViewModel(
         val habit = uiState.value.habits.firstOrNull { it.id == habitId } ?: return
         val reminder = habit.reminder.copy(
             enabled = enabled,
-            time = if (enabled) habit.reminder.time ?: DefaultReminderTime else habit.reminder.time,
+            time = if (enabled) habit.reminder.time ?: DefaultHabitReminderTime else habit.reminder.time,
         )
 
         updateReminder(habitId = habitId, reminder = reminder)
@@ -124,6 +125,91 @@ class HabitsViewModel(
             habitId = habitId,
             reminder = habit.reminder.copy(priority = priority),
         )
+    }
+
+    fun startCreateHabit() {
+        _uiState.value = _uiState.value.copy(
+            editor = HabitEditorState(mode = HabitEditorMode.Create),
+            message = null,
+        )
+    }
+
+    fun startEditHabit(habitId: String) {
+        val habit = uiState.value.habits.firstOrNull { it.id == habitId }
+        if (habit == null) {
+            showMessage(HabitUiMessage.Missing)
+            return
+        }
+
+        _uiState.value = _uiState.value.copy(
+            editor = HabitEditorState(
+                mode = HabitEditorMode.Edit,
+                habitId = habit.id,
+                name = habit.name,
+                reminderEnabled = habit.reminder.enabled,
+                reminderTime = habit.reminder.time ?: DefaultHabitReminderTime,
+                reminderPriority = habit.reminder.priority,
+            ),
+            message = null,
+        )
+    }
+
+    fun updateEditorName(name: String) {
+        updateEditor { editor -> editor.copy(name = name) }
+    }
+
+    fun setEditorReminderEnabled(enabled: Boolean) {
+        updateEditor { editor -> editor.copy(reminderEnabled = enabled) }
+    }
+
+    fun updateEditorReminderTime(time: LocalTime) {
+        updateEditor { editor -> editor.copy(reminderTime = time) }
+    }
+
+    fun increaseEditorReminderTime() {
+        updateEditor { editor -> editor.copy(reminderTime = editor.reminderTime.plusMinutes(30)) }
+    }
+
+    fun updateEditorReminderPriority(priority: HabitReminderPriority) {
+        updateEditor { editor -> editor.copy(reminderPriority = priority) }
+    }
+
+    fun dismissEditor() {
+        _uiState.value = _uiState.value.copy(editor = null)
+    }
+
+    fun saveEditor() {
+        val editor = uiState.value.editor ?: return
+        val habitName = editor.name.trim()
+        if (habitName.isBlank()) {
+            return
+        }
+
+        viewModelScope.launch {
+            val habit = when (editor.mode) {
+                HabitEditorMode.Create -> editor.toNewHabit(habitName)
+                HabitEditorMode.Edit -> {
+                    val habitId = editor.habitId
+                    val existingHabit = habitId?.let { repository.getHabit(it) }
+                    existingHabit?.copy(
+                        name = habitName,
+                        reminder = editor.toReminder(),
+                    )
+                }
+            }
+
+            if (habit == null) {
+                showMessage(HabitUiMessage.Missing)
+                return@launch
+            }
+
+            val savedHabit = repository.saveHabit(habit)
+            reminderScheduler?.scheduleOrCancel(savedHabit)
+            _uiState.value = _uiState.value.copy(
+                editor = null,
+                message = HabitUiMessage.HabitSaved(savedHabit.name),
+            )
+        }
     }
 
     fun attachHabitPhotos(
@@ -156,7 +242,8 @@ class HabitsViewModel(
         reminder: HabitReminder,
     ) {
         viewModelScope.launch {
-            val updatedHabit = repository.updateReminder(habitId = habitId, reminder = reminder)
+            val habit = repository.getHabit(habitId)
+            val updatedHabit = habit?.let { repository.saveHabit(it.copy(reminder = reminder)) }
             showMessage(
                 if (updatedHabit == null) {
                     HabitUiMessage.Missing
@@ -170,6 +257,42 @@ class HabitsViewModel(
 
     private fun showMessage(message: HabitUiMessage) {
         _uiState.value = _uiState.value.copy(message = message)
+    }
+
+    private fun updateEditor(transform: (HabitEditorState) -> HabitEditorState) {
+        val editor = uiState.value.editor ?: return
+        _uiState.value = _uiState.value.copy(editor = transform(editor))
+    }
+
+    private fun HabitEditorState.toNewHabit(habitName: String): Habit =
+        Habit(
+            id = buildHabitId(habitName),
+            name = habitName,
+            frequency = HabitFrequency.Daily,
+            streakCount = 0,
+            lastCheckInDate = null,
+            reminder = toReminder(),
+        )
+
+    private fun HabitEditorState.toReminder(): HabitReminder =
+        HabitReminder(
+            enabled = reminderEnabled,
+            time = if (reminderEnabled) reminderTime else null,
+            priority = reminderPriority,
+        )
+
+    private fun buildHabitId(name: String): String {
+        val baseId = "habit-${name.toHabitIdSlug()}-${nowMillis()}"
+        val existingIds = uiState.value.habits.map { habit -> habit.id }.toSet()
+        if (baseId !in existingIds) {
+            return baseId
+        }
+
+        var suffix = 2
+        while ("$baseId-$suffix" in existingIds) {
+            suffix += 1
+        }
+        return "$baseId-$suffix"
     }
 
     private suspend fun loadHabitPhotos(habits: List<Habit>): Map<String, List<PhotoRecord>> {
@@ -237,9 +360,24 @@ class HabitsViewModel(
         )
     }
 
-    private companion object {
-        val DefaultReminderTime: LocalTime = LocalTime.of(9, 0)
-    }
+}
+
+private val RepeatedDashRegex = Regex("-+")
+
+private fun String.toHabitIdSlug(): String {
+    val slug = trim()
+        .lowercase()
+        .map { character ->
+            when (character) {
+                in 'a'..'z', in '0'..'9' -> character
+                else -> '-'
+            }
+        }
+        .joinToString("")
+        .replace(RepeatedDashRegex, "-")
+        .trim('-')
+
+    return slug.ifBlank { "custom" }
 }
 
 private fun List<Habit>.sortedForDisplay(): List<Habit> =

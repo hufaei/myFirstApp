@@ -154,6 +154,8 @@
     <string name="search_type_notification">Notification</string>
     <string name="habits_title">Habits</string>
     <string name="habits_subtitle">Check-ins, reminders, and photo notes.</string>
+    <string name="habits_new">New</string>
+    <string name="habits_edit">Edit</string>
     <string name="habits_loading">Loading habits</string>
     <string name="habits_loading_body">Your check-in status and streaks will appear here.</string>
     <string name="habits_empty">No habits yet.</string>
@@ -175,6 +177,11 @@
     <string name="habits_reminder_permission_blocked_body">Enabled habit reminders keep their time settings, but Android will not show notifications right now.</string>
     <string name="habits_reminder_permission_action">Allow notifications</string>
     <string name="habits_reminder_delivery_blocked">Android notification permission is off, so this reminder cannot be delivered yet.</string>
+    <string name="habits_editor_create_title">New habit</string>
+    <string name="habits_editor_edit_title">Edit habit</string>
+    <string name="habits_editor_name">Habit name</string>
+    <string name="habits_editor_save">Save habit</string>
+    <string name="habits_editor_cancel">Cancel</string>
     <string name="habits_priority_high">High</string>
     <string name="habits_priority_normal">Normal</string>
     <string name="habits_priority_low">Low</string>
@@ -182,6 +189,7 @@
     <string name="habits_message_already_checked_in">%1$s is already checked in today.</string>
     <string name="habits_message_missing">Habit was not found.</string>
     <string name="habits_message_reminder_updated">Reminder updated for %1$s.</string>
+    <string name="habits_message_saved">Saved %1$s.</string>
     <string name="notifications_title">Messages</string>
     <string name="notifications_subtitle">In-app messages, habit reminders, and Android permission.</string>
     <string name="notifications_loading">Loading notifications</string>

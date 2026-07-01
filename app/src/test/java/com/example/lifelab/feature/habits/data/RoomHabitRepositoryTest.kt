@@ -3,6 +3,7 @@ package com.example.lifelab.feature.habits.data
 import com.example.lifelab.feature.habits.domain.model.Habit
 import com.example.lifelab.feature.habits.domain.model.HabitFrequency
 import com.example.lifelab.feature.habits.domain.model.HabitReminder
+import com.example.lifelab.feature.habits.domain.model.HabitReminderPriority
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlinx.coroutines.flow.Flow
@@ -35,6 +36,35 @@ class RoomHabitRepositoryTest {
 
         assertEquals(saved, dao.getHabit("hydrate")?.toDomain())
         assertEquals(listOf(saved), repository.observeHabits().first())
+    }
+
+    @Test
+    fun saveHabitUpdatesExistingHabitById() = runTest {
+        val dao = FakeHabitDao()
+        val repository = RoomHabitRepository(dao)
+        val original = Habit(
+            id = "read",
+            name = "Read",
+            frequency = HabitFrequency.Daily,
+            streakCount = 0,
+            lastCheckInDate = null,
+            reminder = HabitReminder(enabled = false, time = null),
+        )
+        val edited = original.copy(
+            name = "Deep reading",
+            reminder = HabitReminder(
+                enabled = true,
+                time = LocalTime.of(21, 0),
+                priority = HabitReminderPriority.Low,
+            ),
+        )
+
+        repository.saveHabit(original)
+        val saved = repository.saveHabit(edited)
+
+        assertEquals(edited, saved)
+        assertEquals(listOf(edited), repository.observeHabits().first())
+        assertEquals(1, dao.countHabits())
     }
 
     @Test

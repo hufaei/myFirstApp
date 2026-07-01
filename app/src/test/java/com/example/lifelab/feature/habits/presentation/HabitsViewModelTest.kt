@@ -183,6 +183,87 @@ class HabitsViewModelTest {
     }
 
     @Test
+    fun savingCreateEditorAddsHabitWithReminderAndUpdatesActiveReminderCount() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "hydrate",
+                    reminder = HabitReminder(enabled = false, time = null),
+                ),
+            ),
+        )
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+            nowMillis = { 42_000L },
+        )
+
+        viewModel.startCreateHabit()
+        viewModel.updateEditorName("Morning Yoga")
+        viewModel.setEditorReminderEnabled(true)
+        viewModel.updateEditorReminderTime(LocalTime.of(7, 30))
+        viewModel.updateEditorReminderPriority(HabitReminderPriority.High)
+        viewModel.saveEditor()
+
+        val state = viewModel.uiState.value
+        val created = state.habits.first { habit -> habit.id == "habit-morning-yoga-42000" }
+        assertEquals("Morning Yoga", created.name)
+        assertEquals(
+            HabitReminder(
+                enabled = true,
+                time = LocalTime.of(7, 30),
+                priority = HabitReminderPriority.High,
+            ),
+            created.reminder,
+        )
+        assertEquals(2, state.stats.totalHabits)
+        assertEquals(1, state.stats.activeReminders)
+        assertEquals(null, state.editor)
+        assertEquals(HabitUiMessage.HabitSaved("Morning Yoga"), state.message)
+    }
+
+    @Test
+    fun savingEditEditorUpdatesNameReminderAndActiveReminderCount() = runTest {
+        val repository = InMemoryHabitRepository(
+            initialHabits = listOf(
+                sampleHabit(
+                    id = "read",
+                    name = "Read",
+                    reminder = HabitReminder(enabled = false, time = null),
+                ),
+            ),
+        )
+        val viewModel = HabitsViewModel(
+            repository = repository,
+            today = { today },
+        )
+
+        viewModel.startEditHabit("read")
+        viewModel.updateEditorName("Deep reading")
+        viewModel.setEditorReminderEnabled(true)
+        viewModel.updateEditorReminderTime(LocalTime.of(21, 0))
+        viewModel.updateEditorReminderPriority(HabitReminderPriority.Low)
+        viewModel.saveEditor()
+
+        val state = viewModel.uiState.value
+        val edited = state.habits.single()
+        assertEquals("read", edited.id)
+        assertEquals("Deep reading", edited.name)
+        assertEquals(
+            HabitReminder(
+                enabled = true,
+                time = LocalTime.of(21, 0),
+                priority = HabitReminderPriority.Low,
+            ),
+            edited.reminder,
+        )
+        assertEquals(1, state.stats.totalHabits)
+        assertEquals(1, state.stats.activeReminders)
+        assertEquals(null, state.editor)
+        assertEquals(HabitUiMessage.HabitSaved("Deep reading"), state.message)
+    }
+
+    @Test
     fun attachingHabitPhotosKeepsOnlyThreePhotosForThatHabit() = runTest {
         val repository = InMemoryHabitRepository(
             initialHabits = listOf(
