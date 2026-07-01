@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -22,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.lifelab.R
 import com.example.lifelab.core.ui.components.LifeLabPrimaryActionRow
@@ -54,7 +54,6 @@ fun DiscoverScreen(
     ) {
         LifeLabScreenHeader(
             title = stringResource(R.string.discover_title),
-            subtitle = stringResource(R.string.discover_subtitle),
             onBack = headerBack,
         )
         if (selectedDetail == null) {
@@ -189,7 +188,10 @@ private fun DiscoverContentCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onContentSelected(content.id) },
-        shape = RoundedCornerShape(8.dp),
+        shape = MaterialTheme.shapes.small,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -197,18 +199,23 @@ private fun DiscoverContentCard(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = content.typeLabel(),
+                    modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = content.tag,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             Text(
@@ -219,6 +226,7 @@ private fun DiscoverContentCard(
             Text(
                 text = content.summary,
                 style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = content.detailLabel(),
@@ -237,7 +245,7 @@ private fun DiscoverContentDetailCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = MaterialTheme.shapes.small,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),

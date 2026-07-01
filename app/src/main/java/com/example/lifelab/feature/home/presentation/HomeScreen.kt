@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TaskAlt
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -35,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.lifelab.R
 import com.example.lifelab.core.ui.components.LifeLabScreenHeader
@@ -68,8 +69,8 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(contentPadding)
             .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         HomeHeader(
             isActionEnabled = !uiState.isLoading && !uiState.isRefreshing,
@@ -156,7 +157,7 @@ private fun LoadingSection() {
 
 @Composable
 private fun RefreshingSection() {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         Text(
             text = stringResource(R.string.home_refreshing),
@@ -221,11 +222,11 @@ private fun DailyDashboardCards(
         return
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         LifeLabSectionTitle(title = stringResource(R.string.home_daily_section))
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             if (maxWidth < 560.dp) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     taskSummary?.let {
                         TaskSummaryCard(
                             summary = it,
@@ -240,7 +241,7 @@ private fun DailyDashboardCards(
                     }
                 }
             } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     taskSummary?.let {
                         TaskSummaryCard(
                             summary = it,
@@ -319,8 +320,8 @@ private fun DashboardCard(
         ),
     ) {
         Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 text = title,
@@ -329,8 +330,8 @@ private fun DashboardCard(
             )
             Text(
                 text = metric,
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
@@ -352,7 +353,7 @@ private fun HomeQuickActions(
     onOpenHabits: () -> Unit,
     onOpenDiscover: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         LifeLabSectionTitle(title = stringResource(R.string.home_quick_actions))
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             if (maxWidth < 560.dp) {
@@ -379,7 +380,7 @@ private fun HomeQuickActions(
                     )
                 }
             } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     QuickActionButton(
                         label = stringResource(R.string.home_action_create_task),
                         onClick = onCreateTask,
@@ -417,13 +418,18 @@ private fun QuickActionButton(
     modifier: Modifier = Modifier,
     icon: @Composable () -> Unit,
 ) {
-    Button(
+    FilledTonalButton(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
     ) {
         icon()
         Spacer(modifier = Modifier.width(8.dp))
-        Text(label)
+        Text(
+            text = label,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -441,7 +447,7 @@ private fun RecommendedEntriesSection(
     entries: List<HomeRecommendationEntry>,
     onOpenRoute: (String) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         LifeLabSectionTitle(title = stringResource(R.string.home_recommended))
 
         if (entries.isEmpty()) {
@@ -455,8 +461,8 @@ private fun RecommendedEntriesSection(
                 shape = MaterialTheme.shapes.small,
             ) {
                 Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
                         text = entry.title,
@@ -475,7 +481,11 @@ private fun RecommendedEntriesSection(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = entry.actionLabel)
+                        Text(
+                            text = entry.actionLabel,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 }
             }
@@ -488,7 +498,7 @@ private fun FeedSection(
     items: List<HomeFeedItem.DiscoveryTeaser>,
     onOpenDiscover: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         LifeLabSectionTitle(title = stringResource(R.string.home_feed))
 
         if (items.isEmpty()) {
@@ -502,7 +512,7 @@ private fun FeedSection(
                 shape = MaterialTheme.shapes.small,
             ) {
                 Column(
-                    modifier = Modifier.padding(18.dp),
+                    modifier = Modifier.padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
@@ -522,7 +532,11 @@ private fun FeedSection(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = stringResource(R.string.home_action_discover))
+                        Text(
+                            text = stringResource(R.string.home_action_discover),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 }
             }

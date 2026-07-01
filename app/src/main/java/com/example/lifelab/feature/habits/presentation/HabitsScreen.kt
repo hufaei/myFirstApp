@@ -26,6 +26,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.lifelab.R
 import com.example.lifelab.core.media.PhotoRecord
@@ -114,7 +116,7 @@ fun HabitsScreen(
                 title = stringResource(R.string.habits_title),
                 subtitle = stringResource(R.string.habits_subtitle),
                 actions = {
-                    Button(onClick = onStartCreate) {
+                    FilledTonalButton(onClick = onStartCreate) {
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = null,
@@ -221,12 +223,11 @@ fun HabitsScreen(
 
 @Composable
 private fun StatsCard(state: HabitsUiState) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f),
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ) {
         Row(
             modifier = Modifier
@@ -273,12 +274,14 @@ private fun StatText(
             text = value,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.tertiary,
+            textAlign = TextAlign.Center,
         )
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -348,7 +351,7 @@ private fun HabitCard(
                 }
             }
 
-            Button(
+            FilledTonalButton(
                 onClick = { onCheckIn(habit.id) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isCheckedInToday,
@@ -526,69 +529,63 @@ private fun ReminderControls(
     onReminderTimeChange: () -> Unit,
     onReminderPriorityChange: (HabitReminderPriority) -> Unit,
 ) {
-    Surface(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.habits_reminder),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    Text(
-                        text = reminderTimeLabel,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                Switch(
-                    checked = reminderEnabled,
-                    onCheckedChange = onReminderEnabledChange,
-                )
-            }
-            if (reminderDeliveryBlocked) {
                 Text(
-                    text = stringResource(R.string.habits_reminder_delivery_blocked),
+                    text = stringResource(R.string.habits_reminder),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Text(
+                    text = reminderTimeLabel,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            OutlinedButton(
-                onClick = onReminderTimeChange,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    if (reminderTime == null) {
-                        stringResource(R.string.habits_set_default_time)
-                    } else {
-                        stringResource(R.string.habits_add_30_minutes)
-                    },
+            Switch(
+                checked = reminderEnabled,
+                onCheckedChange = onReminderEnabledChange,
+            )
+        }
+        if (reminderDeliveryBlocked) {
+            Text(
+                text = stringResource(R.string.habits_reminder_delivery_blocked),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        OutlinedButton(
+            onClick = onReminderTimeChange,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                if (reminderTime == null) {
+                    stringResource(R.string.habits_set_default_time)
+                } else {
+                    stringResource(R.string.habits_add_30_minutes)
+                },
+            )
+        }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            HabitReminderPriority.entries.forEach { option ->
+                FilterChip(
+                    selected = priority == option,
+                    onClick = { onReminderPriorityChange(option) },
+                    label = { Text(option.label()) },
                 )
-            }
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                HabitReminderPriority.entries.forEach { option ->
-                    FilterChip(
-                        selected = priority == option,
-                        onClick = { onReminderPriorityChange(option) },
-                        label = { Text(option.label()) },
-                    )
-                }
             }
         }
     }

@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
@@ -49,7 +50,6 @@ import com.example.lifelab.core.ui.components.LifeLabMessageBanner
 import com.example.lifelab.core.ui.components.LifeLabPhotoStrip
 import com.example.lifelab.core.ui.components.LifeLabPrimaryActionRow
 import com.example.lifelab.core.ui.components.LifeLabScreenHeader
-import com.example.lifelab.core.ui.components.LifeLabSectionTitle
 import com.example.lifelab.core.ui.components.LifeLabStateCard
 import com.example.lifelab.feature.tasks.domain.Task
 import com.example.lifelab.feature.tasks.domain.TaskPriority
@@ -119,8 +119,8 @@ private fun TasksScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(contentPadding)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         TasksHeader(
             mode = state.mode,
@@ -181,7 +181,7 @@ private fun TasksHeader(
         onBack = if (mode == TaskScreenMode.List) null else onBackToList,
         actions = {
             if (mode == TaskScreenMode.List) {
-                Button(onClick = onStartCreate) {
+                FilledTonalButton(onClick = onStartCreate) {
                     IconSmallAdd()
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(R.string.tasks_new))
@@ -209,9 +209,8 @@ private fun TaskListContent(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        LifeLabSectionTitle(title = stringResource(R.string.tasks_filter_section))
         TaskFilterRow(
             selectedFilter = state.selectedFilter,
             onSelectFilter = onSelectFilter,
@@ -229,7 +228,7 @@ private fun TaskListContent(
             else -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(
                         items = state.filteredTasks,
@@ -283,8 +282,8 @@ private fun TaskRow(
         ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -368,11 +367,11 @@ private fun TaskDetailContent(
         modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
             text = task.title,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
@@ -425,7 +424,7 @@ private fun TaskEditorContent(
         modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         OutlinedTextField(
             value = editorState.title,
@@ -548,8 +547,8 @@ private fun TaskStatus.label(): String =
 
 @Composable
 private fun TaskStatus.color() = when (this) {
-    TaskStatus.Active -> MaterialTheme.colorScheme.primary
-    TaskStatus.Completed -> MaterialTheme.colorScheme.tertiary
+    TaskStatus.Active -> MaterialTheme.colorScheme.tertiary
+    TaskStatus.Completed -> MaterialTheme.colorScheme.primary
 }
 
 private fun Task.dueLabelOrNull(): String? =

@@ -13,7 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -147,7 +148,7 @@ private fun SearchInputSection(
     onSubmitQuery: () -> Unit,
     onBack: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         LifeLabScreenHeader(
             title = stringResource(R.string.search_title),
             onBack = onBack,
@@ -164,6 +165,7 @@ private fun SearchInputSection(
         LifeLabPrimaryActionRow(
             primaryLabel = stringResource(R.string.search_action),
             onPrimaryClick = onSubmitQuery,
+            primaryIcon = Icons.Filled.Search,
         )
     }
 }
@@ -319,9 +321,9 @@ private fun SearchResultRow(
     onClick: (String) -> Unit,
 ) {
     Card(
-        shape = RoundedCornerShape(8.dp),
+        shape = MaterialTheme.shapes.small,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -329,12 +331,12 @@ private fun SearchResultRow(
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(14.dp),
         ) {
             Text(
                 text = item.type.label(),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
             )
             Text(
                 text = item.title,
