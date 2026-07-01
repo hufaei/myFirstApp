@@ -46,9 +46,6 @@ import com.example.lifelab.feature.home.domain.HomeFeedItem
 import com.example.lifelab.feature.home.domain.HomeHabitInsight
 import com.example.lifelab.feature.home.domain.HomeRecommendationEntry
 import com.example.lifelab.feature.home.domain.HomeTaskSummary
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 @Composable
 fun HomeScreen(
@@ -115,11 +112,8 @@ private fun HomeHeader(
     onOpenSearch: () -> Unit,
     onOpenNotifications: () -> Unit,
 ) {
-    val today = LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
-
     LifeLabScreenHeader(
         title = stringResource(R.string.home_title),
-        subtitle = stringResource(R.string.home_today_subtitle, today),
         actions = {
             IconButton(onClick = onOpenSearch) {
                 Icon(
@@ -426,7 +420,7 @@ private fun QuickActionButton(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = label,
-            maxLines = 2,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
         )

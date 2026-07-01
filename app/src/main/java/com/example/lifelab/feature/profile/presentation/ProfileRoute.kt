@@ -204,53 +204,49 @@ private fun PreferencesCard(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         SettingsSectionCard(title = stringResource(R.string.profile_section_appearance)) {
-            SettingGroup(title = stringResource(R.string.profile_theme_mode)) {
-                ChoiceChipFlow {
-                    ThemeMode.entries.forEach { themeMode ->
-                        FilterChip(
-                            modifier = Modifier.defaultMinSize(
-                                minWidth = SettingChipMinWidth,
-                                minHeight = SettingChipMinHeight,
-                            ),
-                            selected = appPreferences.themeMode == themeMode,
-                            onClick = {
-                                onEvent(ProfileUiEvent.ThemeModeSelected(themeMode))
-                            },
-                            label = {
-                                Text(
-                                    text = themeMode.label(),
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            },
-                        )
-                    }
+            SettingChoiceRow(title = stringResource(R.string.profile_theme_mode)) {
+                ThemeMode.entries.forEach { themeMode ->
+                    FilterChip(
+                        modifier = Modifier.defaultMinSize(
+                            minWidth = SettingChipMinWidth,
+                            minHeight = SettingChipMinHeight,
+                        ),
+                        selected = appPreferences.themeMode == themeMode,
+                        onClick = {
+                            onEvent(ProfileUiEvent.ThemeModeSelected(themeMode))
+                        },
+                        label = {
+                            Text(
+                                text = themeMode.label(),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
                 }
             }
         }
 
         SettingsSectionCard(title = stringResource(R.string.profile_section_language)) {
-            SettingGroup(title = stringResource(R.string.profile_language_mode)) {
-                ChoiceChipFlow {
-                    LanguageMode.entries.forEach { languageMode ->
-                        FilterChip(
-                            modifier = Modifier.defaultMinSize(
-                                minWidth = SettingChipMinWidth,
-                                minHeight = SettingChipMinHeight,
-                            ),
-                            selected = appPreferences.languageMode == languageMode,
-                            onClick = {
-                                onEvent(ProfileUiEvent.LanguageModeSelected(languageMode))
-                            },
-                            label = {
-                                Text(
-                                    text = languageMode.label(),
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            },
-                        )
-                    }
+            SettingChoiceRow(title = stringResource(R.string.profile_language_mode)) {
+                LanguageMode.entries.forEach { languageMode ->
+                    FilterChip(
+                        modifier = Modifier.defaultMinSize(
+                            minWidth = SettingChipMinWidth,
+                            minHeight = SettingChipMinHeight,
+                        ),
+                        selected = appPreferences.languageMode == languageMode,
+                        onClick = {
+                            onEvent(ProfileUiEvent.LanguageModeSelected(languageMode))
+                        },
+                        label = {
+                            Text(
+                                text = languageMode.label(),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
                 }
             }
         }
@@ -277,29 +273,27 @@ private fun PreferencesCard(
         }
 
         SettingsSectionCard(title = stringResource(R.string.profile_section_task_preferences)) {
-            SettingGroup(title = stringResource(R.string.profile_default_task_filter)) {
-                ChoiceChipFlow {
-                    DefaultTaskFilter.entries.forEach { defaultTaskFilter ->
-                        FilterChip(
-                            modifier = Modifier.defaultMinSize(
-                                minWidth = SettingChipMinWidth,
-                                minHeight = SettingChipMinHeight,
-                            ),
-                            selected = preference.defaultTaskFilter == defaultTaskFilter,
-                            onClick = {
-                                onEvent(
-                                    ProfileUiEvent.DefaultTaskFilterSelected(defaultTaskFilter),
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = defaultTaskFilter.label(),
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            },
-                        )
-                    }
+            SettingChoiceRow(title = stringResource(R.string.profile_default_task_filter)) {
+                DefaultTaskFilter.entries.forEach { defaultTaskFilter ->
+                    FilterChip(
+                        modifier = Modifier.defaultMinSize(
+                            minWidth = SettingChipMinWidth,
+                            minHeight = SettingChipMinHeight,
+                        ),
+                        selected = preference.defaultTaskFilter == defaultTaskFilter,
+                        onClick = {
+                            onEvent(
+                                ProfileUiEvent.DefaultTaskFilterSelected(defaultTaskFilter),
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = defaultTaskFilter.label(),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
                 }
             }
 
@@ -400,29 +394,31 @@ private fun SettingSwitchRow(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SettingGroup(
+private fun SettingChoiceRow(
     title: String,
     content: @Composable () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        content()
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun ChoiceChipFlow(content: @Composable () -> Unit) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        content()
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            content()
+        }
     }
 }
 

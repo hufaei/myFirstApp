@@ -18,14 +18,14 @@
     <string name="profile_theme_system">System</string>
     <string name="profile_theme_light">Light</string>
     <string name="profile_theme_dark">Dark</string>
-    <string name="profile_language_mode">Language</string>
+    <string name="profile_language_mode">Mode</string>
     <string name="profile_language_system">System</string>
     <string name="profile_language_zh">中文</string>
     <string name="profile_language_en">English</string>
     <string name="profile_notifications">In-app messages</string>
-    <string name="profile_notifications_description">Show message center content.</string>
+    <string name="profile_notifications_description">Message center content.</string>
     <string name="profile_notification_settings">Message center</string>
-    <string name="profile_notification_settings_description">Phone reminders are enabled on habit cards.</string>
+    <string name="profile_notification_settings_description">Set phone reminders on habit cards.</string>
     <string name="profile_default_task_filter">Default task filter</string>
     <string name="profile_task_filter_all">All</string>
     <string name="profile_task_filter_active">Active</string>
@@ -42,7 +42,6 @@
     <string name="common_retry">Retry</string>
     <string name="home_title">Today</string>
     <string name="home_subtitle">Today in LifeLab</string>
-    <string name="home_today_subtitle">Today, %1$s</string>
     <string name="home_action_search">Search</string>
     <string name="home_action_notifications">Messages</string>
     <string name="home_action_create_task">New task</string>
